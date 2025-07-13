@@ -35,7 +35,7 @@ namespace CosmoBack.Models
         // Навигационные свойства
         public Image? AvatarImage { get; set; }
         public User Owner { get; set; }
-        //public ICollection<ChannelMember> Members { get; set; }
-        //public ICollection<Message> Messages { get; set; }
+        public ICollection<ChannelMember> Members { get; set; }
+        public ICollection<Message>? Messages { get; set; }
     }
 }

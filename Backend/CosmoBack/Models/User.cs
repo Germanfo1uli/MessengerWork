@@ -46,16 +46,14 @@ namespace CosmoBack.Models
         public ICollection<Chat>? ChatsAsSecondUser { get; set; }
         public ICollection<Group>? OwnedGroups { get; set; }
         public ICollection<Channel>? OwnedChannels { get; set; }
-
-        // Раскомментируйте остальные связи по мере необходимости
-        // public ICollection<GroupMember> GroupMemberships { get; set; }
-        // public ICollection<ChannelMember> ChannelMemberships { get; set; }
-        // public ICollection<Message> SentMessages { get; set; }
-        // public ICollection<Contact> Contacts { get; set; }
-        // public ICollection<Contact> ContactOf { get; set; }
-        // public ICollection<Token> Tokens { get; set; }
-        // public ICollection<OAuth> OAuths { get; set; }
-        // public ICollection<Reaction> Reactions { get; set; }
+        public ICollection<GroupMember>? GroupMemberships { get; set; }
+        public ICollection<ChannelMember>? ChannelMemberships { get; set; }
+        public ICollection<Message>? SentMessages { get; set; }
+        // public ICollection<Contact>? Contacts { get; set; }
+        // public ICollection<Contact>? ContactOf { get; set; }
+        // public ICollection<Token>? Tokens { get; set; }
+        // public ICollection<OAuth>? OAuths { get; set; }
+        public ICollection<Reaction>? Reactions { get; set; }
     }
 
     public enum OnlineStatus

@@ -14,7 +14,7 @@ namespace CosmoBack.Models
         public Guid OwnerId { get; set; }
 
         [Required]
-        [MaxLength(256)]
+        [MaxLength(255)]
         public string Name { get; set; }
 
         [Required]
@@ -37,7 +37,7 @@ namespace CosmoBack.Models
         // Навигационные свойства
         public Image? AvatarImage { get; set; }
         public User Owner { get; set; }
-        //public ICollection<GroupMember> Members { get; set; }
-        //public ICollection<Message> Messages { get; set; }
+        public ICollection<GroupMember> Members { get; set; }
+        public ICollection<Message>? Messages { get; set; }
     }
 }

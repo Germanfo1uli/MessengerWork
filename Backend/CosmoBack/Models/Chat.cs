@@ -27,7 +27,7 @@ namespace CosmoBack.Models
         // Навигационные свойства
         public User FirstUser { get; set; }
         public User SecondUser { get; set; }
-        //public Message LastMessage { get; set; }
-        //public ICollection<Message> Messages { get; set; }
+        public Message? LastMessage { get; set; }
+        public ICollection<Message>? Messages { get; set; }
     }
 }
