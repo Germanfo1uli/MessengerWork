@@ -9,25 +9,29 @@ namespace CosmoBack.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        [ForeignKey("FirstUser")]
         [Required]
+        [ForeignKey("FirstUser")]
         public Guid FirstUserId { get; set; }
 
-        [ForeignKey("SecondUser")]
         [Required]
+        [ForeignKey("SecondUser")]
         public Guid SecondUserId { get; set; }
 
+        [Required]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         [ForeignKey("LastMessage")]
         public Guid? LastMessageId { get; set; }
 
-        public DateTime? LastMessageAt { get; set; }
+        [NotMapped]
+        public DateTime? LastMessageAt { get; set; } // возможно нельзя передать во frontend - чек
 
         // Навигационные свойства
         public User FirstUser { get; set; }
         public User SecondUser { get; set; }
-        public Message? LastMessage { get; set; }
+
+        [NotMapped]
+        public Message? LastMessage => Messages?.OrderByDescending(m => m.CreatedAt).FirstOrDefault();
         public ICollection<Message>? Messages { get; set; }
     }
 }

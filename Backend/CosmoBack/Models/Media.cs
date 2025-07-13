@@ -9,6 +9,7 @@ namespace CosmoBack.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; } = Guid.NewGuid();
 
+        [Required]
         [ForeignKey("Message")]
         public Guid MessageId { get; set; }
 
@@ -19,11 +20,14 @@ namespace CosmoBack.Models
         [MaxLength(20)]
         public MediaType Type { get; set; }
 
-        public long FileSize { get; set; }
+        [Required]
+        [Column(TypeName = "bytea")]
+        public byte[] FileSize { get; set; } = default!;
 
         [MaxLength(100)]
         public string? MimeType { get; set; }
 
+        [Required]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Навигационные свойства

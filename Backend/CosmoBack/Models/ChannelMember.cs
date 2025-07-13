@@ -9,11 +9,13 @@ namespace CosmoBack.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; } = Guid.NewGuid();
 
+        [Required]
         [ForeignKey("Channel")]
-        public int ChannelId { get; set; }
+        public Guid ChannelId { get; set; }
 
+        [Required]
         [ForeignKey("User")]
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
 
         [Required]
         public bool Notifications { get; set; } = true;

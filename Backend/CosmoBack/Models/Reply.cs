@@ -9,16 +9,19 @@ namespace CosmoBack.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; } = Guid.NewGuid();
 
+        [Required]
         [ForeignKey("OriginalMessage")]
         public Guid OriginalMessageId { get; set; }
 
+        [Required]
         [ForeignKey("ReplyMessage")]
         public Guid ReplyMessageId { get; set; }
 
+        [Required]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Навигационные свойства
-        public virtual Message OriginalMessage { get; set; }
-        public virtual Message ReplyMessage { get; set; }
+        public Message OriginalMessage { get; set; }
+        public Message ReplyMessage { get; set; }
     }
 }

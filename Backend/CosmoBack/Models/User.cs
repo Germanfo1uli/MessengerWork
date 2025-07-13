@@ -11,16 +11,17 @@ namespace CosmoBack.Models
 
         [Required]
         [MaxLength(100)]
-        public string Username { get; set; }
+        public string Username { get; set; } = default!;
 
         [Required]
         [MaxLength(20)]
-        public string Phone { get; set; }
+        public string Phone { get; set; } = default!;
 
         [Required]
         [MaxLength(255)]
-        public string PasswordHash { get; set; }
+        public string PasswordHash { get; set; } = default!;
 
+        [Required]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public string? Bio { get; set; }
@@ -49,11 +50,14 @@ namespace CosmoBack.Models
         public ICollection<GroupMember>? GroupMemberships { get; set; }
         public ICollection<ChannelMember>? ChannelMemberships { get; set; }
         public ICollection<Message>? SentMessages { get; set; }
-        // public ICollection<Contact>? Contacts { get; set; }
-        // public ICollection<Contact>? ContactOf { get; set; }
-        // public ICollection<Token>? Tokens { get; set; }
-        // public ICollection<OAuth>? OAuths { get; set; }
+        public ICollection<Contact> Contacts { get; set; } = new List<Contact>();
+        public ICollection<Contact> ContactOf { get; set; } = new List<Contact>();
+        public ICollection<Token>? Tokens { get; set; }
+        public ICollection<UserOAuth>? OAuths { get; set; }
         public ICollection<Reaction>? Reactions { get; set; }
+        public ICollection<Payment>? Payments { get; set; }
+        public ICollection<Subscription>? Subscriptions { get; set; }
+        public ICollection<Notification>? Notifications { get; set; }
     }
 
     public enum OnlineStatus

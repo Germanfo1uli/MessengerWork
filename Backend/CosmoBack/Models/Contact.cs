@@ -9,15 +9,18 @@ namespace CosmoBack.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; } = Guid.NewGuid();
 
+        [Required]
         [ForeignKey("Owner")]
         public Guid OwnerId { get; set; }
 
+        [Required]
         [ForeignKey("ContactUser")]
         public Guid ContactId { get; set; }
 
         [MaxLength(100)]
-        public string ContactTag { get; set; } // например, @Германиум
+        public string? ContactTag { get; set; } // например, @Германиум
 
+        [Required]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
 

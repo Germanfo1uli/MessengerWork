@@ -11,9 +11,11 @@ namespace CosmoBack.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; } = Guid.NewGuid();
 
+        [Required]
         [ForeignKey("Group")]
         public Guid GroupId { get; set; }
 
+        [Required]
         [ForeignKey("User")]
         public Guid UserId { get; set; }
 

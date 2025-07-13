@@ -18,13 +18,15 @@ namespace CosmoBack.Models
         [ForeignKey("Channel")]
         public Guid? ChannelId { get; set; }
 
+        [Required]
         [ForeignKey("Sender")]
-        public Guid? SenderId { get; set; }
+        public Guid SenderId { get; set; }
 
         [Column(TypeName = "text")]
         [MaxLength(5000)]
         public string? Comment { get; set; }
 
+        [Required]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Навигационные свойства

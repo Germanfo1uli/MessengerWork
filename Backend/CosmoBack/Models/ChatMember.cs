@@ -10,9 +10,11 @@ namespace CosmoBack.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; } = Guid.NewGuid();
 
+        [Required]
         [ForeignKey("Chat")]
         public Guid ChatId { get; set; }
 
+        [Required]
         [ForeignKey("User")]
         public Guid UserId { get; set; }
 

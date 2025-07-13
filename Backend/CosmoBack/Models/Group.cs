@@ -8,9 +8,9 @@ namespace CosmoBack.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; } = Guid.NewGuid();
-
-        [ForeignKey("Owner")]
+        
         [Required]
+        [ForeignKey("Owner")]
         public Guid OwnerId { get; set; }
 
         [Required]
@@ -33,6 +33,12 @@ namespace CosmoBack.Models
         public bool IsActive { get; set; } = true;
 
         public int MembersNumber { get; set; }
+
+        [NotMapped]
+        public Message? LastMessage => Messages?.OrderByDescending(m => m.CreatedAt).FirstOrDefault();
+
+        [NotMapped]
+        public DateTime? LastMessageAt => LastMessage?.CreatedAt;
 
         // Навигационные свойства
         public Image? AvatarImage { get; set; }
