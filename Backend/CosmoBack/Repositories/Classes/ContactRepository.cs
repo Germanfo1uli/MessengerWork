@@ -12,5 +12,13 @@ namespace CosmoBack.Repositories.Classes
             return await _context.Set<Contact>()
                 .FirstOrDefaultAsync(c => c.OwnerId == userId);
         }
+
+        public async Task<IEnumerable<Contact>> GetUserContactsAsync(Guid userId)
+        {
+            return await _context.Set<Contact>()
+                .Include(c => c.ContactUser)
+                .Where(c => c.OwnerId == userId)
+                .ToListAsync();
+        }
     }
 }

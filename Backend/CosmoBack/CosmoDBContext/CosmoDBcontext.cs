@@ -188,8 +188,7 @@ namespace CosmoBack.CosmoDBContext
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Notification>()
-                .HasIndex(n => new { n.UserId, n.ChatId, n.GroupId, n.ChannelId })
-                .IsUnique();
+                .HasIndex(n => new { n.UserId, n.ChatId, n.GroupId, n.ChannelId });
         }
 
     }

@@ -12,11 +12,5 @@ namespace CosmoBack.Repositories.Classes
             return await _context.Set<ChatMember>()
                 .FirstOrDefaultAsync(cm => cm.ChatId == chatId && cm.UserId == userId);
         }
-
-        public async Task<ChatMember> GetNotificationStatusAsync(Guid chatId, Guid userId)
-        {
-            return await _context.Set<ChatMember>()
-                .FirstOrDefaultAsync(cm => cm.ChatId == chatId && cm.UserId == userId);
-        }
     }
 }
