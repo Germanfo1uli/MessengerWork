@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from '../styles/WelcomeScreen.module.css';
-import { Rocket, MessageCircle } from 'lucide-react';
+import { Rocket } from 'lucide-react';
+import logo from '../styles/image/alo.png'; // Импортируем логотип
 
 const WelcomeScreen = ({ onEnter }) => {
     return (
@@ -9,8 +10,13 @@ const WelcomeScreen = ({ onEnter }) => {
                 <div className={styles.logoContainer}>
                     <div className={styles.logoBackground}>
                         <div className={styles.logoPulse} />
+                        <div className={styles.orbit}>
+                            <div className={styles.planet1}></div>
+                            <div className={styles.planet2}></div>
+                            <div className={styles.planet3}></div>
+                        </div>
                         <div className={styles.logoIcon}>
-                            <MessageCircle className={styles.icon} />
+                            <img src={logo} alt="IMAXIMUS Logo" className={styles.logoImage} />
                         </div>
                     </div>
                 </div>
