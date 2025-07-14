@@ -20,9 +20,6 @@ namespace CosmoBack.Models
         [Required]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        [ForeignKey("LastMessage")]
-        public Guid? LastMessageId { get; set; }
-
         [NotMapped]
         public DateTime? LastMessageAt { get; set; } // возможно нельзя передать во frontend - чек
 
