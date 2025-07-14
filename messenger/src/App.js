@@ -4,7 +4,7 @@ import styles from './App.module.css';
 import StarField from './JSX/WelcomePage/components/StarField';
 import WelcomeScreen from './JSX/WelcomePage/components/WelcomeScreen';
 import AuthScreen from './JSX/WelcomePage/components/AuthScreen';
-// import HomePage from './JSX/HomePage';
+import MainPage from './JSX/MainPage/components/MainPage';
 
 const App = () => {
     const [currentScreen, setCurrentScreen] = useState('welcome');
@@ -24,7 +24,7 @@ const App = () => {
                                 <AuthScreen onBack={() => setCurrentScreen('welcome')} />
                             )
                         } />
-                        {/*<Route path="/home" element={<HomePage />} />*/}
+                        <Route path="/home" element={<MainPage />} />
                     </Routes>
                 </div>
             </div>
