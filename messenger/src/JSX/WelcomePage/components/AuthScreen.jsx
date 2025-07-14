@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { ArrowLeft, User, Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 import styles from '../styles/AuthScreen.module.css';
 import { FcGoogle } from 'react-icons/fc';
+import { useNavigate } from 'react-router-dom';
 
 const AuthScreen = ({ onBack }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [activeTab, setActiveTab] = useState('login');
+    const navigate = useNavigate();
 
     // Схема валидации для входа
     const loginSchema = Yup.object().shape({
@@ -35,19 +38,39 @@ const AuthScreen = ({ onBack }) => {
             .required('Обязательное поле')
     });
 
-    const handleLogin = (values) => {
-        console.log('Вход:', values);
+    const {
+        register: loginRegister,
+        handleSubmit: handleLoginSubmit,
+        formState: { errors: loginErrors, isSubmitting: isLoginSubmitting }
+    } = useForm({
+        resolver: yupResolver(loginSchema)
+    });
+
+    const {
+        register: registerRegister,
+        handleSubmit: handleRegisterSubmit,
+        formState: { errors: registerErrors, isSubmitting: isRegisterSubmitting },
+        watch
+    } = useForm({
+        resolver: yupResolver(registerSchema)
+    });
+
+    const handleLogin = (data) => {
+        console.log('Вход:', data);
         // Здесь будет логика входа
+        navigate('/home');
     };
 
-    const handleRegister = (values) => {
-        console.log('Регистрация:', values);
+    const handleRegister = (data) => {
+        console.log('Регистрация:', data);
         // Здесь будет логика регистрации
+        navigate('/home');
     };
 
     const handleGoogleLogin = () => {
         console.log('Вход через Google');
         // Здесь будет логика входа через Google
+        navigate('/home');
     };
 
     return (
@@ -91,64 +114,60 @@ const AuthScreen = ({ onBack }) => {
                             {/* Форма входа */}
                             {activeTab === 'login' && (
                                 <div className={styles.tabContent}>
-                                    <Formik
-                                        initialValues={{ email: '', password: '' }}
-                                        validationSchema={loginSchema}
-                                        onSubmit={handleLogin}
-                                    >
-                                        {({ isSubmitting }) => (
-                                            <Form className={styles.authForm}>
-                                                <div className={styles.inputGroup}>
-                                                    <label htmlFor="email" className={styles.inputLabel}>
-                                                        Email
-                                                    </label>
-                                                    <div className={styles.inputWrapper}>
-                                                        <Mail className={styles.inputIcon} />
-                                                        <Field
-                                                            id="email"
-                                                            name="email"
-                                                            type="email"
-                                                            placeholder="ваш@email.com"
-                                                            className={styles.authInput}
-                                                        />
-                                                    </div>
-                                                    <ErrorMessage name="email" component="div" className={styles.errorMessage} />
-                                                </div>
+                                    <form onSubmit={handleLoginSubmit(handleLogin)} className={styles.authForm}>
+                                        <div className={styles.inputGroup}>
+                                            <label htmlFor="email" className={styles.inputLabel}>
+                                                Email
+                                            </label>
+                                            <div className={styles.inputWrapper}>
+                                                <Mail className={styles.inputIcon} />
+                                                <input
+                                                    id="email"
+                                                    type="email"
+                                                    placeholder="ваш@email.com"
+                                                    className={styles.authInput}
+                                                    {...loginRegister("email")}
+                                                />
+                                            </div>
+                                            {loginErrors.email && (
+                                                <div className={styles.errorMessage}>{loginErrors.email.message}</div>
+                                            )}
+                                        </div>
 
-                                                <div className={styles.inputGroup}>
-                                                    <label htmlFor="password" className={styles.inputLabel}>
-                                                        Пароль
-                                                    </label>
-                                                    <div className={styles.inputWrapper}>
-                                                        <Lock className={styles.inputIcon} />
-                                                        <Field
-                                                            id="password"
-                                                            name="password"
-                                                            type={showPassword ? 'text' : 'password'}
-                                                            placeholder="Введите пароль"
-                                                            className={`${styles.authInput} ${styles.passwordInput}`}
-                                                        />
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setShowPassword(!showPassword)}
-                                                            className={styles.passwordToggle}
-                                                        >
-                                                            {showPassword ? <EyeOff className={styles.eyeIcon} /> : <Eye className={styles.eyeIcon} />}
-                                                        </button>
-                                                    </div>
-                                                    <ErrorMessage name="password" component="div" className={styles.errorMessage} />
-                                                </div>
-
+                                        <div className={styles.inputGroup}>
+                                            <label htmlFor="password" className={styles.inputLabel}>
+                                                Пароль
+                                            </label>
+                                            <div className={styles.inputWrapper}>
+                                                <Lock className={styles.inputIcon} />
+                                                <input
+                                                    id="password"
+                                                    type={showPassword ? 'text' : 'password'}
+                                                    placeholder="Введите пароль"
+                                                    className={`${styles.authInput} ${styles.passwordInput}`}
+                                                    {...loginRegister("password")}
+                                                />
                                                 <button
-                                                    type="submit"
-                                                    className={styles.submitButton}
-                                                    disabled={isSubmitting}
+                                                    type="button"
+                                                    onClick={() => setShowPassword(!showPassword)}
+                                                    className={styles.passwordToggle}
                                                 >
-                                                    {isSubmitting ? 'Вход...' : 'Войти'}
+                                                    {showPassword ? <EyeOff className={styles.eyeIcon} /> : <Eye className={styles.eyeIcon} />}
                                                 </button>
-                                            </Form>
-                                        )}
-                                    </Formik>
+                                            </div>
+                                            {loginErrors.password && (
+                                                <div className={styles.errorMessage}>{loginErrors.password.message}</div>
+                                            )}
+                                        </div>
+
+                                        <button
+                                            type="submit"
+                                            className={styles.submitButton}
+                                            disabled={isLoginSubmitting}
+                                        >
+                                            {isLoginSubmitting ? 'Вход...' : 'Войти'}
+                                        </button>
+                                    </form>
 
                                     <div className={styles.socialAuth}>
                                         <p className={styles.socialDivider}>или войдите через</p>
@@ -167,103 +186,98 @@ const AuthScreen = ({ onBack }) => {
                             {/* Форма регистрации */}
                             {activeTab === 'register' && (
                                 <div className={styles.tabContent}>
-                                    <Formik
-                                        initialValues={{
-                                            username: '',
-                                            email: '',
-                                            password: '',
-                                            confirmPassword: ''
-                                        }}
-                                        validationSchema={registerSchema}
-                                        onSubmit={handleRegister}
-                                    >
-                                        {({ isSubmitting }) => (
-                                            <Form className={styles.authForm}>
-                                                <div className={styles.inputGroup}>
-                                                    <label htmlFor="username" className={styles.inputLabel}>
-                                                        Имя пользователя
-                                                    </label>
-                                                    <div className={styles.inputWrapper}>
-                                                        <User className={styles.inputIcon} />
-                                                        <Field
-                                                            id="username"
-                                                            name="username"
-                                                            type="text"
-                                                            placeholder="Ваше имя"
-                                                            className={styles.authInput}
-                                                        />
-                                                    </div>
-                                                    <ErrorMessage name="username" component="div" className={styles.errorMessage} />
-                                                </div>
+                                    <form onSubmit={handleRegisterSubmit(handleRegister)} className={styles.authForm}>
+                                        <div className={styles.inputGroup}>
+                                            <label htmlFor="username" className={styles.inputLabel}>
+                                                Имя пользователя
+                                            </label>
+                                            <div className={styles.inputWrapper}>
+                                                <User className={styles.inputIcon} />
+                                                <input
+                                                    id="username"
+                                                    type="text"
+                                                    placeholder="Ваше имя"
+                                                    className={styles.authInput}
+                                                    {...registerRegister("username")}
+                                                />
+                                            </div>
+                                            {registerErrors.username && (
+                                                <div className={styles.errorMessage}>{registerErrors.username.message}</div>
+                                            )}
+                                        </div>
 
-                                                <div className={styles.inputGroup}>
-                                                    <label htmlFor="email" className={styles.inputLabel}>
-                                                        Email
-                                                    </label>
-                                                    <div className={styles.inputWrapper}>
-                                                        <Mail className={styles.inputIcon} />
-                                                        <Field
-                                                            id="email"
-                                                            name="email"
-                                                            type="email"
-                                                            placeholder="ваш@email.com"
-                                                            className={styles.authInput}
-                                                        />
-                                                    </div>
-                                                    <ErrorMessage name="email" component="div" className={styles.errorMessage} />
-                                                </div>
+                                        <div className={styles.inputGroup}>
+                                            <label htmlFor="email" className={styles.inputLabel}>
+                                                Email
+                                            </label>
+                                            <div className={styles.inputWrapper}>
+                                                <Mail className={styles.inputIcon} />
+                                                <input
+                                                    id="email"
+                                                    type="email"
+                                                    placeholder="ваш@email.com"
+                                                    className={styles.authInput}
+                                                    {...registerRegister("email")}
+                                                />
+                                            </div>
+                                            {registerErrors.email && (
+                                                <div className={styles.errorMessage}>{registerErrors.email.message}</div>
+                                            )}
+                                        </div>
 
-                                                <div className={styles.inputGroup}>
-                                                    <label htmlFor="password" className={styles.inputLabel}>
-                                                        Пароль
-                                                    </label>
-                                                    <div className={styles.inputWrapper}>
-                                                        <Lock className={styles.inputIcon} />
-                                                        <Field
-                                                            id="password"
-                                                            name="password"
-                                                            type={showPassword ? 'text' : 'password'}
-                                                            placeholder="Создайте пароль"
-                                                            className={`${styles.authInput} ${styles.passwordInput}`}
-                                                        />
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setShowPassword(!showPassword)}
-                                                            className={styles.passwordToggle}
-                                                        >
-                                                            {showPassword ? <EyeOff className={styles.eyeIcon} /> : <Eye className={styles.eyeIcon} />}
-                                                        </button>
-                                                    </div>
-                                                    <ErrorMessage name="password" component="div" className={styles.errorMessage} />
-                                                </div>
-
-                                                <div className={styles.inputGroup}>
-                                                    <label htmlFor="confirmPassword" className={styles.inputLabel}>
-                                                        Подтвердите пароль
-                                                    </label>
-                                                    <div className={styles.inputWrapper}>
-                                                        <Lock className={styles.inputIcon} />
-                                                        <Field
-                                                            id="confirmPassword"
-                                                            name="confirmPassword"
-                                                            type={showPassword ? 'text' : 'password'}
-                                                            placeholder="Повторите пароль"
-                                                            className={styles.authInput}
-                                                        />
-                                                    </div>
-                                                    <ErrorMessage name="confirmPassword" component="div" className={styles.errorMessage} />
-                                                </div>
-
+                                        <div className={styles.inputGroup}>
+                                            <label htmlFor="password" className={styles.inputLabel}>
+                                                Пароль
+                                            </label>
+                                            <div className={styles.inputWrapper}>
+                                                <Lock className={styles.inputIcon} />
+                                                <input
+                                                    id="password"
+                                                    type={showPassword ? 'text' : 'password'}
+                                                    placeholder="Создайте пароль"
+                                                    className={`${styles.authInput} ${styles.passwordInput}`}
+                                                    {...registerRegister("password")}
+                                                />
                                                 <button
-                                                    type="submit"
-                                                    className={styles.submitButton}
-                                                    disabled={isSubmitting}
+                                                    type="button"
+                                                    onClick={() => setShowPassword(!showPassword)}
+                                                    className={styles.passwordToggle}
                                                 >
-                                                    {isSubmitting ? 'Регистрация...' : 'Создать аккаунт'}
+                                                    {showPassword ? <EyeOff className={styles.eyeIcon} /> : <Eye className={styles.eyeIcon} />}
                                                 </button>
-                                            </Form>
-                                        )}
-                                    </Formik>
+                                            </div>
+                                            {registerErrors.password && (
+                                                <div className={styles.errorMessage}>{registerErrors.password.message}</div>
+                                            )}
+                                        </div>
+
+                                        <div className={styles.inputGroup}>
+                                            <label htmlFor="confirmPassword" className={styles.inputLabel}>
+                                                Подтвердите пароль
+                                            </label>
+                                            <div className={styles.inputWrapper}>
+                                                <Lock className={styles.inputIcon} />
+                                                <input
+                                                    id="confirmPassword"
+                                                    type={showPassword ? 'text' : 'password'}
+                                                    placeholder="Повторите пароль"
+                                                    className={styles.authInput}
+                                                    {...registerRegister("confirmPassword")}
+                                                />
+                                            </div>
+                                            {registerErrors.confirmPassword && (
+                                                <div className={styles.errorMessage}>{registerErrors.confirmPassword.message}</div>
+                                            )}
+                                        </div>
+
+                                        <button
+                                            type="submit"
+                                            className={styles.submitButton}
+                                            disabled={isRegisterSubmitting}
+                                        >
+                                            {isRegisterSubmitting ? 'Регистрация...' : 'Создать аккаунт'}
+                                        </button>
+                                    </form>
                                 </div>
                             )}
                         </div>
