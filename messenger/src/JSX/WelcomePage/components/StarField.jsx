@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import styles from '../../CSS/WelcomePage/StarField.module.css';
+import styles from '../styles/StarField.module.css';
 
 const StarField = () => {
     const canvasRef = useRef(null);

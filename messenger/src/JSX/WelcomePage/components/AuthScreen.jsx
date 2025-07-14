@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, User, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-import styles from '../../CSS/WelcomePage/AuthScreen.module.css';
+import styles from '../styles/AuthScreen.module.css';
 import { FcGoogle } from 'react-icons/fc';
 
 const AuthScreen = ({ onBack }) => {

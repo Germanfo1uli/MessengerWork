@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '../../CSS/WelcomePage/WelcomeScreen.module.css';
+import styles from '../styles/WelcomeScreen.module.css';
 import { Rocket, MessageCircle } from 'lucide-react';
 
 const WelcomeScreen = ({ onEnter }) => {

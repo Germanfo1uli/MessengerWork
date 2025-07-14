@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import styles from './CSS/WelcomePage/App.module.css';
-import StarField from './JSX/WelcomePage/StarField';
-import WelcomeScreen from './JSX/WelcomePage/WelcomeScreen';
-import AuthScreen from './JSX/WelcomePage/AuthScreen';
+import styles from './App.module.css';
+import StarField from './JSX/WelcomePage/components/StarField';
+import WelcomeScreen from './JSX/WelcomePage/components/WelcomeScreen';
+import AuthScreen from './JSX/WelcomePage/components/AuthScreen';
 
 const App = () => {
     const [currentScreen, setCurrentScreen] = useState('welcome');
