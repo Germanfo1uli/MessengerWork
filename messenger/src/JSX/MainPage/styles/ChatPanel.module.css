@@ -1,0 +1,36 @@
+.container {
+    display: flex;
+
+}
+
+.profilebox {
+    display: flex;
+    border: 0.5px solid rgb(17,25,44);
+    background-color: rgb(15,23,42);
+    justify-content: center;
+    align-items: center;
+}
+
+.imgbox {
+    height: 40px;
+    width: 40px;
+    object-fit: cover;
+    display: block;
+    margin: 8px;
+    border-radius: 100%;
+    border: 2px solid rgb(71,45,146);
+}
+
+.p_username {
+    margin: 0px;
+    width: 300%;
+    color: white;
+    font-size: medium;
+}
+
+.p_status {
+    margin: 0px;
+    color: white;
+    opacity: 35%;
+    font-size: smaller;
+}
