@@ -1,0 +1,73 @@
+.container {
+    display: flex;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.container:hover {
+    background-color: rgb(22, 33, 59);
+}
+
+.chatbox {
+    width: 36px;
+    height: 36px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%; /* Круглый аватар */
+    border: 1px solid #000000; /* Рамка */
+}
+
+.avatar_text {
+    font-size: 12px; /* Уменьшаем размер текста для 16x16 пикселей */
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.chat_text {
+    display: flex;
+    flex-direction: column;
+}
+
+.p_chatname {
+    margin: 0px;
+    width: 300%;
+    color: white;
+    font-size: 16px;
+}
+
+.p_lastmes {
+    margin: 0px;
+    color: white;
+    opacity: 35%;
+    font-size: 12px;
+}
+
+.right_box {
+    margin-left: auto;
+}
+
+.p_date {
+    margin: 0px;
+    width: 300%;
+    color: white;
+    font-size: 12px;
+}
+
+.unread_badge {
+    top: -10px;    /* Смещаем вверх от контейнера */
+    right: -10px;  /* Смещаем вправо от контейнера */
+    width: 20px;
+    height: 20px;
+    background-color: #895bfb; /* Красный цвет (как в iOS) */
+    color: white;
+    border-radius: 50%; /* Делаем круг */
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+}

@@ -1,22 +1,29 @@
 .container {
     display: flex;
-
+    flex-direction: column;
 }
 
 .profilebox {
-    display: flex;
-    border: 0.5px solid rgb(17,25,44);
+    display: inline-flex;
+    border: 0.5px solid rgb(21, 31, 54);
     background-color: rgb(15,23,42);
-    justify-content: center;
     align-items: center;
+    height: fit-content;
+}
+
+.buttons {
+    display: flex;
+    flex-direction: column;
+    border: 0.5px solid rgb(21, 31, 54);
+    background-color: rgb(15,23,42);
 }
 
 .imgbox {
     height: 40px;
     width: 40px;
+    margin: 10px;
     object-fit: cover;
     display: block;
-    margin: 8px;
     border-radius: 100%;
     border: 2px solid rgb(71,45,146);
 }
@@ -25,12 +32,90 @@
     margin: 0px;
     width: 300%;
     color: white;
-    font-size: medium;
+    font-size: 16px;
+    max-width: 120px;
 }
 
 .p_status {
     margin: 0px;
     color: white;
     opacity: 35%;
-    font-size: smaller;
+    font-size: 12px;
+}
+
+.svg_icon {
+    color: white;
+    opacity: 35%;
+    cursor: pointer;
+}
+
+.prof_buttons_box {
+    display: flex;
+    margin: 10px;
+    margin-left: auto;
+    gap: 10px;
+}
+
+.search_container {
+    display: flex;
+    align-items: center;
+    background-color: rgb(19, 30, 54);
+    border-radius: 8px;
+    padding: 5px 10px;
+    width: 250px;
+    box-sizing: border-box;
+}
+
+.svg_search {
+    color: #a0a0a0;
+    font-size: 18px;
+    margin-right: 8px;
+}
+
+.search_box {
+    border: 0.5px solid rgb(21, 31, 54);
+    margin: -1px;
+    padding: 10px;
+}
+
+.search_input {
+    flex: 1; /* Занимает оставшееся пространство */
+    border: none;
+    background: transparent;
+    color: #a0a0a0; /* Цвет текста, как на изображении */
+    font-size: 14px;
+    outline: none; /* Убирает обводку при фокусе */
+}
+  
+.search_input::placeholder {
+    color: #a0a0a0; /* Цвет placeholder */
+}
+
+.flexrow {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.button_box {
+    display: flex;
+    justify-content: center;
+    flex: 1; /* Оба элемента займут равное пространство */
+    min-width: 0; /* Важно для корректного сжатия содержимого */
+    padding: 15px;
+    border: 0.5px solid rgb(21, 31, 54);
+    cursor: pointer;
+}
+
+.button_box:hover {
+    background-color: rgb(18, 28, 51);
+}
+
+.chats_container {
+    display: flex;
+    flex-direction: column;
+    border: 0.5px solid rgb(21, 31, 54);
+    background-color: rgb(15,23,42);
+    padding: 10px;
+    gap: 16px;
 }
