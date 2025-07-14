@@ -15,7 +15,7 @@ namespace CosmoBack.Services.Classes
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         }
 
-        public async Task<Contact> AddContactAsync(Guid ownerId, Guid contactId, string tag = null)
+        public async Task<Contact> AddContactAsync(Guid ownerId, Guid contactId, string? tag = null)
         {
             try
             {

@@ -7,5 +7,6 @@ namespace CosmoBack.Services.Interfaces
         Task<ChatMember> GetChatMemberAsync(Guid chatId, Guid userId);
         Task UpdateNotificationStatusAsync(Guid chatId, Guid userId, bool isEnabled);
         Task RemoveMemberFromChatAsync(Guid chatId, Guid userId);
+        Task AddChatMemberAsync(ChatMember chatMember);
     }
 }

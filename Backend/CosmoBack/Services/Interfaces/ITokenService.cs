@@ -1,12 +1,12 @@
-﻿using CosmoBack.Models;
+﻿using CosmoBack.Models.Dtos;
 
 namespace CosmoBack.Services.Interfaces
 {
     public interface ITokenService
     {
-        Task<Token> GenerateTokenAsync(Guid userId);
+        Task<TokenDto> GenerateTokenAsync(Guid userId);
         Task RevokeTokenAsync(string token);
         Task RevokeAllTokensForUserAsync(Guid userId, string currentToken);
-        Task<Token> RefreshTokenAsync(string refreshToken);
+        Task<TokenDto> RefreshTokenAsync(string refreshToken);
     }
 }

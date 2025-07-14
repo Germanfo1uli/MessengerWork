@@ -4,11 +4,12 @@ using CosmoBack.Services.Interfaces;
 
 namespace CosmoBack.Services.Classes
 {
-    public class ChatService(IChatRepository chatRepository, IMessageRepository messageRepository, IUserRepository userRepository) : IChatService
+    public class ChatService(IChatRepository chatRepository, IMessageRepository messageRepository, IUserRepository userRepository, IChatMembersRepository chatMembersService) : IChatService
     {
         private readonly IChatRepository _chatRepository = chatRepository ?? throw new ArgumentNullException(nameof(chatRepository));
         private readonly IMessageRepository _messageRepository = messageRepository ?? throw new ArgumentNullException(nameof(messageRepository));
         private readonly IUserRepository _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+        private readonly IChatMembersRepository _chatMembersService = chatMembersService ?? throw new ArgumentNullException(nameof(chatMembersService));
 
         public async Task<Chat> GetChatByIdAsync(Guid id)
         {

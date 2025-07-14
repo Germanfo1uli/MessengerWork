@@ -11,6 +11,7 @@ using CosmoBack.Services.Classes;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Отключение проверки SSL в режиме разработки (для тестирования)
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddHttpClient("NoSSL").ConfigurePrimaryHttpMessageHandler(() =>
@@ -20,7 +21,6 @@ if (builder.Environment.IsDevelopment())
         });
 }
 
-// Добавление сервисов и репозиториев в контейнер DI
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
 builder.Services.AddScoped<IMessageRepository, MessagesRepository>();
@@ -38,10 +38,14 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IContactService, ContactService>();
 builder.Services.AddScoped<IChatMembersService, ChatMembersService>();
 
+
 builder.Services.AddDbContext<CosmoDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQL")));
 
-// Настройка JWT-аутентификации
+
+builder.Services.AddControllers();
+
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -55,16 +59,17 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Secret"]))
+            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"] ?? throw new InvalidOperationException("Jwt:Secret not configured")))
     };
 });
+
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Настройка middleware
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -78,7 +83,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseRouting(); 
 app.UseAuthentication();
-//app.UseAuthorization(); Пока не работает
+app.UseAuthorization(); 
+app.MapControllers(); 
 
 app.Run();

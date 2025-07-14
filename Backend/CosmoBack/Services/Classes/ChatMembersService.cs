@@ -21,7 +21,7 @@ namespace CosmoBack.Services.Classes
             }
             catch (Exception ex)
             {
-                throw new Exception($"Ошибка при получ_pluginsении участника чата: {ex.Message}", ex);
+                throw new Exception($"Ошибка при получении участника чата: {ex.Message}", ex);
             }
         }
 
@@ -49,6 +49,25 @@ namespace CosmoBack.Services.Classes
             catch (Exception ex)
             {
                 throw new Exception($"Ошибка при удалении участника из чата: {ex.Message}", ex);
+            }
+        }
+
+        public async Task AddChatMemberAsync(ChatMember chatMember)
+        {
+            try
+            {
+                var existingChatMember = await _chatMembersRepository.GetByChatAndUserIdAsync(chatMember.ChatId, chatMember.UserId);
+                if (existingChatMember != null)
+                {
+                    throw new InvalidOperationException($"Участник с userId {chatMember.UserId} уже добавлен в чат {chatMember.ChatId}");
+                }
+
+                
+                await _chatMembersRepository.AddAsync(chatMember);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Ошибка при добавлении участника чата: {ex.Message}", ex);
             }
         }
     }

@@ -5,31 +5,40 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CosmoBack.Repositories.Classes
 {
-    public class TokenRepository(CosmoDbContext context) : Repository<Token>(context), ITokenRepository
+    public class TokenRepository(CosmoDbContext context) : ITokenRepository
     {
-        public async Task RevokeRefreshTokenAsync(string token)
-        {
-            var tokenEntity = await _context.Set<Token>()
-                .FirstOrDefaultAsync(t => t.ClientSecret == token);
+        private readonly CosmoDbContext _context = context ?? throw new ArgumentNullException(nameof(context));
 
-            if (tokenEntity != null)
+        public async Task AddAsync(Token token)
+        {
+            await _context.Tokens.AddAsync(token);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<Token> GetByClientSecretAsync(string clientSecret)
+        {
+            return await _context.Tokens
+                .FirstOrDefaultAsync(t => t.ClientSecret == clientSecret);
+        }
+
+        public async Task RevokeRefreshTokenAsync(string clientSecret)
+        {
+            var token = await _context.Tokens
+                .FirstOrDefaultAsync(t => t.ClientSecret == clientSecret);
+            if (token != null)
             {
-                _context.Set<Token>().Remove(tokenEntity);
+                _context.Tokens.Remove(token);
                 await _context.SaveChangesAsync();
             }
         }
 
-        public async Task RevokeRefreshTokensUserAsync(Guid userId, string token)
+        public async Task RevokeRefreshTokensUserAsync(Guid userId, string currentClientSecret)
         {
-            var tokensToRevoke = await _context.Set<Token>()
-                .Where(t => t.UserId == userId && t.ClientSecret != token)
+            var tokens = await _context.Tokens
+                .Where(t => t.UserId == userId && t.ClientSecret != currentClientSecret)
                 .ToListAsync();
-
-            if (tokensToRevoke.Any())
-            {
-                _context.Set<Token>().RemoveRange(tokensToRevoke);
-                await _context.SaveChangesAsync();
-            }
+            _context.Tokens.RemoveRange(tokens);
+            await _context.SaveChangesAsync();
         }
     }
 }

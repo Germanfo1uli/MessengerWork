@@ -2,9 +2,11 @@
 
 namespace CosmoBack.Repositories.Interfaces
 {
-    public interface ITokenRepository : IRepository<Token>
+    public interface ITokenRepository
     {
-        Task RevokeRefreshTokenAsync(string token);
-        Task RevokeRefreshTokensUserAsync(Guid userId, string token);
+        Task AddAsync(Token token);
+        Task<Token> GetByClientSecretAsync(string clientSecret);
+        Task RevokeRefreshTokenAsync(string clientSecret);
+        Task RevokeRefreshTokensUserAsync(Guid userId, string currentClientSecret);
     }
 }

@@ -1,0 +1,118 @@
+﻿using CosmoBack.Models;
+using CosmoBack.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+
+namespace CosmoBack.Controllers
+{
+    [Authorize]
+    [ApiController]
+    [Route("api/[controller]")]
+    public class ChatsController(IChatService chatService) : ControllerBase
+    {
+        private readonly IChatService _chatService = chatService ?? throw new ArgumentNullException(nameof(chatService));
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetChat(Guid id)
+        {
+            try
+            {
+                var chat = await _chatService.GetChatByIdAsync(id);
+                return Ok(chat);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetUserChats(Guid userId)
+        {
+            try
+            {
+                var chats = await _chatService.GetUserChatsAsync(userId);
+                return Ok(chats);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateChat([FromBody] CreateChatRequest request)
+        {
+            try
+            {
+                var chat = await _chatService.CreateChatAsync(request.FirstUserId, request.SecondUserId);
+                return Ok(chat);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpDelete("{chatId}")]
+        public async Task<IActionResult> DeleteChat(Guid chatId)
+        {
+            try
+            {
+                await _chatService.DeleteChatAsync(chatId);
+                return Ok("Чат удален");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("{chatId}/message")]
+        public async Task<IActionResult> SendMessage(Guid chatId, [FromBody] SendMessageRequest request)
+        {
+            try
+            {
+                var message = await _chatService.SendMessageAsync(chatId, request.SenderId, request.Comment);
+                return Ok(message);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+    }
+
+    public class CreateChatRequest
+    {
+        public Guid FirstUserId { get; set; }
+        public Guid SecondUserId { get; set; }
+    }
+
+    public class SendMessageRequest
+    {
+        public Guid SenderId { get; set; }
+        public string Comment { get; set; }
+    }
+}

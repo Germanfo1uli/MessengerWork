@@ -1,21 +1,30 @@
 ﻿using CosmoBack.Models;
+using CosmoBack.Models.Dtos;
 using CosmoBack.Repositories.Interfaces;
 using CosmoBack.Services.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Security.Cryptography;
 
-namespace CosmoBack.Services
+namespace CosmoBack.Services.Classes
 {
-    public class TokenService(ITokenRepository tokenRepository, IUserRepository userRepository, IConfiguration configuration) : ITokenService
+    public class TokenService : ITokenService
     {
-        private readonly ITokenRepository _tokenRepository = tokenRepository ?? throw new ArgumentNullException(nameof(tokenRepository));
-        private readonly IUserRepository _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-        private readonly string _jwtSecret = configuration["Jwt:Secret"] ?? throw new ArgumentNullException("Jwt:Secret не настроен");
-        private readonly TimeSpan _tokenLifetime = TimeSpan.FromHours(24);
+        private readonly ITokenRepository _tokenRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly string _jwtSecret;
+        private readonly TimeSpan _tokenLifetime = TimeSpan.FromMinutes(5);
 
-        public async Task<Token> GenerateTokenAsync(Guid userId)
+        public TokenService(ITokenRepository tokenRepository, IUserRepository userRepository, IConfiguration configuration)
+        {
+            _tokenRepository = tokenRepository ?? throw new ArgumentNullException(nameof(tokenRepository));
+            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+            _jwtSecret = configuration["Jwt:Secret"] ?? throw new ArgumentNullException("Jwt:Secret не настроен");
+        }
+
+        public async Task<TokenDto> GenerateTokenAsync(Guid userId)
         {
             try
             {
@@ -43,19 +52,31 @@ namespace CosmoBack.Services
                 var jwtToken = tokenHandler.CreateToken(tokenDescriptor);
                 var tokenString = tokenHandler.WriteToken(jwtToken);
 
-                var token = new Token
+                var refreshToken = new Token
                 {
                     UserId = userId,
                     Name = "JWT",
                     ClientId = Guid.NewGuid().ToString(),
-                    ClientSecret = Guid.NewGuid().ToString(), // В реальной системе использовать безопасный генератор
+                    ClientSecret = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)), 
                     AuthorizationEndpoint = "https://auth.cosmoback.com/authorize",
                     TokenEndpoint = "https://auth.cosmoback.com/token",
-                    UserInfoEndpoint = "https://auth.cosmoback.com/userinfo",
+                    UserInfoEndpoint = "https://auth.cosmoback.com/userinfo"
                 };
 
-                await _tokenRepository.AddAsync(token);
-                return token;
+                await _tokenRepository.AddAsync(refreshToken);
+
+                return new TokenDto
+                {
+                    Id = refreshToken.Id,
+                    UserId = refreshToken.UserId,
+                    Name = refreshToken.Name,
+                    ClientId = refreshToken.ClientId,
+                    ClientSecret = refreshToken.ClientSecret,
+                    TokenValue = tokenString,
+                    AuthorizationEndpoint = refreshToken.AuthorizationEndpoint,
+                    TokenEndpoint = refreshToken.TokenEndpoint,
+                    UserInfoEndpoint = refreshToken.UserInfoEndpoint
+                };
             }
             catch (Exception ex)
             {
@@ -63,11 +84,11 @@ namespace CosmoBack.Services
             }
         }
 
-        public async Task RevokeTokenAsync(string token)
+        public async Task RevokeTokenAsync(string clientSecret)
         {
             try
             {
-                await _tokenRepository.RevokeRefreshTokenAsync(token);
+                await _tokenRepository.RevokeRefreshTokenAsync(clientSecret);
             }
             catch (Exception ex)
             {
@@ -75,11 +96,11 @@ namespace CosmoBack.Services
             }
         }
 
-        public async Task RevokeAllTokensForUserAsync(Guid userId, string currentToken)
+        public async Task RevokeAllTokensForUserAsync(Guid userId, string currentClientSecret)
         {
             try
             {
-                await _tokenRepository.RevokeRefreshTokensUserAsync(userId, currentToken);
+                await _tokenRepository.RevokeRefreshTokensUserAsync(userId, currentClientSecret);
             }
             catch (Exception ex)
             {
@@ -87,20 +108,18 @@ namespace CosmoBack.Services
             }
         }
 
-        public async Task<Token> RefreshTokenAsync(string refreshToken)
+        public async Task<TokenDto> RefreshTokenAsync(string clientSecret)
         {
             try
             {
-                var token = await _tokenRepository.GetByIdAsync(Guid.Parse(refreshToken)); // Предполагается, что ClientSecret хранит refresh token
+                var token = await _tokenRepository.GetByClientSecretAsync(clientSecret);
                 if (token == null)
                 {
                     throw new SecurityTokenException("Недействительный refresh token");
                 }
 
-                // Удаляем старый токен
-                await _tokenRepository.RevokeRefreshTokenAsync(token.ClientSecret);
+                await _tokenRepository.RevokeRefreshTokenAsync(clientSecret);
 
-                // Генерируем новый токен
                 return await GenerateTokenAsync(token.UserId);
             }
             catch (Exception ex)
