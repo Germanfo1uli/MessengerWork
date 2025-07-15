@@ -64,7 +64,7 @@
     background-color: #895bfb; /* Красный цвет (как в iOS) */
     color: white;
     border-radius: 50%; /* Делаем круг */
-    
+
     display: flex;
     align-items: center;
     justify-content: center;

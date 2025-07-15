@@ -9,71 +9,104 @@ import { IoStarOutline } from 'react-icons/io5';
 import { FaEnvelope } from 'react-icons/fa';
 
 const ChatPanel = () => {
-
     const data = [
         {
-            name: "Сука",
-            unread: 5,
-            lastMessage: "Я что похож на гея, помогите никите он сын бляди",
-            time: "0:28"
+            name: "Орбитальная станция",
+            unread: 3,
+            lastMessage: "Подготовка к стыковке нового модуля...",
+            time: "12:45",
+            status: "online"
         },
         {
-            name: "Пидарасы",
-            unread: 2,
-            lastMessage: "Помогите :(((",
-            time: "0:28"
+            name: "Марсианская база",
+            unread: 0,
+            lastMessage: "Завершены геологические исследования...",
+            time: "09:22",
+            status: "idle"
+        },
+        {
+            name: "Центр управления",
+            unread: 7,
+            lastMessage: "ТРЕВОГА: обнаружена аномалия в секторе 4...",
+            time: "15:18",
+            status: "busy"
+        },
+        {
+            name: "Экипаж 'Прометей'",
+            unread: 0,
+            lastMessage: "Все системы в норме, продолжаем курс...",
+            time: "07:33",
+            status: "offline"
         }
     ]
 
     return (
         <div className={cl.container}>
-            <div className={cl.profilebox}>
-                <img className={cl.imgbox} src={baseavatar} alt="Profile_Image"/>
-                <div>
-                    <p className={cl.p_username}>Гжегош</p>
-                    <p className={cl.p_status}>В сети</p>
+            {/* Шапка профиля */}
+            <div className={cl.profileHeader}>
+                <div className={cl.avatarContainer}>
+                    <img src={baseavatar} alt="Аватар" className={cl.avatarImage} />
+                    <div className={cl.statusBadge}></div>
                 </div>
-                <div className={cl.prof_buttons_box}>
-                    <div className={cl.svg_icon}>
+                <div className={cl.profileInfo}>
+                    <h3 className={cl.profileName}>Командир Ковальски</h3>
+                    <p className={cl.profileStatus}>На связи</p>
+                </div>
+                <div className={cl.profileActions}>
+                    <button className={cl.iconButton}>
                         <IoSettingsOutline />
-                    </div>
-                    <div className={cl.svg_icon}>
+                    </button>
+                    <button className={cl.iconButton}>
                         <IoIosMore />
-                    </div>
+                    </button>
                 </div>
             </div>
-            <div className={cl.buttons}>
-                <div className={cl.search_box}>
-                    <div className={cl.search_container}>
-                        <IoSearchOutline className={cl.svg_search} />
-                            <input
-                                type="text"
-                                className={cl.search_input}
-                                placeholder="Поиск в галактике..."
-                            />
-                    </div>
-                </div>
-                <div className={cl.flexrow}>
-                    <div className={cl.button_box}>
-                        <IoStarOutline className={cl.svg_icon}/>
-                        <p className={cl.p_status}>&nbsp;Избранное</p>
-                    </div>
-                    <div className={cl.button_box}>
-                        <FaEnvelope className={cl.svg_icon}/>
-                        <p className={cl.p_status}>&nbsp;Чаты</p>
-                    </div>
+
+            {/* Поиск */}
+            <div className={cl.searchPanel}>
+                <div className={cl.searchInputContainer}>
+                    <IoSearchOutline className={cl.searchIcon} />
+                    <input
+                        type="text"
+                        placeholder="Поиск по каналам..."
+                        className={cl.searchInput}
+                    />
                 </div>
             </div>
-            <div className={cl.chats_container}>
-            {data.map((chat, index) => (
-                <ChatBox 
-                    key={index}
-                    name={chat.name}
-                    unread={chat.unread}
-                    lastMessage={chat.lastMessage?.slice(0, 25) + (chat.lastMessage?.length > 25 ? "..." : "")}
-                    time={chat.time}
-                />
-            ))}
+
+            {/* Вкладки */}
+            <div className={cl.tabsContainer}>
+                <button className={`${cl.tabButton} ${cl.active}`}>
+                    <IoStarOutline className={cl.tabIcon} />
+                    <span>Избранное</span>
+                </button>
+                <button className={cl.tabButton}>
+                    <FaEnvelope className={cl.tabIcon} />
+                    <span>Все каналы</span>
+                </button>
+            </div>
+
+            {/* Список чатов */}
+            <div className={cl.chatsList}>
+                {data.map((chat, index) => (
+                    <div key={index} className={cl.chatItem}>
+                        <div className={cl.chatAvatar} data-status={chat.status}>
+                            <span>{chat.name.split(' ').map(n => n[0]).join('').slice(0, 2)}</span>
+                        </div>
+                        <div className={cl.chatContent}>
+                            <div className={cl.chatHeader}>
+                                <h4 className={cl.chatName}>{chat.name}</h4>
+                                <span className={cl.chatTime}>{chat.time}</span>
+                            </div>
+                            <p className={cl.chatMessage}>
+                                {chat.lastMessage}
+                                {chat.unread > 0 && (
+                                    <span className={cl.unreadCount}>{chat.unread}</span>
+                                )}
+                            </p>
+                        </div>
+                    </div>
+                ))}
             </div>
         </div>
     );
