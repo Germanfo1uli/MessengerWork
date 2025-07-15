@@ -6,6 +6,8 @@ import { IoIosMore } from 'react-icons/io';
 import { IoSearchOutline } from 'react-icons/io5';
 import { IoStarOutline } from 'react-icons/io5';
 import { FaEnvelope } from 'react-icons/fa';
+import { FaGift } from 'react-icons/fa';
+import { IoAddCircleOutline } from 'react-icons/io5';
 import Modal from './Modal';
 
 const ChatPanel = () => {
@@ -87,6 +89,18 @@ const ChatPanel = () => {
                 onClose={toggleModal}
                 user={user}
             />
+
+            {/* Кнопки "Подарки" и "Добавить чат" */}
+            <div className={cl.actionButtons}>
+                <button className={cl.actionButton}>
+                    <FaGift className={cl.actionIcon} />
+                    <span>Подарки</span>
+                </button>
+                <button className={cl.actionButton}>
+                    <IoAddCircleOutline className={cl.actionIcon} />
+                    <span>Добавить чат</span>
+                </button>
+            </div>
 
             {/* Поиск */}
             <div className={cl.searchPanel}>
