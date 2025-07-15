@@ -59,6 +59,9 @@ const ChatWindow = ({ activeChat }) => {
                             <div className={cl.star}></div>
                             <div className={cl.star}></div>
                             <div className={cl.star}></div>
+                            <div className={cl.star}></div>
+                            <div className={cl.star}></div>
+                            <div className={cl.star}></div>
                         </div>
                         <div className={cl.planetSmall}></div>
                         <div className={cl.planetLarge}></div>
@@ -95,6 +98,7 @@ const ChatWindow = ({ activeChat }) => {
                         <FiMoreVertical />
                     </button>
                 </div>
+                <div className={cl.headerDecoration}></div>
             </div>
 
             {/* Search bar (visible when searching) */}
@@ -122,6 +126,7 @@ const ChatWindow = ({ activeChat }) => {
                         </div>
                     </div>
                 ))}
+                <div className={cl.messageDecoration}></div>
             </div>
 
             {/* Message input */}
