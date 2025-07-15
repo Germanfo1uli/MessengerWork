@@ -144,3 +144,324 @@
     transform: scale(1.2);
     color: #00d4ff;
 }
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal {
+    background: linear-gradient(145deg, #0f0f23, #1a1a3a);
+    border-radius: 20px;
+    width: 480px;
+    max-width: 95%;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(100, 149, 237, 0.2);
+    overflow: hidden;
+    position: relative;
+    animation: modalSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.closeButton {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(30, 30, 60, 0.5);
+    border: none;
+    color: #e0e0ff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.closeButton:hover {
+    background: rgba(79, 195, 247, 0.2);
+    color: #4fc3f7;
+    transform: rotate(90deg);
+}
+
+.modalHeader {
+    padding: 24px 24px 0;
+}
+
+.modalTitle {
+    color: #e0e0ff;
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    text-align: center;
+}
+
+.modalDescription {
+    color: #b0b0ff;
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0 0 16px 0;
+    text-align: center;
+}
+
+.tabs {
+    display: flex;
+    gap: 8px;
+    background: rgba(20, 20, 50, 0.5);
+    border-radius: 12px;
+    padding: 4px;
+}
+
+.tabButton {
+    flex: 1;
+    padding: 12px;
+    background: transparent;
+    border: none;
+    color: #b0b0ff;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 15px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.tabButton:hover {
+    color: #e0e0ff;
+    background: rgba(79, 195, 247, 0.1);
+}
+
+.tabButton.active {
+    background: linear-gradient(135deg, rgba(79, 195, 247, 0.3), rgba(100, 149, 237, 0.3));
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(79, 195, 247, 0.2);
+}
+
+.modalContent {
+    padding: 24px;
+}
+
+.createForm, .joinForm {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.formGroup label {
+    color: #b0b0ff;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.formGroup input,
+.formGroup textarea,
+.formGroup select {
+    padding: 14px 16px;
+    background: rgba(20, 20, 50, 0.5);
+    border: 1px solid rgba(100, 149, 237, 0.2);
+    border-radius: 12px;
+    color: #ffffff;
+    font-size: 15px;
+    transition: all 0.3s ease;
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus,
+.formGroup select:focus {
+    outline: none;
+    border-color: #4fc3f7;
+    box-shadow: 0 0 0 2px rgba(79, 195, 247, 0.2);
+}
+
+.formGroup textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.avatarUpload {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.uploadLabel {
+    cursor: pointer;
+    position: relative;
+    display: block;
+}
+
+.avatarPreviewContainer {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid rgba(100, 149, 237, 0.3);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.avatarPreview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatarOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.avatarPreviewContainer:hover .avatarOverlay {
+    opacity: 1;
+}
+
+.uploadPlaceholder {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: rgba(20, 20, 50, 0.5);
+    border: 2px dashed rgba(100, 149, 237, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #b0b0ff;
+    transition: all 0.3s ease;
+    text-align: center;
+    padding-right: 5px;
+}
+
+.uploadPlaceholder:hover {
+    background: rgba(79, 195, 247, 0.1);
+    border-color: #4fc3f7;
+    color: #e0e0ff;
+}
+
+.uploadPlaceholder span {
+    margin-top: 8px;
+    font-size: 12px;
+    max-width: 90px;
+    line-height: 1.2;
+}
+
+.uploadInput {
+    display: none;
+}
+
+.agreement {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+.agreement input {
+    width: 18px;
+    height: 18px;
+    accent-color: #4fc3f7;
+}
+
+.agreement label {
+    color: #b0b0ff;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.agreement a {
+    color: #4fc3f7;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.agreement a:hover {
+    text-decoration: underline;
+}
+
+.submitButton {
+    padding: 14px;
+    background: linear-gradient(135deg, #4fc3f7, #6393f1);
+    border: none;
+    border-radius: 12px;
+    color: #0a0a1a;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+    box-shadow: 0 4px 15px rgba(79, 195, 247, 0.3);
+}
+
+.submitButton:hover {
+    background: linear-gradient(135deg, #63d2ff, #7aa3ff);
+    box-shadow: 0 6px 20px rgba(79, 195, 247, 0.4);
+    transform: translateY(-2px);
+}
+
+.example {
+    margin-top: 10px;
+    padding: 12px;
+    background: rgba(20, 20, 50, 0.3);
+    border-radius: 8px;
+    font-size: 14px;
+    color: #b0b0ff;
+    line-height: 1.5;
+}
+
+.example p {
+    margin: 0 0 6px 0;
+    color: #e0e0ff;
+}
+
+.example code {
+    display: block;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    font-family: 'Courier New', monospace;
+    color: #4fc3f7;
+    overflow-x: auto;
+}
