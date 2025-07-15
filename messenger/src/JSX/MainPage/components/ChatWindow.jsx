@@ -16,7 +16,7 @@ const ChatWindow = ({ activeChat }) => {
 
     useEffect(() => {
         if (activeChat) {
-            // Mock messages for demonstration
+
             setMessages([
                 { id: 1, text: 'Привет! Как дела?', isUser: false, time: '12:30' },
                 { id: 2, text: 'Привет! Все отлично, спасибо!', isUser: true, time: '12:32' },
@@ -47,7 +47,7 @@ const ChatWindow = ({ activeChat }) => {
 
     const handleAvatarClick = () => {
         console.log(`Clicked on ${activeChat?.name}'s avatar`);
-        // Placeholder for future functionality, e.g., open profile
+
     };
 
     if (!activeChat) {
@@ -137,22 +137,25 @@ const ChatWindow = ({ activeChat }) => {
             </div>
 
             {/* Message input */}
-            <div className={cl.messageInput}>
-                <button className={cl.attachmentButton}>
-                    <FiPaperclip />
-                </button>
-                <input
-                    type="text"
-                    placeholder="Напишите сообщение..."
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                />
-                <button className={cl.emojiButton}>
-                    <FiSmile />
-                </button>
-                <button className={cl.sendButton} onClick={handleSendMessage}>
-                    <FiSend />
+            <div className={cl.messageInputContainer}>
+                <div className={cl.inputWrapper}>
+                    <button className={cl.attachmentButton}>
+                        <FiPaperclip className={cl.icon} />
+                    </button>
+                    <input
+                        type="text"
+                        placeholder="Напишите сообщение..."
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        className={cl.messageInputField}
+                    />
+                    <button className={cl.emojiButton}>
+                        <FiSmile className={cl.icon} />
+                    </button>
+                </div>
+                <button className={cl.sendButton} onClick={handleSendMessage} disabled={!message.trim()}>
+                    <FiSend className={cl.sendIcon} />
                 </button>
             </div>
         </div>

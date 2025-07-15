@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from '../styles/WelcomeScreen.module.css';
 import { Rocket } from 'lucide-react';
-import logo from '../styles/image/alo.png'; // Импортируем логотип
+import logo from '../styles/image/alo.png';
 
 const WelcomeScreen = ({ onEnter }) => {
     return (
