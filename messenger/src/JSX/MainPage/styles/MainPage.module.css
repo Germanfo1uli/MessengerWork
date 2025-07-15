@@ -1,0 +1,12 @@
+.container {
+    display: flex;
+    height: 100vh;
+    background: linear-gradient(180deg, #0a0b1a 0%, #1c2526 100%);
+    overflow: hidden;
+}
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+}

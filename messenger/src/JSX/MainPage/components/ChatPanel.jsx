@@ -10,7 +10,7 @@ import { FaGift } from 'react-icons/fa';
 import { IoAddCircleOutline } from 'react-icons/io5';
 import Modal from './Modal';
 
-const ChatPanel = () => {
+const ChatPanel = ({ onChatSelect }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [user] = useState({
         username: 'Командир Ковальски',
@@ -33,7 +33,7 @@ const ChatPanel = () => {
             lastMessage: 'Подготовка к стыковке нового модуля...',
             time: '12:45',
             status: 'online',
-            isSentByUser: false, 
+            isSentByUser: false,
             messageStatus: 'read'
         },
         {
@@ -67,6 +67,10 @@ const ChatPanel = () => {
 
     const toggleModal = () => {
         setIsModalOpen(!isModalOpen);
+    };
+
+    const handleChatClick = (chat) => {
+        onChatSelect(chat);
     };
 
     return (
@@ -137,17 +141,18 @@ const ChatPanel = () => {
             {/* Список чатов */}
             <div className={cl.chatsList}>
                 {data.map((chat, index) => (
-                    <ChatBox
-                        key={index}
-                        name={chat.name}
-                        unread={chat.unread}
-                        lastMessage={chat.lastMessage}
-                        time={chat.time}
-                        status={chat.status}
-                        isFavorite={true}
-                        messageStatus={chat.messageStatus}
-                        isSentByUser={chat.isSentByUser}
-                    />
+                    <div key={index} onClick={() => handleChatClick(chat)} style={{ cursor: 'pointer' }}>
+                        <ChatBox
+                            name={chat.name}
+                            unread={chat.unread}
+                            lastMessage={chat.lastMessage}
+                            time={chat.time}
+                            status={chat.status}
+                            isFavorite={true}
+                            messageStatus={chat.messageStatus}
+                            isSentByUser={chat.isSentByUser}
+                        />
+                    </div>
                 ))}
             </div>
         </div>
