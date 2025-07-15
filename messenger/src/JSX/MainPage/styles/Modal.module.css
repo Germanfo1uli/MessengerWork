@@ -4,15 +4,14 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(5px);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 1100;
     animation: fadeIn 0.3s ease;
+    background: transparent;
+    pointer-events: auto;
 }
-
 .modal {
     width: 450px;
     background: linear-gradient(145deg, #0a0e23, #1a1f3a);
@@ -21,7 +20,9 @@
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5),
     inset 0 0 10px rgba(90, 150, 255, 0.1);
     overflow: hidden;
-    position: relative;
+    z-index: 1200;
+    position: fixed;
+    pointer-events: auto;
 }
 
 /* Космический баннер */
@@ -83,7 +84,6 @@
     border: 3px solid #1a1f3a;
     z-index: 3;
 }
-
 
 .statusOnline {
     background: #00ff9d;  /* Электрический бирюзовый */
@@ -185,7 +185,6 @@
     100% { opacity: 0.3; }
 }
 
-
 /* Стиль для тега пользователя */
 .userTag {
     color: #a0a8ff;
@@ -251,6 +250,7 @@
 .statusIcon {
     font-size: 12px;
 }
+
 /* Стили для раздела подарков */
 .giftsSection {
     margin: 20px 0;

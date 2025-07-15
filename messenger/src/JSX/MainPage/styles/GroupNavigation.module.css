@@ -10,7 +10,7 @@
     position: fixed;
     left: 0;
     top: 0;
-    z-index: 1000;
+    z-index: 999;
     border-right: 1px solid rgba(138, 43, 226, 0.3);
 }
 
@@ -83,7 +83,7 @@
     background: rgba(0, 0, 0, 0.8);
     color: #e0e0ff;
     padding: 5px 10px;
-    z-index: 99999;
+    z-index: 1000;
     border-radius: 5px;
     font-size: 14px;
     white-space: nowrap;
