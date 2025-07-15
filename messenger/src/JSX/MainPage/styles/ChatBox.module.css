@@ -150,3 +150,49 @@
 .container:hover .favorite_icon {
     transform: scale(1.2);
 }
+/* Добавьте эти стили в ваш файл */
+/* Добавьте эти стили в ваш ChatBox.module.css */
+
+.lastMessageContainer {
+    display: flex;
+    align-items: center;
+    margin: 4px 0 0 0;
+}
+
+.messageStatus {
+    margin-right: 6px;
+    display: flex;
+    align-items: center;
+}
+
+.messageStatusIcon {
+    font-size: 12px;
+    color: #b0b0ff;
+    opacity: 0.7;
+}
+
+.messageStatusIcon.read {
+    color: #8a2be2;
+    opacity: 1;
+}
+
+.messageStatusIcon.sending {
+    color: #b0b0ff;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.4; }
+    50% { opacity: 1; }
+    100% { opacity: 0.4; }
+}
+
+.p_lastmes {
+    margin: 0;
+    color: #b0b0ff;
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+}

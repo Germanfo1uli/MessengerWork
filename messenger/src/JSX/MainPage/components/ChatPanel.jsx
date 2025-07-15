@@ -33,6 +33,8 @@ const ChatPanel = () => {
             lastMessage: 'Подготовка к стыковке нового модуля...',
             time: '12:45',
             status: 'online',
+            isSentByUser: false, 
+            messageStatus: 'read'
         },
         {
             name: 'Марсианская база',
@@ -40,6 +42,8 @@ const ChatPanel = () => {
             lastMessage: 'Завершены геологические исследования...',
             time: '09:22',
             status: 'idle',
+            isSentByUser: true,
+            messageStatus: 'delivered'
         },
         {
             name: 'Центр управления',
@@ -47,6 +51,8 @@ const ChatPanel = () => {
             lastMessage: 'ТРЕВОГА: обнаружена аномалия в секторе 4...',
             time: '15:18',
             status: 'busy',
+            isSentByUser: false,
+            messageStatus: 'sent'
         },
         {
             name: 'Экипаж "Прометей"',
@@ -54,6 +60,8 @@ const ChatPanel = () => {
             lastMessage: 'Все системы в норме, продолжаем курс...',
             time: '07:33',
             status: 'offline',
+            isSentByUser: true,
+            messageStatus: 'sending'
         },
     ];
 
@@ -137,6 +145,8 @@ const ChatPanel = () => {
                         time={chat.time}
                         status={chat.status}
                         isFavorite={true}
+                        messageStatus={chat.messageStatus}
+                        isSentByUser={chat.isSentByUser}
                     />
                 ))}
             </div>

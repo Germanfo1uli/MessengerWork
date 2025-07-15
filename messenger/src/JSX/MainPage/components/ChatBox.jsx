@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import {
+    FaCheck,
+    FaCheckDouble,
+    FaClock
+} from 'react-icons/fa';
 import cl from '../styles/ChatBox.module.css';
 
-const ChatBox = ({ name, unread, lastMessage, time, status, isFavorite }) => {
+const ChatBox = ({ name, unread, lastMessage, time, status, isFavorite, messageStatus, isSentByUser }) => {
     const [avatarText, setAvatarText] = useState('');
     const [avatarColor, setAvatarColor] = useState('#4B0082');
 
@@ -20,6 +25,23 @@ const ChatBox = ({ name, unread, lastMessage, time, status, isFavorite }) => {
         setAvatarColor(dynamicColor);
     }, [name]);
 
+    const renderMessageStatus = () => {
+        if (!isSentByUser) return null; // Don't show status icons for received messages
+
+        switch(messageStatus) {
+            case 'sent':
+                return <FaCheck className={cl.messageStatusIcon} />;
+            case 'delivered':
+                return <FaCheckDouble className={cl.messageStatusIcon} />;
+            case 'read':
+                return <FaCheckDouble className={`${cl.messageStatusIcon} ${cl.read}`} />;
+            case 'sending':
+                return <FaClock className={`${cl.messageStatusIcon} ${cl.sending}`} />;
+            default:
+                return null;
+        }
+    };
+
     return (
         <div className={cl.container}>
             <div className={cl.avatar_wrapper}>
@@ -33,7 +55,14 @@ const ChatBox = ({ name, unread, lastMessage, time, status, isFavorite }) => {
                     <p className={cl.p_chatname}>{name}</p>
                     {isFavorite && <span className={cl.favorite_icon}>★</span>}
                 </div>
-                <p className={cl.p_lastmes}>{lastMessage}</p>
+                <div className={cl.lastMessageContainer}>
+                    {messageStatus && (
+                        <div className={cl.messageStatus}>
+                            {renderMessageStatus()}
+                        </div>
+                    )}
+                    <p className={cl.p_lastmes}>{lastMessage}</p>
+                </div>
             </div>
             <div className={cl.right_box}>
                 <p className={cl.p_date}>{time}</p>
