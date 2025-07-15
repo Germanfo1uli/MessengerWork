@@ -45,6 +45,11 @@ const ChatWindow = ({ activeChat }) => {
         }
     };
 
+    const handleAvatarClick = () => {
+        console.log(`Clicked on ${activeChat?.name}'s avatar`);
+        // Placeholder for future functionality, e.g., open profile
+    };
+
     if (!activeChat) {
         return (
             <div className={cl.emptyChat}>
@@ -77,9 +82,11 @@ const ChatWindow = ({ activeChat }) => {
             {/* Chat header */}
             <div className={cl.chatHeader}>
                 <div className={cl.userInfo}>
-                    <div className={cl.avatar} style={{ backgroundColor: activeChat.avatarColor }}>
-                        {activeChat.avatarText}
-                    </div>
+                    <button className={cl.avatarButton} onClick={handleAvatarClick}>
+                        <div className={cl.avatar} style={{ backgroundColor: activeChat.avatarColor }}>
+                            {activeChat.avatarText}
+                        </div>
+                    </button>
                     <div className={cl.userDetails}>
                         <h3>{activeChat.name}</h3>
                         <p className={cl.userStatus} data-status={activeChat.status}>
