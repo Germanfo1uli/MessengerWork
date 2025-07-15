@@ -11,6 +11,11 @@ const GroupNavigation = () => {
         { avatar: 'https://avatars.mds.yandex.net/i?id=3a060b00307ec724a511c4e2d8f503bc_l-4120702-images-thumbs&n=13', name: 'Fleet', id: 'group3' }
     ];
 
+    const handleAddGroup = () => {
+        // Здесь будет логика открытия модального окна
+        console.log('Open add group modal');
+    };
+
     return (
         <nav className={styles.navPanel}>
             <button
@@ -39,6 +44,25 @@ const GroupNavigation = () => {
                         )}
                     </div>
                 ))}
+
+                {/* Кнопка добавления новой группы */}
+                <div
+                    className={styles.addGroupButton}
+                    onMouseEnter={() => setTooltip('Add new group')}
+                    onMouseLeave={() => setTooltip('')}
+                    onClick={handleAddGroup}
+                >
+                    <div className={styles.avatarWrapper}>
+                        <div className={styles.plusIcon}>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="#e0e0ff">
+                                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    {tooltip === 'Add new group' && (
+                        <span className={styles.tooltip}>Add new group</span>
+                    )}
+                </div>
             </div>
         </nav>
     );

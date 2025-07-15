@@ -109,3 +109,38 @@
         transform: translateY(-50%) scale(1);
     }
 }
+
+.addGroupButton {
+    position: relative;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.addGroupButton .avatarWrapper {
+    background: rgba(30, 30, 70, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed rgba(138, 43, 226, 0.5);
+    transition: all 0.3s ease;
+}
+
+.addGroupButton .avatarWrapper:hover {
+    background: rgba(138, 43, 226, 0.2);
+    border-color: #8a2be2;
+    box-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+}
+
+.plusIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.3s ease;
+}
+
+.addGroupButton:hover .plusIcon {
+    transform: scale(1.2);
+    color: #00d4ff;
+}
