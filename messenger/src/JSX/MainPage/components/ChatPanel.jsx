@@ -1,14 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
 import cl from '../styles/ChatPanel.module.css';
-import baseavatar from '../../../assets/images/baseavatar.jpg';
 import ChatBox from './ChatBox';
 import { IoSettingsOutline } from 'react-icons/io5';
 import { IoIosMore } from 'react-icons/io';
 import { IoSearchOutline } from 'react-icons/io5';
 import { IoStarOutline } from 'react-icons/io5';
 import { FaEnvelope } from 'react-icons/fa';
+import Modal from './Modal';
 
 const ChatPanel = () => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [user] = useState({
+        username: 'Командир Ковальски',
+        avatarUrl: 'https://i.pravatar.cc/150?img=3',
+        bannerUrl: 'https://picsum.photos/600/200?random=1',
+        lastSeen: 'На связи',
+        status: 'online',
+        quote: 'Каждый шаг становится бременем... Я теряю себя в лабиринте своих сомнений.',
+        playingWorktest: true,
+        editProfile: true,
+        doNotDisturb: false,
+        switchAccounts: false,
+        copyUserId: false
+    });
+
     const data = [
         {
             name: 'Орбитальная станция',
@@ -40,17 +55,21 @@ const ChatPanel = () => {
         },
     ];
 
+    const toggleModal = () => {
+        setIsModalOpen(!isModalOpen);
+    };
+
     return (
         <div className={cl.container}>
-            {/* Шапка профиля */}
+            {/* Шапка профиля с модальным окном */}
             <div className={cl.profileHeader}>
-                <div className={cl.avatarContainer}>
-                    <img src={baseavatar} alt="Аватар" className={cl.avatarImage} />
-                    <div className={cl.statusBadge}></div>
+                <div className={cl.avatarContainer} onClick={toggleModal} style={{ cursor: 'pointer' }}>
+                    <img src={user.avatarUrl} alt="Аватар" className={cl.avatarImage} />
+                    <div className={`${cl.statusBadge} ${cl[user.status]}`}></div>
                 </div>
                 <div className={cl.profileInfo}>
-                    <h3 className={cl.profileName}>Командир Ковальски</h3>
-                    <p className={cl.profileStatus}>На связи</p>
+                    <h3 className={cl.profileName}>{user.username}</h3>
+                    <p className={cl.profileStatus}>{user.lastSeen}</p>
                 </div>
                 <div className={cl.profileActions}>
                     <button className={cl.iconButton}>
@@ -61,6 +80,13 @@ const ChatPanel = () => {
                     </button>
                 </div>
             </div>
+
+            {/* Модальное окно профиля */}
+            <Modal
+                isOpen={isModalOpen}
+                onClose={toggleModal}
+                user={user}
+            />
 
             {/* Поиск */}
             <div className={cl.searchPanel}>
