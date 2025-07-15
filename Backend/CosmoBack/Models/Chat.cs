@@ -21,7 +21,7 @@ namespace CosmoBack.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         [NotMapped]
-        public DateTime? LastMessageAt { get; set; } // возможно нельзя передать во frontend - чек
+        public DateTime? LastMessageAt { get; set; } 
 
         // Навигационные свойства
         public User FirstUser { get; set; }

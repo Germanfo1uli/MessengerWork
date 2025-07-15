@@ -44,19 +44,6 @@ namespace CosmoBack.Controllers
             }
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateMessage([FromBody] Message message)
-        {
-            try
-            {
-                var createdMessage = await _messageService.CreateMessageAsync(message);
-                return Ok(createdMessage);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateMessage(Guid id, [FromBody] string newContent)

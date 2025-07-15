@@ -1,5 +1,4 @@
-﻿using CosmoBack.Models;
-using CosmoBack.Models.Dtos;
+﻿using CosmoBack.Models.Dtos;
 using CosmoBack.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -55,30 +54,6 @@ namespace CosmoBack.Controllers
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-        [HttpPost] //Пока не правильно работает
-        public async Task<IActionResult> CreateUser([FromBody] User user)
-        {
-            try
-            {
-                var createdUser = await _userService.CreateUserAsync(user);
-                var userDto = new UserDto
-                {
-                    Id = createdUser.Id,
-                    Phone = createdUser.Phone,
-                    Username = createdUser.Username
-                };
-                return Ok(userDto);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(ex.Message);
             }
             catch (Exception ex)
             {

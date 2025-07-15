@@ -1,20 +1,23 @@
-﻿using CosmoBack.Models;
-using CosmoBack.Services.Interfaces;
+﻿using CosmoBack.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
 
 namespace CosmoBack.Controllers
 {
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class ChatsController(IChatService chatService) : ControllerBase
+    public class ChatController : ControllerBase
     {
-        private readonly IChatService _chatService = chatService ?? throw new ArgumentNullException(nameof(chatService));
+        private readonly IChatService _chatService;
+
+        public ChatController(IChatService chatService)
+        {
+            _chatService = chatService ?? throw new ArgumentNullException(nameof(chatService));
+        }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetChat(Guid id)
+        public async Task<IActionResult> GetChatById(Guid id)
         {
             try
             {
@@ -73,7 +76,11 @@ namespace CosmoBack.Controllers
             try
             {
                 await _chatService.DeleteChatAsync(chatId);
-                return Ok("Чат удален");
+                return Ok("Чат удалён");
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
@@ -81,12 +88,12 @@ namespace CosmoBack.Controllers
             }
         }
 
-        [HttpPost("{chatId}/message")]
-        public async Task<IActionResult> SendMessage(Guid chatId, [FromBody] SendMessageRequest request)
+        [HttpPost("message")]
+        public async Task<IActionResult> SendMessage([FromBody] SendMessageRequest request)
         {
             try
             {
-                var message = await _chatService.SendMessageAsync(chatId, request.SenderId, request.Comment);
+                var message = await _chatService.SendMessageAsync(request.ChatId, request.SenderId, request.Comment);
                 return Ok(message);
             }
             catch (KeyNotFoundException ex)
@@ -112,7 +119,8 @@ namespace CosmoBack.Controllers
 
     public class SendMessageRequest
     {
+        public Guid ChatId { get; set; }
         public Guid SenderId { get; set; }
-        public string Comment { get; set; }
+        public string Comment { get; set; } = default!;
     }
 }
