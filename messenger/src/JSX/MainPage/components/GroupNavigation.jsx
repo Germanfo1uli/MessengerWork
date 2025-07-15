@@ -15,7 +15,7 @@ const GroupNavigation = () => {
         <nav className={styles.navPanel}>
             <button
                 className={styles.homeButton}
-                onClick={() => window.location.href = '/'}
+                onClick={() => window.location.href = '/home'}
             >
                 <svg width="24" height="24" fill="#e0e0ff" viewBox="0 0 24 24">
                     <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
