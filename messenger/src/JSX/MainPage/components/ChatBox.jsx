@@ -1,42 +1,46 @@
-import React, {useState, useEffect} from 'react';
-import cl from '../styles/ChatBox.module.css'
+import React, { useState, useEffect } from 'react';
+import cl from '../styles/ChatBox.module.css';
 
-const ChatBox = (props) => {
+const ChatBox = ({ name, unread, lastMessage, time, status, isFavorite }) => {
     const [avatarText, setAvatarText] = useState('');
     const [avatarColor, setAvatarColor] = useState('#4B0082');
 
     useEffect(() => {
-        // Получаем первые буквы названия чата
-        const initials = props.name
+        const initials = name
             .split(' ')
             .map(word => word.charAt(0))
             .join('')
-            .slice(0, 2) // Берем только первые две буквы
+            .slice(0, 2)
             .toUpperCase();
         setAvatarText(initials);
 
-        // Генерируем цвет на основе текущей даты
         const today = new Date();
         const hash = today.toDateString().split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-        const dynamicColor = `hsl(${hash % 360}, 70%, 40%)`; // Генерация цвета по HSV
+        const dynamicColor = `hsl(${hash % 360}, 70%, 40%)`;
         setAvatarColor(dynamicColor);
-    }, [props]);
+    }, [name]);
 
     return (
         <div className={cl.container}>
-            <div className={cl.chatbox} style={{ backgroundColor: avatarColor }}>
-                <span className={cl.avatar_text}>{avatarText}</span>
+            <div className={cl.avatar_wrapper}>
+                <div className={cl.chatbox} style={{ backgroundColor: avatarColor }}>
+                    <span className={cl.avatar_text}>{avatarText}</span>
+                </div>
+                <div className={cl.statusBadge} data-status={status}></div>
             </div>
             <div className={cl.chat_text}>
-                <p className={cl.p_chatname}>{props.name}</p>
-                <p className={cl.p_lastmes}>{props.lastMessage}</p>  
+                <div className={cl.name_wrapper}>
+                    <p className={cl.p_chatname}>{name}</p>
+                    {isFavorite && <span className={cl.favorite_icon}>★</span>}
+                </div>
+                <p className={cl.p_lastmes}>{lastMessage}</p>
             </div>
             <div className={cl.right_box}>
-                <p className={cl.p_date}>{props.time}</p>
-                <span className={cl.unread_badge}>{props.unread}</span>
+                <p className={cl.p_date}>{time}</p>
+                {unread > 0 && <span className={cl.unread_badge}>{unread}</span>}
             </div>
         </div>
     );
-}
+};
 
 export default ChatBox;

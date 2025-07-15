@@ -3,15 +3,16 @@
     height: 100vh;
     display: flex;
     flex-direction: column;
-    background: linear-gradient(180deg, #0f0c29 0%, #1a1a3a 100%);
+    background: linear-gradient(180deg, #1a1a2e, #16213e);
     border-right: 1px solid rgba(138, 43, 226, 0.3);
     overflow: hidden;
     position: fixed;
     left: 80px;
     top: 0;
     box-shadow: 4px 0 15px rgba(0, 0, 0, 0.3);
-    z-index: 1000;
+    z-index: 999;
 }
+
 /* Шапка профиля */
 .profileHeader {
     display: flex;
@@ -40,9 +41,9 @@
     right: 0;
     width: 10px;
     height: 10px;
-    background-color: #00ff7f;
+    background-color: #00d4ff; /* Changed to cyan to match GroupNavigation's hover color */
     border-radius: 50%;
-    border: 2px solid #0f0c29;
+    border: 2px solid #16213e; /* Matched GroupNavigation's darker gradient color */
 }
 
 .profileInfo {
@@ -53,13 +54,13 @@
     margin: 0;
     font-size: 15px;
     font-weight: 600;
-    color: #ffffff;
+    color: #e0e0ff; /* Matched GroupNavigation's text color */
 }
 
 .profileStatus {
     margin: 3px 0 0 0;
     font-size: 12px;
-    color: #8a2be2;
+    color: #b0b0ff; /* Matched GroupNavigation's separator color */
 }
 
 .profileActions {
@@ -79,7 +80,7 @@
 }
 
 .iconButton:hover {
-    color: #ffffff;
+    color: #00d4ff; /* Matched GroupNavigation's hover color */
     background: rgba(138, 43, 226, 0.2);
 }
 
@@ -114,13 +115,13 @@
     flex: 1;
     border: none;
     background: transparent;
-    color: #e0e0e0;
+    color: #e0e0ff; /* Matched GroupNavigation's text color */
     font-size: 13px;
     outline: none;
 }
 
 .searchInput::placeholder {
-    color: #555588;
+    color: #b0b0ff; /* Matched GroupNavigation's separator color */
 }
 
 /* Вкладки */
@@ -137,7 +138,7 @@
     padding: 12px 0;
     cursor: pointer;
     font-size: 13px;
-    color: #555588;
+    color: #b0b0ff; /* Matched GroupNavigation's separator color */
     transition: all 0.2s;
     background: transparent;
     border: none;
@@ -146,7 +147,7 @@
 
 .tabButton:hover {
     background: rgba(138, 43, 226, 0.1);
-    color: #e0e0e0;
+    color: #e0e0ff; /* Matched GroupNavigation's text color */
 }
 
 .tabButton.active {
@@ -174,126 +175,6 @@
     overflow-y: auto;
     padding: 10px 0;
     background: rgba(10, 10, 30, 0.5);
-}
-
-.chatItem {
-    display: flex;
-    align-items: center;
-    padding: 12px 15px;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-}
-
-.chatItem:hover {
-    background: rgba(138, 43, 226, 0.1);
-}
-
-.chatItem::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 60px;
-    right: 15px;
-    height: 1px;
-    background: rgba(138, 43, 226, 0.1);
-}
-
-.chatAvatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #8a2be2 0%, #4b0082 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: bold;
-    font-size: 14px;
-    margin-right: 12px;
-    position: relative;
-}
-
-.chatAvatar[data-status="online"]::after {
-    background: #00ff7f;
-}
-
-.chatAvatar[data-status="idle"]::after {
-    background: #ffaa00;
-}
-
-.chatAvatar[data-status="busy"]::after {
-    background: #ff5555;
-}
-
-.chatAvatar[data-status="offline"]::after {
-    background: #888888;
-}
-
-.chatAvatar::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    border: 2px solid #0f0c29;
-}
-
-.chatContent {
-    flex: 1;
-    min-width: 0;
-}
-
-.chatHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 4px;
-}
-
-.chatName {
-    margin: 0;
-    font-size: 14px;
-    font-weight: 600;
-    color: #ffffff;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.chatTime {
-    font-size: 11px;
-    color: #8a2be2;
-    flex-shrink: 0;
-    margin-left: 8px;
-}
-
-.chatMessage {
-    margin: 0;
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.7);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    position: relative;
-    padding-right: 20px;
-}
-
-.unreadCount {
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    background: #8a2be2;
-    color: white;
-    border-radius: 10px;
-    padding: 2px 6px;
-    font-size: 11px;
-    font-weight: bold;
-    min-width: 18px;
-    text-align: center;
 }
 
 /* Кастомный скролл */

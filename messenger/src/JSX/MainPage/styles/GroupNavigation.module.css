@@ -83,6 +83,7 @@
     background: rgba(0, 0, 0, 0.8);
     color: #e0e0ff;
     padding: 5px 10px;
+    z-index: 99999;
     border-radius: 5px;
     font-size: 14px;
     white-space: nowrap;
