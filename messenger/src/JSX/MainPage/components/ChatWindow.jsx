@@ -49,13 +49,20 @@ const ChatWindow = ({ activeChat }) => {
         return (
             <div className={cl.emptyChat}>
                 <div className={cl.emptyContent}>
-                    <h2>Выберите чат</h2>
-                    <p>Начните общение, выбрав диалог из списка</p>
+                    <h2>Зажгите свою звезду чата</h2>
+                    <p>Выберите чат и исследуйте бескрайние просторы диалогов</p>
                     <div className={cl.cosmicDecoration}>
-                        <div className={cl.star}></div>
-                        <div className={cl.star}></div>
-                        <div className={cl.star}></div>
-                        <div className={cl.planet}></div>
+                        <div className={cl.nebula}></div>
+                        <div className={cl.starField}>
+                            <div className={cl.star}></div>
+                            <div className={cl.star}></div>
+                            <div className={cl.star}></div>
+                            <div className={cl.star}></div>
+                            <div className={cl.star}></div>
+                        </div>
+                        <div className={cl.planetSmall}></div>
+                        <div className={cl.planetLarge}></div>
+                        <div className={cl.comet}></div>
                     </div>
                 </div>
             </div>
