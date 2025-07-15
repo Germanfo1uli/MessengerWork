@@ -2,12 +2,13 @@ using CosmoBack.CosmoDBContext;
 using CosmoBack.Repositories.Classes;
 using CosmoBack.Repositories.Interfaces;
 using CosmoBack.Services;
-using CosmoBack.Services.Interfaces;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using CosmoBack.Services.Classes;
+using CosmoBack.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,13 +39,10 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IContactService, ContactService>();
 builder.Services.AddScoped<IChatMembersService, ChatMembersService>();
 
-
 builder.Services.AddDbContext<CosmoDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQL")));
 
-
 builder.Services.AddControllers();
-
 
 builder.Services.AddAuthentication(options =>
 {
@@ -63,17 +61,47 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "CosmoBack API", Version = "v1" });
+
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "¬ведите JWT-токен в формате `Bearer {token}`"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] { }
+        }
+    });
+});
 
 var app = builder.Build();
-
 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "CosmoBack API v1");
+        c.OAuthUseBasicAuthenticationWithAccessCodeGrant();
+    });
 
     using (var scope = app.Services.CreateScope())
     {
@@ -83,9 +111,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseRouting(); 
+app.UseRouting();
 app.UseAuthentication();
-app.UseAuthorization(); 
-app.MapControllers(); 
+app.UseAuthorization();
+app.MapControllers();
 
 app.Run();

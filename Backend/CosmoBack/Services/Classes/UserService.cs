@@ -1,19 +1,17 @@
-﻿using CosmoBack.Models;
+﻿using CosmoBack.CosmoDBContext;
+using CosmoBack.Models;
 using CosmoBack.Repositories.Interfaces;
 using CosmoBack.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace CosmoBack.Services.Classes
 {
-    public class UserService : IUserService
+    public class UserService(IUserRepository userRepository, CosmoDbContext context) : IUserService
     {
-        private readonly IUserRepository _userRepository;
-
-        public UserService(IUserRepository userRepository)
-        {
-            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-        }
+        private readonly IUserRepository _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+        private readonly CosmoDbContext _context = context ?? throw new ArgumentNullException(nameof(context));
 
         public async Task<User> GetUserByIdAsync(Guid id)
         {
@@ -100,6 +98,10 @@ namespace CosmoBack.Services.Classes
                     throw new KeyNotFoundException($"Пользователь с ID {user.Id} не найден");
                 }
 
+                if (await _context.Users.AnyAsync(u => u.Id != user.Id && (u.Phone == user.Phone)))
+                {
+                    throw new InvalidOperationException("Пользователь с таким номером телефона уже существует");
+                }
                 existingUser.Username = user.Username;
                 existingUser.Phone = user.Phone;
                 existingUser.Bio = user.Bio;
@@ -207,7 +209,7 @@ namespace CosmoBack.Services.Classes
         {
             try
             {
-                var user = await _userRepository.GetByUsernameAsync(phone);
+                var user = await _userRepository.GetByPhoneAsync(phone);
                 if (user == null || !VerifyPassword(password, user.PasswordHash))
                 {
                     throw new UnauthorizedAccessException("Неверный телефон или пароль");
@@ -262,7 +264,7 @@ namespace CosmoBack.Services.Classes
         {
             try
             {
-                var user = await _userRepository.GetByUsernameAsync(phone);
+                var user = await _userRepository.GetByPhoneAsync(phone);
                 if (user == null || !VerifyPassword(oldPassword, user.PasswordHash))
                 {
                     throw new UnauthorizedAccessException("Неверный телефон или пароль");

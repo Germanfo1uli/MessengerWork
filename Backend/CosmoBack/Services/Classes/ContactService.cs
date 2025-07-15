@@ -1,101 +1,105 @@
-﻿using CosmoBack.Models;
+﻿using CosmoBack.CosmoDBContext;
+using CosmoBack.Models;
+using CosmoBack.Models.Dtos;
 using CosmoBack.Repositories.Interfaces;
 using CosmoBack.Services.Interfaces;
-
+using Microsoft.EntityFrameworkCore;
 namespace CosmoBack.Services.Classes
 {
-    public class ContactService : IContactService
+    public class ContactService(IContactRepository contactRepository, IUserRepository userRepository, CosmoDbContext context) : IContactService
     {
-        private readonly IContactRepository _contactRepository;
-        private readonly IUserRepository _userRepository;
+        private readonly IContactRepository _contactRepository = contactRepository ?? throw new ArgumentNullException(nameof(contactRepository));
+        private readonly IUserRepository _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+        private readonly CosmoDbContext _context = context ?? throw new ArgumentNullException(nameof(context));
 
-        public ContactService(IContactRepository contactRepository, IUserRepository userRepository)
+        public async Task<ContactDto> AddContactAsync(Guid ownerId, Guid contactId, string? tag)
         {
-            _contactRepository = contactRepository ?? throw new ArgumentNullException(nameof(contactRepository));
-            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-        }
-
-        public async Task<Contact> AddContactAsync(Guid ownerId, Guid contactId, string? tag = null)
-        {
-            try
+            if (ownerId == contactId)
             {
-                if (ownerId == contactId)
-                {
-                    throw new InvalidOperationException("Нельзя добавить себя в контакты");
-                }
-
-                var owner = await _userRepository.GetByIdAsync(ownerId);
-                var contactUser = await _userRepository.GetByIdAsync(contactId);
-
-                if (owner == null || contactUser == null)
-                {
-                    throw new KeyNotFoundException("Один или оба пользователя не найдены");
-                }
-
-                var existingContact = await _contactRepository.GetByUserIdAsync(ownerId);
-                if (existingContact != null && existingContact.ContactId == contactId)
-                {
-                    throw new InvalidOperationException("Контакт уже существует");
-                }
-
-                var contact = new Contact
-                {
-                    OwnerId = ownerId,
-                    ContactId = contactId,
-                    ContactTag = tag,
-                    CreatedAt = DateTime.UtcNow
-                };
-
-                await _contactRepository.AddAsync(contact);
-                return contact;
+                throw new InvalidOperationException("Нельзя добавить себя в контакты");
             }
-            catch (Exception ex)
+
+            var owner = await _userRepository.GetByIdAsync(ownerId);
+            if (owner == null)
             {
-                throw new Exception($"Ошибка при добавлении контакта: {ex.Message}", ex);
+                throw new KeyNotFoundException("Владелец контакта не найден");
             }
+
+            var contactUser = await _userRepository.GetByIdAsync(contactId);
+            if (contactUser == null)
+            {
+                throw new KeyNotFoundException("Пользователь для добавления в контакты не найден");
+            }
+
+            if (await _context.Contacts.AnyAsync(c => c.OwnerId == ownerId && c.ContactId == contactId))
+            {
+                throw new InvalidOperationException("Контакт уже существует");
+            }
+
+            var contact = new Contact
+            {
+                Id = Guid.NewGuid(),
+                OwnerId = ownerId,
+                ContactId = contactId,
+                ContactTag = tag
+            };
+
+            await _contactRepository.AddAsync(contact);
+
+            return new ContactDto
+            {
+                Id = contact.Id,
+                OwnerId = contact.OwnerId,
+                ContactId = contact.ContactId,
+                ContactUsername = contactUser.Username,
+                ContactPhone = contactUser.Phone,
+                Tag = contact.ContactTag
+            };
         }
 
         public async Task RemoveContactAsync(Guid contactId)
         {
-            try
+            var contact = await _contactRepository.GetByIdAsync(contactId);
+            if (contact == null)
             {
-                await _contactRepository.DeleteAsync(contactId);
+                throw new KeyNotFoundException("Контакт не найден");
             }
-            catch (Exception ex)
-            {
-                throw new Exception($"Ошибка при удалении контакта: {ex.Message}", ex);
-            }
+
+            await _contactRepository.DeleteAsync(contactId);
         }
 
-        public async Task<IEnumerable<Contact>> GetUserContactsAsync(Guid userId)
+        public async Task<List<ContactDto>> GetUserContactsAsync(Guid userId)
         {
-            try
-            {
-                return await _contactRepository.GetUserContactsAsync(userId);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Ошибка при получении контактов пользователя: {ex.Message}", ex);
-            }
+            var contacts = await _context.Contacts
+                .Where(c => c.OwnerId == userId)
+                .Join(
+                    _context.Users,
+                    contact => contact.ContactId,
+                    user => user.Id,
+                    (contact, user) => new ContactDto
+                    {
+                        Id = contact.Id,
+                        OwnerId = contact.OwnerId,
+                        ContactId = contact.ContactId,
+                        ContactUsername = user.Username,
+                        ContactPhone = user.Phone,
+                        Tag = contact.ContactTag
+                    })
+                .ToListAsync();
+
+            return contacts;
         }
 
         public async Task UpdateContactTagAsync(Guid contactId, string newTag)
         {
-            try
+            var contact = await _contactRepository.GetByIdAsync(contactId);
+            if (contact == null)
             {
-                var contact = await _contactRepository.GetByIdAsync(contactId);
-                if (contact == null)
-                {
-                    throw new KeyNotFoundException($"Контакт с ID {contactId} не найден");
-                }
+                throw new KeyNotFoundException("Контакт не найден");
+            }
 
-                contact.ContactTag = newTag;
-                await _contactRepository.UpdateAsync(contact);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Ошибка при обновлении тега контакта: {ex.Message}", ex);
-            }
+            contact.ContactTag = newTag;
+            await _contactRepository.UpdateAsync(contact);
         }
     }
 }

@@ -7,9 +7,14 @@ namespace CosmoBack.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class ContactsController(IContactService contactService) : ControllerBase
+    public class ContactsController : ControllerBase
     {
-        private readonly IContactService _contactService = contactService ?? throw new ArgumentNullException(nameof(contactService));
+        private readonly IContactService _contactService;
+
+        public ContactsController(IContactService contactService)
+        {
+            _contactService = contactService ?? throw new ArgumentNullException(nameof(contactService));
+        }
 
         [HttpPost]
         public async Task<IActionResult> AddContact([FromBody] AddContactRequest request)
@@ -40,6 +45,10 @@ namespace CosmoBack.Controllers
             {
                 await _contactService.RemoveContactAsync(contactId);
                 return Ok("Контакт удален");
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {

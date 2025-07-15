@@ -5,6 +5,7 @@ namespace CosmoBack.Repositories.Interfaces
     public interface IUserRepository : IRepository<User>
     {
         Task<User> GetByUsernameAsync(string username);
+        Task<User> GetByPhoneAsync(string phone);
         Task<User> GetByPublicnameAsync(string publicname);
     }
 }

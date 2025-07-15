@@ -15,7 +15,7 @@ namespace CosmoBack.Services.Classes
         {
             try
             {
-                var user = await _userRepository.GetByUsernameAsync(phone); // телефон используется как уникальное имя пользователя
+                var user = await _userRepository.GetByPhoneAsync(phone); // телефон используется как уникальное имя пользователя
                 if (user == null || !VerifyPassword(password, user.PasswordHash))
                 {
                     throw new UnauthorizedAccessException("Неверный телефон или пароль");

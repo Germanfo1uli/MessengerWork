@@ -1,12 +1,12 @@
-﻿using CosmoBack.Models;
+﻿using CosmoBack.Models.Dtos;
 
 namespace CosmoBack.Services.Interfaces
 {
     public interface IContactService
     {
-        Task<Contact> AddContactAsync(Guid ownerId, Guid contactId, string tag = null);
+        Task<ContactDto> AddContactAsync(Guid ownerId, Guid contactId, string? tag);
         Task RemoveContactAsync(Guid contactId);
-        Task<IEnumerable<Contact>> GetUserContactsAsync(Guid userId);
+        Task<List<ContactDto>> GetUserContactsAsync(Guid userId);
         Task UpdateContactTagAsync(Guid contactId, string newTag);
     }
 }

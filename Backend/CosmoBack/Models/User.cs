@@ -60,7 +60,7 @@ namespace CosmoBack.Models
         public ICollection<Notification>? Notifications { get; set; }
     }
 
-    public enum OnlineStatus
+    public enum OnlineStatus // 0-offline 1-online 2-away 3-donotdisturb
     {
         Offline,
         Online,
@@ -68,7 +68,7 @@ namespace CosmoBack.Models
         DoNotDisturb
     }
 
-    public enum Theme
+    public enum Theme // 0-Light 1-Dark 2-System
     {
         Light,
         Dark,

@@ -3,6 +3,7 @@ using CosmoBack.Models.Dtos;
 using CosmoBack.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CosmoBack.Controllers
 {
@@ -61,7 +62,7 @@ namespace CosmoBack.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPost] //Пока не правильно работает
         public async Task<IActionResult> CreateUser([FromBody] User user)
         {
             try
@@ -86,16 +87,46 @@ namespace CosmoBack.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateUser([FromBody] User user)
+        public async Task<IActionResult> UpdateUser([FromBody] UpdateUserDto updateUserDto)
         {
             try
             {
+                var userIdFromToken = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                    ?? throw new UnauthorizedAccessException("Пользователь не аутентифицирован"));
+                if (userIdFromToken != updateUserDto.Id)
+                {
+                    return Forbid("Вы можете обновлять только свой профиль");
+                }
+
+                var user = await _userService.GetUserByIdAsync(updateUserDto.Id);
+                if (user == null)
+                {
+                    return NotFound("Пользователь не найден");
+                }
+
+                if (!string.IsNullOrEmpty(updateUserDto.Username))
+                    user.Username = updateUserDto.Username;
+                if (!string.IsNullOrEmpty(updateUserDto.Phone))
+                    user.Phone = updateUserDto.Phone;
+                if (updateUserDto.Bio != null)
+                    user.Bio = updateUserDto.Bio;
+                if (!string.IsNullOrEmpty(updateUserDto.PublicName))
+                    user.PublicName = updateUserDto.PublicName;
+                if (updateUserDto.Theme.HasValue)
+                    user.Theme = updateUserDto.Theme.Value;
+                if (updateUserDto.AvatarImageId.HasValue)
+                    user.AvatarImageId = updateUserDto.AvatarImageId;
+
                 await _userService.UpdateUserAsync(user);
                 return Ok("Пользователь обновлен");
             }
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (Exception ex)
             {
