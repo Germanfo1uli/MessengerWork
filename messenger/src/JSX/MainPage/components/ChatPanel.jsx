@@ -24,46 +24,46 @@ const ChatPanel = ({ onChatSelect }) => {
     const navigate = useNavigate();
 
     const [data, setData] = useState([
-        {
-            name: 'Орбитальная станция',
-            unread: 3,
-            lastMessage: 'Подготовка к стыковке нового модуля...',
-            time: '12:45',
-            status: 'online',
-            isSentByUser: false,
-            messageStatus: 'read',
-            isFavorite: true
-        },
-        {
-            name: 'Марсианская база',
-            unread: 0,
-            lastMessage: 'Завершены геологические исследования...',
-            time: '09:22',
-            status: 'idle',
-            isSentByUser: true,
-            messageStatus: 'delivered',
-            isFavorite: false
-        },
-        {
-            name: 'Центр управления',
-            unread: 7,
-            lastMessage: 'ТРЕВОГА: обнаружена аномалия в секторе 4...',
-            time: '15:18',
-            status: 'busy',
-            isSentByUser: false,
-            messageStatus: 'sent',
-            isFavorite: true
-        },
-        {
-            name: 'Экипаж "Прометей"',
-            unread: 0,
-            lastMessage: 'Все системы в норме, продолжаем курс...',
-            time: '07:33',
-            status: 'offline',
-            isSentByUser: true,
-            messageStatus: 'sending',
-            isFavorite: false
-        },
+        // {
+        //     name: 'Орбитальная станция',
+        //     unread: 3,
+        //     lastMessage: 'Подготовка к стыковке нового модуля...',
+        //     time: '12:45',
+        //     status: 'online',
+        //     isSentByUser: false,
+        //     messageStatus: 'read',
+        //     isFavorite: true
+        // },
+        // {
+        //     name: 'Марсианская база',
+        //     unread: 0,
+        //     lastMessage: 'Завершены геологические исследования...',
+        //     time: '09:22',
+        //     status: 'idle',
+        //     isSentByUser: true,
+        //     messageStatus: 'delivered',
+        //     isFavorite: false
+        // },
+        // {
+        //     name: 'Центр управления',
+        //     unread: 7,
+        //     lastMessage: 'ТРЕВОГА: обнаружена аномалия в секторе 4...',
+        //     time: '15:18',
+        //     status: 'busy',
+        //     isSentByUser: false,
+        //     messageStatus: 'sent',
+        //     isFavorite: true
+        // },
+        // {
+        //     name: 'Экипаж "Прометей"',
+        //     unread: 0,
+        //     lastMessage: 'Все системы в норме, продолжаем курс...',
+        //     time: '07:33',
+        //     status: 'offline',
+        //     isSentByUser: true,
+        //     messageStatus: 'sending',
+        //     isFavorite: false
+        // },
     ]);
 
     useEffect(() => {
@@ -79,16 +79,6 @@ const ChatPanel = ({ onChatSelect }) => {
                         authenticated: isAuthenticated
                     })
                 ]);
-
-                const getStatusString = (statusCode) => {
-                    switch(statusCode) {
-                        case 0: return 'offline';
-                        case 1: return 'online';
-                        case 2: return 'idle';
-                        case 3: return 'busy';
-                        default: return 'offline';
-                    }
-                };
 
                 console.log(chatsResponse);
     
@@ -114,6 +104,16 @@ const ChatPanel = ({ onChatSelect }) => {
 
         fetchData();
     }, [isLoading, userId, username, isAuthenticated, logout]);
+
+    const getStatusString = (statusCode) => {
+        switch(statusCode) {
+            case 0: return 'offline';
+            case 1: return 'online';
+            case 2: return 'idle';
+            case 3: return 'busy';
+            default: return 'offline';
+        }
+    };
 
     const toggleModal = () => {
         setIsModalOpen(!isModalOpen);
@@ -235,14 +235,14 @@ const ChatPanel = ({ onChatSelect }) => {
                 {filteredChats.map((chat, index) => (
                     <div key={index} onClick={() => handleChatClick(chat)} style={{ cursor: 'pointer' }}>
                         <ChatBox
-                            name={chat.name}
-                            unread={chat.unread}
-                            lastMessage={chat.lastMessage.comment}
-                            time={chat.lastMessage.createdAt}
-                            status={chat.status}
-                            isFavorite={chat.isFavorite}
-                            messageStatus={chat.messageStatus}
-                            isSentByUser={chat.isSentByUser}
+                            name={chat.secondUser.username}
+                            unread={10}
+                            lastMessage={chat.lastMessage?.comment ?? "Нет сообщений"}
+                            time={chat.lastMessage?.createdAt ?? "Нет сообщений"}
+                            status={getStatusString(chat.secondUser.onlineStatus)}
+                            isFavorite={false}
+                            messageStatus={"sent"}
+                            isSentByUser={true}
                         />
                     </div>
                 ))}
