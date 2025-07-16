@@ -23,6 +23,22 @@ if (builder.Environment.IsDevelopment())
         });
 }
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("ReactApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000", "https://ziragon.ru")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+
+        policy.WithOrigins("https://js.stripe.com", "https://merchant-ui-api.stripe.com")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+
+});
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
 builder.Services.AddScoped<IMessageRepository, MessagesRepository>();
@@ -114,6 +130,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("ReactApp");
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
