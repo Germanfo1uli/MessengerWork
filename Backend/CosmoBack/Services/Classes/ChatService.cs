@@ -47,13 +47,31 @@ namespace CosmoBack.Services.Classes
                     throw new KeyNotFoundException($"Чат с ID {id} не найден");
                 }
 
+                var lastMessage = chat.Messages?.OrderByDescending(m => m.CreatedAt).FirstOrDefault();
+
                 return new ChatDto
                 {
                     Id = chat.Id,
                     FirstUserId = chat.FirstUserId,
                     SecondUserId = chat.SecondUserId,
                     CreatedAt = chat.CreatedAt,
-                    LastMessageAt = chat.Messages?.OrderByDescending(m => m.CreatedAt).FirstOrDefault()?.CreatedAt
+                    LastMessageAt = lastMessage?.CreatedAt,
+                    LastMessage = lastMessage != null ? new ChatMessageDto
+                    {
+                        Id = lastMessage.Id,
+                        ChatId = lastMessage.ChatId,
+                        SenderId = lastMessage.SenderId,
+                        Comment = lastMessage.Comment,
+                        CreatedAt = lastMessage.CreatedAt
+                    } : null,
+                    Messages = chat.Messages?.Select(m => new ChatMessageDto
+                    {
+                        Id = m.Id,
+                        ChatId = m.ChatId,
+                        SenderId = m.SenderId,
+                        Comment = m.Comment,
+                        CreatedAt = m.CreatedAt
+                    }).ToList() ?? new List<ChatMessageDto>()
                 };
             }
             catch (Exception ex)
@@ -70,6 +88,7 @@ namespace CosmoBack.Services.Classes
             {
                 var chats = await _context.Chats
                     .Where(c => c.FirstUserId == userId || c.SecondUserId == userId)
+                    .Include(c => c.Messages)
                     .Select(c => new ChatDto
                     {
                         Id = c.Id,
@@ -78,7 +97,27 @@ namespace CosmoBack.Services.Classes
                         CreatedAt = c.CreatedAt,
                         LastMessageAt = c.Messages != null
                             ? c.Messages.OrderByDescending(m => m.CreatedAt).Select(m => (DateTime?)m.CreatedAt).FirstOrDefault()
-                            : null
+                            : null,
+                        LastMessage = c.Messages != null
+                            ? c.Messages.OrderByDescending(m => m.CreatedAt).Select(m => new ChatMessageDto
+                            {
+                                Id = m.Id,
+                                ChatId = m.ChatId,
+                                SenderId = m.SenderId,
+                                Comment = m.Comment,
+                                CreatedAt = m.CreatedAt
+                            }).FirstOrDefault()
+                            : null,
+                        Messages = c.Messages != null
+                            ? c.Messages.Select(m => new ChatMessageDto
+                            {
+                                Id = m.Id,
+                                ChatId = m.ChatId,
+                                SenderId = m.SenderId,
+                                Comment = m.Comment,
+                                CreatedAt = m.CreatedAt
+                            }).ToList()
+                            : new List<ChatMessageDto>()
                     })
                     .ToListAsync();
 
@@ -128,7 +167,6 @@ namespace CosmoBack.Services.Classes
 
                 await _chatRepository.CreateChatAsync(chat);
 
-                // Создание записей в ChatMembers
                 var chatMembers = new List<ChatMember>
                 {
                     new ChatMember
@@ -152,7 +190,6 @@ namespace CosmoBack.Services.Classes
                     await _chatMembersRepository.AddAsync(member);
                 }
 
-                // Создание записей в Notifications
                 var notifications = new List<Notification>
                 {
                     new Notification
@@ -188,7 +225,9 @@ namespace CosmoBack.Services.Classes
                     FirstUserId = chat.FirstUserId,
                     SecondUserId = chat.SecondUserId,
                     CreatedAt = chat.CreatedAt,
-                    LastMessageAt = null
+                    LastMessageAt = null,
+                    LastMessage = null,
+                    Messages = new List<ChatMessageDto>()
                 };
             }
             catch (Exception ex)

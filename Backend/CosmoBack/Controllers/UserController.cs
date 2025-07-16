@@ -1,4 +1,5 @@
 ﻿using CosmoBack.Models.Dtos;
+using CosmoBack.Repositories.Interfaces;
 using CosmoBack.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,31 +10,43 @@ namespace CosmoBack.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class UserController(IUserService userService) : ControllerBase
+    public class UserController(IUserService userService, IUserRepository userRepository) : ControllerBase
     {
         private readonly IUserService _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+        private readonly IUserRepository _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetUser(Guid id)
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> GetUser(Guid userId)
         {
             try
             {
-                var user = await _userService.GetUserByIdAsync(id);
+                var user = await _userRepository.GetByIdAsync(userId);
+                if (user == null)
+                {
+                    return NotFound($"Пользователь с ID {userId} не найден");
+                }
+
                 var userDto = new UserDto
                 {
                     Id = user.Id,
+                    Username = user.Username,
                     Phone = user.Phone,
-                    Username = user.Username
+                    PasswordHash = user.PasswordHash,
+                    CreatedAt = user.CreatedAt,
+                    Bio = user.Bio,
+                    AvatarImageId = user.AvatarImageId,
+                    LastSeen = user.LastSeen,
+                    IsActive = user.IsActive,
+                    PublicName = user.PublicName,
+                    OnlineStatus = user.OnlineStatus,
+                    Theme = user.Theme
                 };
+
                 return Ok(userDto);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest($"Ошибка при получении пользователя: {ex.Message}");
             }
         }
 

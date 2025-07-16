@@ -4,13 +4,15 @@ using CosmoBack.Models.Dtos;
 using CosmoBack.Repositories.Interfaces;
 using CosmoBack.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 namespace CosmoBack.Services.Classes
 {
-    public class ContactService(IContactRepository contactRepository, IUserRepository userRepository, CosmoDbContext context) : IContactService
+    public class ContactService(IContactRepository contactRepository, IUserRepository userRepository, CosmoDbContext context, ILogger<ContactService> logger) : IContactService
     {
         private readonly IContactRepository _contactRepository = contactRepository ?? throw new ArgumentNullException(nameof(contactRepository));
         private readonly IUserRepository _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         private readonly CosmoDbContext _context = context ?? throw new ArgumentNullException(nameof(context));
+        private readonly ILogger<ContactService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         public async Task<ContactDto> AddContactAsync(Guid ownerId, Guid contactId, string? tag)
         {
@@ -68,26 +70,54 @@ namespace CosmoBack.Services.Classes
             await _contactRepository.DeleteAsync(contactId);
         }
 
-        public async Task<List<ContactDto>> GetUserContactsAsync(Guid userId)
+        public async Task<IEnumerable<UserDto>> GetUserContactsAsync(Guid userId)
         {
-            var contacts = await _context.Contacts
-                .Where(c => c.OwnerId == userId)
-                .Join(
-                    _context.Users,
-                    contact => contact.ContactId,
-                    user => user.Id,
-                    (contact, user) => new ContactDto
-                    {
-                        Id = contact.Id,
-                        OwnerId = contact.OwnerId,
-                        ContactId = contact.ContactId,
-                        ContactUsername = user.Username,
-                        ContactPhone = user.Phone,
-                        Tag = contact.ContactTag
-                    })
-                .ToListAsync();
+            _logger.LogInformation("Getting contacts for user {UserId}", userId);
+            try
+            {
+                var contactIds = await _context.Contacts
+                    .Where(c => c.OwnerId == userId)
+                    .Select(c => c.ContactId)
+                    .ToListAsync();
 
-            return contacts;
+                _logger.LogInformation("Found {ContactCount} contacts for user {UserId}", contactIds.Count, userId);
+
+                var users = new List<UserDto>();
+                foreach (var contactId in contactIds)
+                {
+                    var user = await _userRepository.GetByIdAsync(contactId);
+                    if (user != null)
+                    {
+                        users.Add(new UserDto
+                        {
+                            Id = user.Id,
+                            Username = user.Username,
+                            Phone = user.Phone,
+                            PasswordHash = user.PasswordHash,
+                            CreatedAt = user.CreatedAt,
+                            Bio = user.Bio,
+                            AvatarImageId = user.AvatarImageId,
+                            LastSeen = user.LastSeen,
+                            IsActive = user.IsActive,
+                            PublicName = user.PublicName,
+                            OnlineStatus = user.OnlineStatus,
+                            Theme = user.Theme
+                        });
+                    }
+                    else
+                    {
+                        _logger.LogWarning("User with ID {ContactId} not found for contact of user {UserId}", contactId, userId);
+                    }
+                }
+
+                _logger.LogInformation("Retrieved {UserCount} user details for contacts of user {UserId}", users.Count, userId);
+                return users;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving contacts for user {UserId}", userId);
+                throw new Exception($"Ошибка при получении контактов пользователя: {ex.Message}", ex);
+            }
         }
 
         public async Task UpdateContactTagAsync(Guid contactId, string newTag)

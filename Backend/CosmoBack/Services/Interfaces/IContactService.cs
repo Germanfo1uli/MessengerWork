@@ -6,7 +6,7 @@ namespace CosmoBack.Services.Interfaces
     {
         Task<ContactDto> AddContactAsync(Guid ownerId, Guid contactId, string? tag);
         Task RemoveContactAsync(Guid contactId);
-        Task<List<ContactDto>> GetUserContactsAsync(Guid userId);
+        Task<IEnumerable<UserDto>> GetUserContactsAsync(Guid userId);
         Task UpdateContactTagAsync(Guid contactId, string newTag);
     }
 }

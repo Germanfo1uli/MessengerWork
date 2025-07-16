@@ -2,11 +2,6 @@
 using CosmoBack.Models;
 using CosmoBack.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace CosmoBack.Repositories.Classes
 {
     public class ChatRepository(CosmoDbContext context) : Repository<Chat>(context), IChatRepository
