@@ -14,6 +14,8 @@ import AddContactModal from './AddContactModal';
 const ChatPanel = ({ onChatSelect }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isAddContactModalOpen, setIsAddContactModalOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState('favorites'); // Состояние для активной вкладки
+    const [searchQuery, setSearchQuery] = useState(''); // Состояние для поискового запроса
     const [user] = useState({
         username: 'Командир Ковальски',
         avatarUrl: 'https://i.pravatar.cc/150?img=3',
@@ -36,7 +38,8 @@ const ChatPanel = ({ onChatSelect }) => {
             time: '12:45',
             status: 'online',
             isSentByUser: false,
-            messageStatus: 'read'
+            messageStatus: 'read',
+            isFavorite: true
         },
         {
             name: 'Марсианская база',
@@ -45,7 +48,8 @@ const ChatPanel = ({ onChatSelect }) => {
             time: '09:22',
             status: 'idle',
             isSentByUser: true,
-            messageStatus: 'delivered'
+            messageStatus: 'delivered',
+            isFavorite: false
         },
         {
             name: 'Центр управления',
@@ -54,7 +58,8 @@ const ChatPanel = ({ onChatSelect }) => {
             time: '15:18',
             status: 'busy',
             isSentByUser: false,
-            messageStatus: 'sent'
+            messageStatus: 'sent',
+            isFavorite: true
         },
         {
             name: 'Экипаж "Прометей"',
@@ -63,7 +68,8 @@ const ChatPanel = ({ onChatSelect }) => {
             time: '07:33',
             status: 'offline',
             isSentByUser: true,
-            messageStatus: 'sending'
+            messageStatus: 'sending',
+            isFavorite: false
         },
     ]);
 
@@ -80,8 +86,6 @@ const ChatPanel = ({ onChatSelect }) => {
     };
 
     const handleAddContact = (contactData) => {
-        // Здесь должна быть логика добавления контакта
-        // Для примера просто добавим новый чат
         const newChat = {
             name: contactData.username || `Новый контакт (${contactData.phone})`,
             unread: 0,
@@ -89,11 +93,20 @@ const ChatPanel = ({ onChatSelect }) => {
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             status: 'online',
             isSentByUser: false,
-            messageStatus: 'sent'
+            messageStatus: 'sent',
+            isFavorite: false
         };
 
         setData([...data, newChat]);
     };
+
+    // Функция для фильтрации чатов
+    const filteredChats = (activeTab === 'favorites'
+            ? data.filter((chat) => chat.isFavorite)
+            : data
+    ).filter((chat) =>
+        chat.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     return (
         <div className={cl.container}>
@@ -151,17 +164,25 @@ const ChatPanel = ({ onChatSelect }) => {
                         type="text"
                         placeholder="Поиск по каналам..."
                         className={cl.searchInput}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
             </div>
 
             {/* Вкладки */}
             <div className={cl.tabsContainer}>
-                <button className={`${cl.tabButton} ${cl.active}`}>
+                <button
+                    className={`${cl.tabButton} ${activeTab === 'favorites' ? cl.active : ''}`}
+                    onClick={() => setActiveTab('favorites')}
+                >
                     <IoStarOutline className={cl.tabIcon} />
                     <span>Избранное</span>
                 </button>
-                <button className={cl.tabButton}>
+                <button
+                    className={`${cl.tabButton} ${activeTab === 'all' ? cl.active : ''}`}
+                    onClick={() => setActiveTab('all')}
+                >
                     <FaEnvelope className={cl.tabIcon} />
                     <span>Все каналы</span>
                 </button>
@@ -169,7 +190,7 @@ const ChatPanel = ({ onChatSelect }) => {
 
             {/* Список чатов */}
             <div className={cl.chatsList}>
-                {data.map((chat, index) => (
+                {filteredChats.map((chat, index) => (
                     <div key={index} onClick={() => handleChatClick(chat)} style={{ cursor: 'pointer' }}>
                         <ChatBox
                             name={chat.name}
@@ -177,7 +198,7 @@ const ChatPanel = ({ onChatSelect }) => {
                             lastMessage={chat.lastMessage}
                             time={chat.time}
                             status={chat.status}
-                            isFavorite={true}
+                            isFavorite={chat.isFavorite}
                             messageStatus={chat.messageStatus}
                             isSentByUser={chat.isSentByUser}
                         />
