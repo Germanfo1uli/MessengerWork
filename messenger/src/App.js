@@ -6,6 +6,7 @@ import StarField from './JSX/WelcomePage/components/StarField';
 import WelcomeScreen from './JSX/WelcomePage/components/WelcomeScreen';
 import AuthScreen from './JSX/WelcomePage/components/AuthScreen';
 import MainPage from './JSX/MainPage/components/MainPage';
+import SettingsPage from "./JSX/SettingsPage/components/SettingsPage";
 
 const AppContent = () => {
     const [currentScreen, setCurrentScreen] = useState('welcome');
@@ -13,7 +14,7 @@ const AppContent = () => {
 
     return (
         <div className={styles.appContainer}>
-            {location.pathname !== '/home' && <StarField />}
+            {location.pathname !== '/home' || '/settings' && <StarField />}
             <div className={styles.spaceOverlay} />
 
             <div className={styles.contentContainer}>
@@ -26,6 +27,7 @@ const AppContent = () => {
                 ) : (
                     <Routes>
                         <Route path="/home" element={<MainPage />} />
+                        <Route path="/settings" element={<SettingsPage />} />
                     </Routes>
                 )}
             </div>

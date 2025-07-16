@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import cl from '../styles/ChatPanel.module.css';
 import ChatBox from './ChatBox';
 import { IoSettingsOutline } from 'react-icons/io5';
@@ -12,10 +13,11 @@ import Modal from './Modal';
 import AddContactModal from './AddContactModal';
 
 const ChatPanel = ({ onChatSelect }) => {
+    const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isAddContactModalOpen, setIsAddContactModalOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState('favorites'); // Состояние для активной вкладки
-    const [searchQuery, setSearchQuery] = useState(''); // Состояние для поискового запроса
+    const [activeTab, setActiveTab] = useState('favorites');
+    const [searchQuery, setSearchQuery] = useState('');
     const [user] = useState({
         username: 'Командир Ковальски',
         avatarUrl: 'https://i.pravatar.cc/150?img=3',
@@ -100,7 +102,6 @@ const ChatPanel = ({ onChatSelect }) => {
         setData([...data, newChat]);
     };
 
-    // Функция для фильтрации чатов
     const filteredChats = (activeTab === 'favorites'
             ? data.filter((chat) => chat.isFavorite)
             : data
@@ -121,7 +122,7 @@ const ChatPanel = ({ onChatSelect }) => {
                     <p className={cl.profileStatus}>{user.lastSeen}</p>
                 </div>
                 <div className={cl.profileActions}>
-                    <button className={cl.iconButton}>
+                    <button className={cl.iconButton} onClick={() => navigate('/settings')}>
                         <IoSettingsOutline />
                     </button>
                     <button className={cl.iconButton}>
