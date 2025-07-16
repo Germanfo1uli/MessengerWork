@@ -15,7 +15,7 @@ namespace CosmoBack.Services.Classes
         private readonly ITokenRepository _tokenRepository;
         private readonly IUserRepository _userRepository;
         private readonly string _jwtSecret;
-        private readonly TimeSpan _tokenLifetime = TimeSpan.FromMinutes(5);
+        private readonly TimeSpan _tokenLifetime = TimeSpan.FromDays(24);
 
         public TokenService(ITokenRepository tokenRepository, IUserRepository userRepository, IConfiguration configuration)
         {

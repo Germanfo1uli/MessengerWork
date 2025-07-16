@@ -1,39 +1,32 @@
 ﻿using CosmoBack.CosmoDBContext;
+using CosmoBack.Hubs;
 using CosmoBack.Models;
 using CosmoBack.Models.Dtos;
 using CosmoBack.Repositories.Interfaces;
 using CosmoBack.Services.Interfaces;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace CosmoBack.Services.Classes
 {
-    public class ChatService : IChatService
+    public class ChatService(
+        IChatRepository chatRepository,
+        IMessageRepository messageRepository,
+        IUserRepository userRepository,
+        IChatMembersRepository chatMembersRepository,
+        INotificationService notificationService,
+        CosmoDbContext context,
+        ILogger<ChatService> logger,
+        IHubContext<ChatHub> hubContext) : IChatService
     {
-        private readonly IChatRepository _chatRepository;
-        private readonly IMessageRepository _messageRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly IChatMembersRepository _chatMembersRepository;
-        private readonly INotificationService _notificationService;
-        private readonly CosmoDbContext _context;
-        private readonly ILogger<ChatService> _logger;
-
-        public ChatService(
-            IChatRepository chatRepository,
-            IMessageRepository messageRepository,
-            IUserRepository userRepository,
-            IChatMembersRepository chatMembersRepository,
-            INotificationService notificationService,
-            CosmoDbContext context,
-            ILogger<ChatService> logger)
-        {
-            _chatRepository = chatRepository ?? throw new ArgumentNullException(nameof(chatRepository));
-            _messageRepository = messageRepository ?? throw new ArgumentNullException(nameof(messageRepository));
-            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-            _chatMembersRepository = chatMembersRepository ?? throw new ArgumentNullException(nameof(chatMembersRepository));
-            _notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
-            _context = context ?? throw new ArgumentNullException(nameof(context));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
+        private readonly IChatRepository _chatRepository = chatRepository;
+        private readonly IMessageRepository _messageRepository = messageRepository;
+        private readonly IUserRepository _userRepository = userRepository;
+        private readonly IChatMembersRepository _chatMembersRepository = chatMembersRepository;
+        private readonly INotificationService _notificationService = notificationService;
+        private readonly CosmoDbContext _context = context;
+        private readonly ILogger<ChatService> _logger = logger;
+        private readonly IHubContext<ChatHub> _hubContext = hubContext;
 
         public async Task<ChatDto> GetChatByIdAsync(Guid id)
         {

@@ -1,4 +1,5 @@
 using CosmoBack.CosmoDBContext;
+using CosmoBack.Hubs;
 using CosmoBack.Repositories.Classes;
 using CosmoBack.Repositories.Interfaces;
 using CosmoBack.Services;
@@ -12,7 +13,7 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Отключение проверки SSL в режиме разработки (для тестирования)
+// РћС‚РєР»СЋС‡РµРЅРёРµ РїСЂРѕРІРµСЂРєРё SSL РІ СЂРµР¶РёРјРµ СЂР°Р·СЂР°Р±РѕС‚РєРё (РґР»СЏ С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ)
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddHttpClient("NoSSL").ConfigurePrimaryHttpMessageHandler(() =>
@@ -75,7 +76,7 @@ builder.Services.AddSwaggerGen(c =>
         Scheme = "Bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Введите JWT-токен в формате `Bearer {token}`"
+        Description = "Р’РІРµРґРёС‚Рµ JWT-С‚РѕРєРµРЅ РІ С„РѕСЂРјР°С‚Рµ `Bearer {token}`"
     });
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -116,6 +117,7 @@ app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapHub<ChatHub>("/chatHub");
 app.MapControllers();
 
 app.Run();
