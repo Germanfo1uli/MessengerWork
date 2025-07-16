@@ -6,11 +6,11 @@ import * as Yup from 'yup';
 import styles from '../styles/AuthScreen.module.css';
 import { FcGoogle } from 'react-icons/fc';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/UseAuth.js';
+import { useAuth } from '../../../hooks/UseAuth.js';
 import { apiRequest } from '../../../hooks/ApiRequest.js';
 
 const AuthScreen = ({ onBack }) => {
-    const { auth, login, logout } = useAuth();
+    const {login} = useAuth();
     const [authError, setAuthError] = useState();
     const [showPassword, setShowPassword] = useState(false);
     const [activeTab, setActiveTab] = useState('login');

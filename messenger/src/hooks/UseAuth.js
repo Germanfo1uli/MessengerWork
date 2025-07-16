@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect } from "react";
-import { apiRequest } from "../../../hooks/ApiRequest.js";
+import { apiRequest } from "./ApiRequest.js";
 import { jwtDecode } from 'jwt-decode';
 
 const AuthContext = createContext();
@@ -10,7 +10,7 @@ const useAuthProvider = () => {
         userId: null,
         username: null,
         token: null,
-        expires: null,
+        expiresAt: null,
         isLoading: true
     });
 
@@ -20,7 +20,7 @@ const useAuthProvider = () => {
             return {
                 userId: decoded.sub,
                 username: decoded.username || 'Пользователь',
-                expiresAt: decoded.exp * 1000 // Конвертируем в мс
+                expiresAt: decoded.expiresAt * 1000 // Конвертируем в мс
             };
         } catch (error) {
             console.error('Token decoding failed:', error);
@@ -43,6 +43,9 @@ const useAuthProvider = () => {
             expiresAt: decoded.expiresAt,
             isLoading: false
         });
+        console.log(decoded);
+        console.log(auth);
+
     }, [decodeToken]);
 
     // Очищает данные аутентификации
@@ -89,16 +92,15 @@ const useAuthProvider = () => {
     const checkTokenExpiration = useCallback(async () => {
         const token = localStorage.getItem('authToken');
         if (!token) return;
-
+    
         try {
             const decoded = decodeToken(token);
-            const timeLeft = decoded.exp - Date.now();
-
-            // Обновляем токен если осталось меньше 1 минуты
+            const timeLeft = decoded.expiresAt - Date.now(); // Теперь оба значения в миллисекундах
+    
             if (timeLeft < 60000) {
                 return await refreshTokens();
             }
-
+    
             return token;
         } catch (error) {
             console.error('Token validation failed:', error);
@@ -114,37 +116,42 @@ const useAuthProvider = () => {
                 setAuth(prev => ({ ...prev, isLoading: false }));
                 return;
             }
-
+    
             const validToken = await checkTokenExpiration();
-            if (!validToken) return;
-
+            if (!validToken) {
+                logout();
+                return;
+            }
+    
             const decoded = decodeToken(validToken);
             if (!decoded) {
                 logout();
                 return;
             }
-
+    
             setAuth({
                 isAuthenticated: true,
                 userId: decoded.userId,
                 username: decoded.username,
                 token: validToken,
-                expires: decoded.exp,
+                expiresAt: decoded.expiresAt, // Use expiresAt from decoded token
                 isLoading: false
             });
         };
-
+    
         initializeAuth();
     }, [checkTokenExpiration, decodeToken, logout]);
+
+
     useEffect(() => {
-        if (!auth.token || !auth.exp) return;
+        if (!auth.token || !auth.expiresAt) return;
 
         const checkInterval = setInterval(() => {
             checkTokenExpiration();
         }, 30000); // Проверяем каждые 30 секунд
 
         return () => clearInterval(checkInterval);
-    }, [auth.token, auth.exp, checkTokenExpiration]);
+    }, [auth.token, auth.expiresAt, checkTokenExpiration]);
 
     return { 
         ...auth,

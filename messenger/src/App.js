@@ -6,7 +6,7 @@ import StarField from './JSX/WelcomePage/components/StarField';
 import WelcomeScreen from './JSX/WelcomePage/components/WelcomeScreen';
 import AuthScreen from './JSX/WelcomePage/components/AuthScreen';
 import MainPage from './JSX/MainPage/components/MainPage';
-import { AuthProvider } from './JSX/WelcomePage/hooks/UseAuth';
+import { AuthProvider } from './hooks/UseAuth';
 
 const AppContent = () => {
     const [currentScreen, setCurrentScreen] = useState('welcome');

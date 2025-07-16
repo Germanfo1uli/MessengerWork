@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import cl from '../styles/ChatPanel.module.css';
 import ChatBox from './ChatBox';
 import { IoSettingsOutline } from 'react-icons/io5';
@@ -10,25 +10,18 @@ import { FaGift } from 'react-icons/fa';
 import { IoAddCircleOutline } from 'react-icons/io5';
 import Modal from './Modal';
 import AddContactModal from './AddContactModal';
+import { apiRequest } from '../../../hooks/ApiRequest';
+import { useAuth } from '../../../hooks/UseAuth';
+import { useNavigate } from 'react-router-dom';
 
 const ChatPanel = ({ onChatSelect }) => {
+    const {isLoading, userId, username, isAuthenticated, logout} = useAuth();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isAddContactModalOpen, setIsAddContactModalOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('favorites'); // Состояние для активной вкладки
     const [searchQuery, setSearchQuery] = useState(''); // Состояние для поискового запроса
-    const [user] = useState({
-        username: 'Командир Ковальски',
-        avatarUrl: 'https://i.pravatar.cc/150?img=3',
-        bannerUrl: 'https://picsum.photos/600/200?random=1',
-        lastSeen: 'На связи',
-        status: 'online',
-        quote: 'Каждый шаг становится бременем... Я теряю себя в лабиринте своих сомнений.',
-        playingWorktest: true,
-        editProfile: true,
-        doNotDisturb: false,
-        switchAccounts: false,
-        copyUserId: false
-    });
+    const [user, setUser] = useState({});
+    const navigate = useNavigate();
 
     const [data, setData] = useState([
         {
@@ -73,6 +66,55 @@ const ChatPanel = ({ onChatSelect }) => {
         },
     ]);
 
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [profileResponse, chatsResponse] = await Promise.all([
+                    apiRequest(`/api/user/${userId}`, {
+                        method: 'GET',
+                        authenticated: isAuthenticated
+                    }),
+                    apiRequest(`/api/chat/user/${userId}`, {
+                        method: 'GET',
+                        authenticated: isAuthenticated
+                    })
+                ]);
+
+                const getStatusString = (statusCode) => {
+                    switch(statusCode) {
+                        case 0: return 'offline';
+                        case 1: return 'online';
+                        case 2: return 'idle';
+                        case 3: return 'busy';
+                        default: return 'offline';
+                    }
+                };
+
+                console.log(chatsResponse);
+    
+                setUser({
+                    username: profileResponse.username || username,
+                    status: getStatusString(profileResponse.onlineStatus),
+                    avatarUrl: '/default-avatar.png'
+                });
+                setData(chatsResponse);
+            } catch (error) {
+                console.error('Failed to fetch user data:', error);
+            }
+        };
+
+        if (isLoading || !userId) {
+            return; 
+        }
+
+        if (!isAuthenticated) {
+            logout();
+            navigate('/');
+        }
+
+        fetchData();
+    }, [isLoading, userId, username, isAuthenticated, logout]);
+
     const toggleModal = () => {
         setIsModalOpen(!isModalOpen);
     };
@@ -103,10 +145,10 @@ const ChatPanel = ({ onChatSelect }) => {
     // Функция для фильтрации чатов
     const filteredChats = (activeTab === 'favorites'
             ? data.filter((chat) => chat.isFavorite)
-            : data
-    ).filter((chat) =>
-        chat.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+            : data)
+    // ).filter((chat) =>
+    //     chat.name.toLowerCase().includes(searchQuery.toLowerCase())
+    // );
 
     return (
         <div className={cl.container}>
@@ -195,8 +237,8 @@ const ChatPanel = ({ onChatSelect }) => {
                         <ChatBox
                             name={chat.name}
                             unread={chat.unread}
-                            lastMessage={chat.lastMessage}
-                            time={chat.time}
+                            lastMessage={chat.lastMessage.comment}
+                            time={chat.lastMessage.createdAt}
                             status={chat.status}
                             isFavorite={chat.isFavorite}
                             messageStatus={chat.messageStatus}
