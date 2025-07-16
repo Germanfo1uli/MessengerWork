@@ -44,6 +44,8 @@ builder.Services.AddDbContext<CosmoDbContext>(options =>
 
 builder.Services.AddControllers();
 
+builder.Services.AddSignalR();
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
