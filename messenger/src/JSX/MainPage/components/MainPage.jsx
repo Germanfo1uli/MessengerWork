@@ -1,16 +1,33 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ChatPanel from './ChatPanel.jsx';
 import GroupNavigation from './GroupNavigation';
+import ChatWindow from './ChatWindow';
 
 const MainPage = () => {
+    const [activeChat, setActiveChat] = useState(null);
+
+    const handleChatSelect = (chat) => {
+        setActiveChat({
+            ...chat,
+            avatarText: chat.name
+                .split(' ')
+                .map(word => word.charAt(0))
+                .join('')
+                .slice(0, 2)
+                .toUpperCase(),
+            avatarColor: `hsl(${Math.random() * 360}, 70%, 40%)`
+        });
+    };
+
     return (
-        <div style={{ display: 'flex' }}>
+        <div style={{ display: 'flex', height: '100vh', width: '100vw' }}>
             <GroupNavigation />
-            <ChatPanel/>
-            <main style={{ marginLeft: '60px', padding: '20px', flexGrow: 1 }}>
-                <h1>Welcome to Main Page</h1>
-                <p>This is the main content area.</p>
-            </main>
+            <div style={{ width: '350px', minWidth: '350px', borderRight: '1px solid #2f3136' }}>
+                <ChatPanel onChatSelect={handleChatSelect} />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+                <ChatWindow activeChat={activeChat} />
+            </div>
         </div>
     );
 };

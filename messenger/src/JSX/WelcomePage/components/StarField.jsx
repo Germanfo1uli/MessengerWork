@@ -1,12 +1,25 @@
 import React, { useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import styles from '../styles/StarField.module.css';
 
 const StarField = () => {
     const canvasRef = useRef(null);
     const starsRef = useRef([]);
     const animationRef = useRef();
+    const location = useLocation();
 
     useEffect(() => {
+        // Если мы на странице /home, не запускаем анимацию
+        if (location.pathname === '/home') {
+            // Очищаем canvas, если он уже был нарисован
+            const canvas = canvasRef.current;
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+            return;
+        }
+
         const canvas = canvasRef.current;
         if (!canvas) return;
 
@@ -31,7 +44,7 @@ const StarField = () => {
 
             for (let i = 0; i < numStars; i++) {
                 const isMeteor = Math.random() < 0.1;
-                const isBright = !isMeteor && Math.random() < 0.3; // 30% chance for bright twinkling stars
+                const isBright = !isMeteor && Math.random() < 0.3;
                 stars.push({
                     x: Math.random() * canvas.width,
                     y: Math.random() * canvas.height,
@@ -42,8 +55,8 @@ const StarField = () => {
                     tailLength: isMeteor ? Math.random() * 20 + 10 : 0,
                     color: isMeteor ? '#ffffff' : colors[Math.floor(Math.random() * colors.length)],
                     isBright,
-                    twinklePhase: Math.random() * Math.PI * 2, // Random phase for twinkling
-                    twinkleSpeed: isBright ? Math.random() * 0.05 + 0.02 : 0, // Twinkle speed for bright stars
+                    twinklePhase: Math.random() * Math.PI * 2,
+                    twinkleSpeed: isBright ? Math.random() * 0.05 + 0.02 : 0,
                 });
             }
 
@@ -64,7 +77,6 @@ const StarField = () => {
 
                 ctx.save();
 
-                // Apply twinkling effect for bright stars
                 let currentOpacity = star.opacity;
                 if (star.isBright && !star.isMeteor) {
                     currentOpacity = star.opacity * (0.7 + 0.3 * Math.sin(star.twinklePhase));
@@ -115,7 +127,12 @@ const StarField = () => {
             }
             window.removeEventListener('resize', resizeCanvas);
         };
-    }, []);
+    }, [location.pathname]); // Зависимость от текущего пути
+
+
+    if (location.pathname === '/home') {
+        return null;
+    }
 
     return (
         <canvas
