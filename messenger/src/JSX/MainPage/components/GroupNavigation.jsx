@@ -122,9 +122,13 @@ const GroupNavigation = () => {
                         </button>
 
                         <div className={styles.modalHeader}>
-                            <h2 className={styles.modalTitle}>Создайте свой сервер</h2>
+                            <h2 className={styles.modalTitle}>
+                                {activeTab === 'create' ? 'Создайте свой сервер' : 'Присоединитесь к серверу'}
+                            </h2>
                             <p className={styles.modalDescription}>
-                                Объединяйтесь с единомышленниками для обсуждения космоса и технологий!
+                                {activeTab === 'create'
+                                    ? 'Объединяйтесь с единомышленниками для обсуждения космоса и технологий!'
+                                    : 'Найдите сообщество по интересам и станьте его частью!'}
                             </p>
                             <div className={styles.tabs}>
                                 <button
@@ -224,7 +228,7 @@ const GroupNavigation = () => {
                                             required
                                         />
                                         <label htmlFor="agreement">
-                                            Я согласен с <a href="#">Условиями группы</a> и <a href="#">Правилами сообщества</a>
+                                            Я согласен с <a href="#" className={styles.termsLink}>Условиями группы</a> и <a href="#" className={styles.termsLink}>Правилами сообщества</a>
                                         </label>
                                     </div>
 
