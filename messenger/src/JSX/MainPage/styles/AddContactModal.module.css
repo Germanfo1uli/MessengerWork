@@ -1,0 +1,184 @@
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal {
+    background: linear-gradient(145deg, #0f0f23, #1a1a3a);
+    border-radius: 20px;
+    width: 480px;
+    max-width: 95%;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(100, 149, 237, 0.2);
+    overflow: hidden;
+    position: relative;
+    animation: modalSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.closeButton {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(30, 30, 60, 0.5);
+    border: none;
+    color: #e0e0ff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.closeButton:hover {
+    background: rgba(79, 195, 247, 0.2);
+    color: #4fc3f7;
+    transform: rotate(90deg);
+}
+
+.modalHeader {
+    padding: 24px 24px 0;
+}
+
+.modalTitle {
+    color: #e0e0ff;
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    text-align: center;
+}
+
+.modalDescription {
+    color: #b0b0ff;
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0 0 16px 0;
+    text-align: center;
+}
+
+.tabs {
+    display: flex;
+    gap: 8px;
+    background: rgba(20, 20, 50, 0.5);
+    border-radius: 12px;
+    padding: 4px;
+}
+
+.tabButton {
+    flex: 1;
+    padding: 12px;
+    background: transparent;
+    border: none;
+    color: #b0b0ff;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 15px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.tabButton:hover {
+    color: #e0e0ff;
+    background: rgba(79, 195, 247, 0.1);
+}
+
+.tabButton.active {
+    background: linear-gradient(135deg, rgba(79, 195, 247, 0.3), rgba(100, 149, 237, 0.3));
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(79, 195, 247, 0.2);
+}
+
+.modalContent {
+    padding: 24px;
+}
+
+.contactForm {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.formGroup label {
+    color: #b0b0ff;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.formGroup input,
+.formGroup textarea {
+    padding: 14px 16px;
+    background: rgba(20, 20, 50, 0.5);
+    border: 1px solid rgba(100, 149, 237, 0.2);
+    border-radius: 12px;
+    color: #ffffff;
+    font-size: 15px;
+    transition: all 0.3s ease;
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus {
+    outline: none;
+    border-color: #4fc3f7;
+    box-shadow: 0 0 0 2px rgba(79, 195, 247, 0.2);
+}
+
+.formGroup textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.submitButton {
+    padding: 14px;
+    background: linear-gradient(135deg, #4fc3f7, #6393f1);
+    border: none;
+    border-radius: 12px;
+    color: #0a0a1a;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+    box-shadow: 0 4px 15px rgba(79, 195, 247, 0.3);
+}
+
+.submitButton:hover {
+    background: linear-gradient(135deg, #63d2ff, #7aa3ff);
+    box-shadow: 0 6px 20px rgba(79, 195, 247, 0.4);
+    transform: translateY(-2px);
+}

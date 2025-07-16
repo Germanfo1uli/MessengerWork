@@ -9,9 +9,11 @@ import { FaEnvelope } from 'react-icons/fa';
 import { FaGift } from 'react-icons/fa';
 import { IoAddCircleOutline } from 'react-icons/io5';
 import Modal from './Modal';
+import AddContactModal from './AddContactModal';
 
 const ChatPanel = ({ onChatSelect }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isAddContactModalOpen, setIsAddContactModalOpen] = useState(false);
     const [user] = useState({
         username: 'Командир Ковальски',
         avatarUrl: 'https://i.pravatar.cc/150?img=3',
@@ -26,7 +28,7 @@ const ChatPanel = ({ onChatSelect }) => {
         copyUserId: false
     });
 
-    const data = [
+    const [data, setData] = useState([
         {
             name: 'Орбитальная станция',
             unread: 3,
@@ -63,14 +65,34 @@ const ChatPanel = ({ onChatSelect }) => {
             isSentByUser: true,
             messageStatus: 'sending'
         },
-    ];
+    ]);
 
     const toggleModal = () => {
         setIsModalOpen(!isModalOpen);
     };
 
+    const toggleAddContactModal = () => {
+        setIsAddContactModalOpen(!isAddContactModalOpen);
+    };
+
     const handleChatClick = (chat) => {
         onChatSelect(chat);
+    };
+
+    const handleAddContact = (contactData) => {
+        // Здесь должна быть логика добавления контакта
+        // Для примера просто добавим новый чат
+        const newChat = {
+            name: contactData.username || `Новый контакт (${contactData.phone})`,
+            unread: 0,
+            lastMessage: contactData.message || 'Новый контакт добавлен',
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            status: 'online',
+            isSentByUser: false,
+            messageStatus: 'sent'
+        };
+
+        setData([...data, newChat]);
     };
 
     return (
@@ -102,13 +124,20 @@ const ChatPanel = ({ onChatSelect }) => {
                 user={user}
             />
 
+            {/* Модальное окно добавления контакта */}
+            <AddContactModal
+                isOpen={isAddContactModalOpen}
+                onClose={toggleAddContactModal}
+                onAddContact={handleAddContact}
+            />
+
             {/* Кнопки "Подарки" и "Добавить чат" */}
             <div className={cl.actionButtons}>
                 <button className={cl.actionButton}>
                     <FaGift className={cl.actionIcon} />
                     <span>Подарки</span>
                 </button>
-                <button className={cl.actionButton}>
+                <button className={cl.actionButton} onClick={toggleAddContactModal}>
                     <IoAddCircleOutline className={cl.actionIcon} />
                     <span>Добавить чат</span>
                 </button>

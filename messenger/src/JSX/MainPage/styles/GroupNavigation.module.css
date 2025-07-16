@@ -10,7 +10,7 @@
     position: fixed;
     left: 0;
     top: 0;
-    z-index: 999;
+    z-index: 998;
     border-right: 1px solid rgba(138, 43, 226, 0.3);
 }
 
@@ -117,16 +117,16 @@
 }
 
 .formGroup select {
-    /* Стили для самого выпадающего списка */
-    appearance: none; /* Убираем стандартный вид браузера */
+
+    appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    background: rgba(20, 20, 50, 0.5); /* Фон, как у других полей */
+    background: rgba(20, 20, 50, 0.5);
     border: 1px solid rgba(100, 149, 237, 0.2);
     border-radius: 12px;
     color: #ffffff;
     font-size: 15px;
-    padding: 14px 40px 14px 16px; /* Учитываем место для стрелки */
+    padding: 14px 40px 14px 16px;
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
@@ -143,21 +143,21 @@
 }
 
 .formGroup select option {
-    /* Стили для опций в выпадающем списке */
-    background: #1a1a3a; /* Темный фон для опций */
-    color: #e0e0ff; /* Цвет текста */
+
+    background: #1a1a3a;
+    color: #e0e0ff;
     font-size: 15px;
-    padding: 10px; /* Отступы внутри опций */
+    padding: 10px;
     border: none;
 }
 
-/* Стили для опций при наведении (работает в некоторых браузерах, например, Firefox) */
+
 .formGroup select option:hover {
-    background: rgba(79, 195, 247, 0.3); /* Цвет фона при наведении */
+    background: rgba(79, 195, 247, 0.3);
     color: #ffffff;
 }
 
-/* Стили для выбранной опции */
+
 .formGroup select option:checked {
     background: linear-gradient(135deg, rgba(79, 195, 247, 0.3), rgba(100, 149, 237, 0.3));
     color: #ffffff;
