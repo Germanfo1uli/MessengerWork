@@ -7,7 +7,7 @@ namespace CosmoBack.Repositories.Classes
 {
     public class TokenRepository(CosmoDbContext context) : ITokenRepository
     {
-        private readonly CosmoDbContext _context = context ?? throw new ArgumentNullException(nameof(context));
+        private readonly CosmoDbContext _context = context;
 
         public async Task AddAsync(Token token)
         {

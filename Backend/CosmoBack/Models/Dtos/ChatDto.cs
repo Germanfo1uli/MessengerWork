@@ -8,6 +8,13 @@ namespace CosmoBack.Models.Dtos
         public DateTime CreatedAt { get; set; }
         public DateTime? LastMessageAt { get; set; }
         public ChatMessageDto? LastMessage { get; set; }
-        public List<ChatMessageDto> Messages { get; set; } = new List<ChatMessageDto>();
+        public SecondUserDto? SecondUser { get; set; }
+    }
+
+    public class SecondUserDto
+    {
+        public string Username { get; set; } = default!;
+        public OnlineStatus OnlineStatus { get; set; }
+        public string? ContactTag { get; set; }
     }
 }
