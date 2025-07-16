@@ -57,7 +57,7 @@ const Modal = ({ isOpen, onClose, user }) => {
 
                 {/* Информация о пользователе */}
                 <div className={styles.userInfo}>
-                    <h2 className={styles.username}>{user.username || "armisaelb"}</h2>
+                    <h2 className={styles.username2}>{user.username || "armisaelb"}</h2>
                     <div className={styles.userTag} onClick={copyTag}>
                         {user.tag || "#0000"}
                         <FaCopy className={styles.copyIcon} />

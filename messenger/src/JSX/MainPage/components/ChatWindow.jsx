@@ -7,16 +7,17 @@ import {
     FiSmile,
     FiSend
 } from 'react-icons/fi';
+import UserProfileModal from './UserProfileModal';
 import cl from '../styles/ChatWindow.module.css';
 
-const ChatWindow = ({ activeChat }) => {
+const ChatWindow = ({ activeChat, onToggleFavorite }) => {
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
 
     useEffect(() => {
         if (activeChat) {
-
             setMessages([
                 { id: 1, text: 'Привет! Как дела?', isUser: false, time: '12:30' },
                 { id: 2, text: 'Привет! Все отлично, спасибо!', isUser: true, time: '12:32' },
@@ -46,8 +47,32 @@ const ChatWindow = ({ activeChat }) => {
     };
 
     const handleAvatarClick = () => {
-        console.log(`Clicked on ${activeChat?.name}'s avatar`);
+        setIsProfileOpen(true);
+    };
 
+    const closeProfile = () => {
+        setIsProfileOpen(false);
+    };
+
+    const handleStartChat = () => {
+        closeProfile();
+        // Логика начала чата
+    };
+
+    const handleBlockUser = () => {
+        closeProfile();
+        // Логика блокировки пользователя
+    };
+
+    const handleReportUser = () => {
+        closeProfile();
+        // Логика жалобы на пользователя
+    };
+
+    const handleToggleFavorite = () => {
+        if (onToggleFavorite) {
+            onToggleFavorite();
+        }
     };
 
     if (!activeChat) {
@@ -158,6 +183,26 @@ const ChatWindow = ({ activeChat }) => {
                     <FiSend className={cl.sendIcon} />
                 </button>
             </div>
+
+            {/* User Profile Modal */}
+            {isProfileOpen && (
+                <UserProfileModal
+                    user={{
+                        name: activeChat.name,
+                        avatarText: activeChat.avatarText,
+                        avatarColor: activeChat.avatarColor,
+                        status: activeChat.status,
+                        isFavorite: activeChat.isFavorite,
+                        tag: "#0000",
+                        quote: "Статус пользователя"
+                    }}
+                    onClose={closeProfile}
+                    onStartChat={handleStartChat}
+                    onBlockUser={handleBlockUser}
+                    onReportUser={handleReportUser}
+                    onToggleFavorite={handleToggleFavorite}
+                />
+            )}
         </div>
     );
 };
