@@ -13,7 +13,7 @@ const Sidebar = () => {
         const path = location.pathname;
         if (path.startsWith('/settings')) return 'settings';
         if (path.startsWith('/language')) return 'language';
-        if (path.startsWith('/notifications')) return 'notifications';
+        if (path.startsWith('/appearance')) return 'appearance';
         if (path.startsWith('/security')) return 'security';
         return 'settings'; // по умолчанию
     };
@@ -42,11 +42,11 @@ const Sidebar = () => {
                     <span>Язык</span>
                 </button>
                 <button
-                    className={`${styles.navButton} ${activePath === 'notifications' ? styles.active : ''}`}
-                    onClick={() => navigate('/notifications')}
+                    className={`${styles.navButton} ${activePath === 'appearance' ? styles.active : ''}`}
+                    onClick={() => navigate('/appearance')}
                 >
                     <FiBell className={styles.navIcon} />
-                    <span>Уведомления</span>
+                    <span>Внешний вид</span>
                 </button>
                 <button
                     className={`${styles.navButton} ${activePath === 'security' ? styles.active : ''}`}

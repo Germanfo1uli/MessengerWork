@@ -8,6 +8,7 @@ import AuthScreen from './JSX/WelcomePage/components/AuthScreen';
 import MainPage from './JSX/MainPage/components/MainPage';
 import SettingsPage from "./JSX/SettingsPage/components/SettingsPage";
 import LanguageSettingsPage from "./JSX/SettingsPage/components/LanguageSettingsPage";
+import AppearanceSettings from "./JSX/SettingsPage/components/AppearanceSettings";
 
 const AppContent = () => {
     const [currentScreen, setCurrentScreen] = useState('welcome');
@@ -15,7 +16,7 @@ const AppContent = () => {
 
     return (
         <div className={styles.appContainer}>
-            {location.pathname !== '/home' || '/settings' && <StarField />}
+            {location.pathname !== '/home' || '/settings'  || '/language'  && <StarField />}
             <div className={styles.spaceOverlay} />
 
             <div className={styles.contentContainer}>
@@ -30,6 +31,7 @@ const AppContent = () => {
                         <Route path="/home" element={<MainPage />} />
                         <Route path="/settings" element={<SettingsPage />} />
                         <Route path="/language" element={<LanguageSettingsPage />} />
+                        <Route path="/appearance" element={<AppearanceSettings />} />
                     </Routes>
                 )}
             </div>
