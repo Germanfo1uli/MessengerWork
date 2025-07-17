@@ -9,5 +9,6 @@ namespace CosmoBack.Services.Interfaces
         Task ToggleNotificationStatusAsync(Guid notificationId);
         Task DeleteNotificationAsync(Guid notificationId);
         Task DeleteNotificationsByChatIdAsync(Guid chatId);
+        Task DeleteNotificationsByGroupIdAsync(Guid groupId);
     }
 }

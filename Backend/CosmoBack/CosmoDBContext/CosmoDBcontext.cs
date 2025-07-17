@@ -13,7 +13,6 @@ namespace CosmoBack.CosmoDBContext
         public DbSet<UserOAuth> UserOAuths { get; set; }
         public DbSet<Token> Tokens { get; set; }
 
-
         // Социальные сущности
         public DbSet<Channel> Channels { get; set; }
         public DbSet<ChannelMember> ChannelMembers { get; set; }
@@ -40,7 +39,6 @@ namespace CosmoBack.CosmoDBContext
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-
             base.OnModelCreating(modelBuilder);
 
             ConfigureAuthAndUsers(modelBuilder);
@@ -106,11 +104,23 @@ namespace CosmoBack.CosmoDBContext
                 .HasForeignKey(c => c.SecondUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Chat>()
+                .HasIndex(c => c.PublicId)
+                .IsUnique();
+
+            modelBuilder.Entity<Group>()
+                .HasIndex(g => g.PublicId)
+                .IsUnique();
+
+            modelBuilder.Entity<Group>()
+                .Property(g => g.Favorite)
+                .HasDefaultValue(false);
+
             modelBuilder.Entity<Contact>()
                 .HasOne(c => c.Owner)
                 .WithMany(u => u.Contacts)
                 .HasForeignKey(c => c.OwnerId)
-                .OnDelete(DeleteBehavior.Cascade); 
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Contact>()
                 .HasOne(c => c.ContactUser)
@@ -125,6 +135,18 @@ namespace CosmoBack.CosmoDBContext
                 .HasOne(m => m.Sender)
                 .WithMany(u => u.SentMessages)
                 .HasForeignKey(m => m.SenderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Message>()
+                .HasOne(m => m.Chat)
+                .WithMany(c => c.Messages)
+                .HasForeignKey(m => m.ChatId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Message>()
+                .HasOne(m => m.Group)
+                .WithMany(g => g.Messages)
+                .HasForeignKey(m => m.GroupId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Message>()
@@ -188,8 +210,25 @@ namespace CosmoBack.CosmoDBContext
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Notification>()
+                .HasOne(n => n.Group)
+                .WithMany()
+                .HasForeignKey(n => n.GroupId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.Chat)
+                .WithMany()
+                .HasForeignKey(n => n.ChatId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.Channel)
+                .WithMany()
+                .HasForeignKey(n => n.ChannelId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Notification>()
                 .HasIndex(n => new { n.UserId, n.ChatId, n.GroupId, n.ChannelId });
         }
-
     }
 }

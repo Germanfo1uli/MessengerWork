@@ -10,7 +10,7 @@ namespace CosmoBack.Controllers
     [Route("api/[controller]")]
     public class NotificationsController(INotificationService notificationService) : ControllerBase
     {
-        private readonly INotificationService _notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
+        private readonly INotificationService _notificationService = notificationService;
 
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetUserNotifications(Guid userId)
@@ -32,7 +32,7 @@ namespace CosmoBack.Controllers
             try
             {
                 var createdNotification = await _notificationService.CreateNotificationAsync(notification);
-                return Ok(createdNotification);
+                return StatusCode(201, createdNotification);
             }
             catch (Exception ex)
             {
@@ -46,7 +46,7 @@ namespace CosmoBack.Controllers
             try
             {
                 await _notificationService.ToggleNotificationStatusAsync(notificationId);
-                return Ok("Статус уведомления изменен");
+                return Ok("Статус уведомления изменён");
             }
             catch (KeyNotFoundException ex)
             {
@@ -65,6 +65,20 @@ namespace CosmoBack.Controllers
             {
                 await _notificationService.DeleteNotificationAsync(notificationId);
                 return Ok("Уведомление удалено");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpDelete("group/{groupId}")]
+        public async Task<IActionResult> DeleteNotificationsByGroupId(Guid groupId)
+        {
+            try
+            {
+                await _notificationService.DeleteNotificationsByGroupIdAsync(groupId);
+                return Ok("Уведомления для группы удалены");
             }
             catch (Exception ex)
             {

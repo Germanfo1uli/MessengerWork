@@ -1,4 +1,5 @@
 ﻿using CosmoBack.Models;
+using CosmoBack.Models.Dtos;
 using CosmoBack.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,7 +11,7 @@ namespace CosmoBack.Controllers
     [Route("api/[controller]")]
     public class MessagesController(IMessageService messageService) : ControllerBase
     {
-        private readonly IMessageService _messageService = messageService ?? throw new ArgumentNullException(nameof(messageService));
+        private readonly IMessageService _messageService = messageService;
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetMessage(Guid id)
@@ -44,6 +45,19 @@ namespace CosmoBack.Controllers
             }
         }
 
+        [HttpGet("group/{groupId}")]
+        public async Task<IActionResult> GetMessagesByGroup(Guid groupId)
+        {
+            try
+            {
+                var messages = await _messageService.GetMessagesByGroupWithDetailsAsync(groupId);
+                return Ok(messages);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateMessage(Guid id, [FromBody] string newContent)
