@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styles from '../styles/AppearanceSettings.module.css';
 import ChatPanelPreview from './ChatPanelPreview';
 import ChatWindowPreview from './ChatWindowPreview';
+import GroupNavigationPreview from './GroupNavigationPreview';
 import Sidebar from './Sidebar';
 
 const AppearanceSettings = () => {
@@ -198,9 +199,12 @@ const AppearanceSettings = () => {
                     </div>
 
                     <div className={styles.previewPanel}>
-                        <h3>Предпросмотр</h3>
+                        <h3>Предпросмотр интерфейса</h3>
                         <div className={styles.previewWrapper}>
                             <div className={styles.interfacePreview}>
+                                <div className={styles.groupNavigationPreview}>
+                                    <GroupNavigationPreview theme={theme} />
+                                </div>
                                 <div className={styles.chatPanelPreview}>
                                     <ChatPanelPreview
                                         theme={theme}
@@ -208,14 +212,16 @@ const AppearanceSettings = () => {
                                         fontSize={panelFontSize}
                                     />
                                 </div>
-                                <div className={styles.chatWindowPreview}>
-                                    <ChatWindowPreview
-                                        theme={theme}
-                                        chatStyle={windowChatStyle}
-                                        accentColor={windowAccentColor}
-                                        fontSize={windowFontSize}
-                                    />
-                                </div>
+                            </div>
+
+                            <h3 className={styles.previewSubtitle}>Предпросмотр окна чата</h3>
+                            <div className={styles.chatWindowPreviewContainer}>
+                                <ChatWindowPreview
+                                    theme={theme}
+                                    chatStyle={windowChatStyle}
+                                    accentColor={windowAccentColor}
+                                    fontSize={windowFontSize}
+                                />
                             </div>
                         </div>
                     </div>
