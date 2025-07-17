@@ -1,7 +1,15 @@
 import React from 'react';
 import styles from '../styles/GroupNavigationPreview.module.css';
 
-const GroupNavigationPreview = ({ theme }) => {
+const GroupNavigationPreview = ({ theme, avatarShape = 'round' }) => {
+    const getAvatarClass = () => {
+        switch (avatarShape) {
+            case 'square': return styles.square;
+            case 'rounded-square': return styles.roundedSquare;
+            default: return styles.round;
+        }
+    };
+
     return (
         <div className={`${styles.groupNavPreview} ${styles[theme]}`}>
             <nav className={styles.navPanel}>
@@ -15,13 +23,13 @@ const GroupNavigationPreview = ({ theme }) => {
                     {[1, 2, 3].map((group) => (
                         <div key={group} className={styles.groupItem}>
                             <div className={styles.avatarWrapper}>
-                                <div className={styles.avatar}></div>
+                                <div className={`${styles.avatar} ${getAvatarClass()}`}></div>
                             </div>
                         </div>
                     ))}
                     <div className={styles.addGroupButton}>
                         <div className={styles.avatarWrapper}>
-                            <div className={styles.plusIcon}>
+                            <div className={`${styles.plusIcon} ${getAvatarClass()}`}>
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
                                 </svg>

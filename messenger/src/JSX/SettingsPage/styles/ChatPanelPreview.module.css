@@ -4,9 +4,25 @@
     display: flex;
     flex-direction: column;
     background: #1a1a2e;
-
+    font-family: var(--font-family, system-ui);
+    font-size: var(--font-size, 16px);
+    --accent-color: #6a5acd;
     overflow: hidden;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+.previewPanel.normal .chatItem {
+    padding: 12px;
+    margin: 4px 0;
+}
+
+.previewPanel.compact .chatItem {
+    padding: 8px;
+    margin: 2px 0;
+}
+
+.previewPanel.spacious .chatItem {
+    padding: 16px;
+    margin: 8px 0;
 }
 
 .previewPanel[data-theme="light"] {
@@ -80,7 +96,20 @@
     background: #4b0082;
     margin-right: 12px;
 }
+.avatar.round,
+.chatAvatar.round {
+    border-radius: 50%;
+}
 
+.avatar.square,
+.chatAvatar.square {
+    border-radius: 0;
+}
+
+.avatar.rounded-square,
+.chatAvatar.rounded-square {
+    border-radius: 6px;
+}
 .chatInfo h5 {
     margin: 0;
     color: #e0e0ff;
@@ -121,5 +150,68 @@
 
 .previewPanel[data-theme="light"] .chatItem:hover {
     background: rgba(106, 90, 205, 0.1);
+}
+/* Добавьте эти стили */
+.previewWindow {
+    font-family: var(--font-family, system-ui);
+    font-size: var(--font-size, 16px);
+    position: relative;
+}
+
+.previewWindow::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--background-image);
+    filter: var(--background-filter, none);
+    opacity: var(--background-opacity, 1);
+    z-index: -1;
+}
+
+.message {
+    border-radius: var(--corner-radius, 12px);
+    box-shadow: var(--message-shadow, none);
+}
+
+/* Стили для разных стилей сообщений */
+.message.bubbles {
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    max-width: 80%;
+}
+
+.message.minimal {
+    padding: 8px 12px;
+    margin-bottom: 4px;
+    background: transparent !important;
+    border: 1px solid var(--border-color);
+    max-width: 90%;
+}
+
+.message.compact {
+    padding: 6px 10px;
+    margin-bottom: 2px;
+    max-width: 95%;
+}
+
+/* Стили для мета-информации */
+.messageMeta {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-top: 4px;
+    font-size: 0.8em;
+    opacity: 0.8;
+}
+
+.timestamp {
+    margin-right: 4px;
+}
+
+.readReceipt {
+    display: inline-flex;
 }
 

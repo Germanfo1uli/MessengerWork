@@ -3,10 +3,28 @@
     height: 500px;
     display: flex;
     flex-direction: column;
+    font-family: var(--font-family, system-ui);
+    font-size: var(--font-size, 16px);
+    position: relative;
     background: #0f0c29;
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.previewWindow::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: var(--background-image);
+    background-size: cover;
+    background-position: center;
+    filter: var(--background-filter, none);
+    opacity: var(--background-opacity, 1);
+    z-index: -1;
 }
 
 .previewWindow[data-theme="light"] {
@@ -52,6 +70,8 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+    border-radius: var(--corner-radius, 12px);
+    box-shadow: var(--message-shadow, none);
 }
 
 .message {
@@ -60,6 +80,25 @@
     border-radius: 18px;
     position: relative;
     word-wrap: break-word;
+}
+.message.bubbles {
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    max-width: 80%;
+}
+
+.message.minimal {
+    padding: 8px 12px;
+    margin-bottom: 4px;
+    background: transparent !important;
+    border: 1px solid var(--border-color);
+    max-width: 90%;
+}
+
+.message.compact {
+    padding: 6px 10px;
+    margin-bottom: 2px;
+    max-width: 95%;
 }
 
 .incoming {
@@ -137,3 +176,46 @@
     border: 1px solid rgba(106, 90, 205, 0.5);
 }
 
+/* Добавьте эти стили */
+.previewPanel {
+    font-family: var(--font-family, system-ui);
+    font-size: var(--font-size, 16px);
+}
+
+/* Стили для разных вариантов расстояний */
+.previewPanel.normal .chatItem {
+    padding: 12px;
+}
+
+.previewPanel.compact .chatItem {
+    padding: 8px;
+}
+
+.previewPanel.spacious .chatItem {
+    padding: 16px;
+}
+
+/* Стили для аватаров */
+.avatar.round {
+    border-radius: 50%;
+}
+
+.avatar.square {
+    border-radius: 0;
+}
+
+.avatar.roundedSquare {
+    border-radius: 12px;
+}
+
+.chatAvatar.round {
+    border-radius: 50%;
+}
+
+.chatAvatar.square {
+    border-radius: 0;
+}
+
+.chatAvatar.roundedSquare {
+    border-radius: 12px;
+}
