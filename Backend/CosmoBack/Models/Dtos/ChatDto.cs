@@ -4,7 +4,7 @@ namespace CosmoBack.Models.Dtos
     {
         public Guid Id { get; set; }
         public long PublicId { get; set; }
-        public bool Favorite { get; set; }
+        public bool IsFavorite { get; set; }
         public Guid FirstUserId { get; set; }
         public Guid SecondUserId { get; set; }
         public DateTime CreatedAt { get; set; }

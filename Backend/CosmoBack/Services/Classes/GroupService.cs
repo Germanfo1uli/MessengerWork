@@ -9,36 +9,24 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CosmoBack.Services.Classes
 {
-    public class GroupService : IGroupService
+    public class GroupService(
+        IGroupRepository groupRepository,
+        IMessageRepository messageRepository,
+        IUserRepository userRepository,
+        IGroupMembersRepository groupMembersRepository,
+        INotificationService notificationService,
+        CosmoDbContext context,
+        ILogger<GroupService> logger,
+        IHubContext<ChatHub> hubContext) : IGroupService
     {
-        private readonly IGroupRepository _groupRepository;
-        private readonly IMessageRepository _messageRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly IGroupMembersRepository _groupMembersRepository;
-        private readonly INotificationService _notificationService;
-        private readonly CosmoDbContext _context;
-        private readonly ILogger<GroupService> _logger;
-        private readonly IHubContext<ChatHub> _hubContext;
-
-        public GroupService(
-            IGroupRepository groupRepository,
-            IMessageRepository messageRepository,
-            IUserRepository userRepository,
-            IGroupMembersRepository groupMembersRepository,
-            INotificationService notificationService,
-            CosmoDbContext context,
-            ILogger<GroupService> logger,
-            IHubContext<ChatHub> hubContext)
-        {
-            _groupRepository = groupRepository;
-            _messageRepository = messageRepository;
-            _userRepository = userRepository;
-            _groupMembersRepository = groupMembersRepository;
-            _notificationService = notificationService;
-            _context = context;
-            _logger = logger;
-            _hubContext = hubContext;
-        }
+        private readonly IGroupRepository _groupRepository = groupRepository;
+        private readonly IMessageRepository _messageRepository = messageRepository;
+        private readonly IUserRepository _userRepository = userRepository;
+        private readonly IGroupMembersRepository _groupMembersRepository = groupMembersRepository;
+        private readonly INotificationService _notificationService = notificationService;
+        private readonly CosmoDbContext _context = context;
+        private readonly ILogger<GroupService> _logger = logger;
+        private readonly IHubContext<ChatHub> _hubContext = hubContext;
 
         public async Task<GroupDto> GetGroupByIdAsync(Guid id)
         {
@@ -51,6 +39,10 @@ namespace CosmoBack.Services.Classes
                     _logger.LogWarning("Group with ID {GroupId} not found", id);
                     throw new KeyNotFoundException($"Группа с ID {id} не найдена");
                 }
+
+                var userId = Guid.Parse(System.Threading.Thread.CurrentPrincipal?.Identity?.Name
+                    ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
+                var groupMember = await _groupMembersRepository.GetByGroupAndUserIdAsync(id, userId);
 
                 var lastMessage = await _context.Messages
                     .Where(m => m.GroupId == id)
@@ -82,7 +74,7 @@ namespace CosmoBack.Services.Classes
                     AvatarImageId = group.AvatarImageId,
                     CreatedAt = group.CreatedAt,
                     IsActive = group.IsActive,
-                    Favorite = group.Favorite,
+                    IsFavorite = groupMember?.IsFavorite ?? false,
                     LastMessageAt = lastMessage?.CreatedAt,
                     LastMessage = lastMessage
                 };
@@ -104,6 +96,7 @@ namespace CosmoBack.Services.Classes
 
                 foreach (var group in groups)
                 {
+                    var groupMember = await _groupMembersRepository.GetByGroupAndUserIdAsync(group.Id, userId);
                     var lastMessage = await _context.Messages
                         .Where(m => m.GroupId == group.Id)
                         .Join(_context.Users,
@@ -134,7 +127,7 @@ namespace CosmoBack.Services.Classes
                         AvatarImageId = group.AvatarImageId,
                         CreatedAt = group.CreatedAt,
                         IsActive = group.IsActive,
-                        Favorite = group.Favorite,
+                        IsFavorite = groupMember?.IsFavorite ?? false,
                         LastMessageAt = lastMessage?.CreatedAt,
                         LastMessage = lastMessage
                     });
@@ -178,8 +171,7 @@ namespace CosmoBack.Services.Classes
                     Description = description,
                     AvatarImageId = avatarImageId,
                     CreatedAt = DateTime.UtcNow,
-                    IsActive = true,
-                    Favorite = false // По умолчанию не избранное
+                    IsActive = true
                 };
 
                 await _groupRepository.CreateGroupAsync(group);
@@ -190,7 +182,8 @@ namespace CosmoBack.Services.Classes
                     GroupId = group.Id,
                     UserId = ownerId,
                     Role = GroupRole.Owner,
-                    Notifications = true
+                    Notifications = true,
+                    IsFavorite = false // По умолчанию не избранное
                 };
 
                 await _groupMembersRepository.AddAsync(groupMember);
@@ -221,7 +214,7 @@ namespace CosmoBack.Services.Classes
                     AvatarImageId = group.AvatarImageId,
                     CreatedAt = group.CreatedAt,
                     IsActive = group.IsActive,
-                    Favorite = group.Favorite,
+                    IsFavorite = false,
                     LastMessageAt = null,
                     LastMessage = null
                 };
@@ -346,7 +339,7 @@ namespace CosmoBack.Services.Classes
                     throw new KeyNotFoundException($"Пользователь не является участником группы {groupId}");
                 }
 
-                group.Favorite = favorite;
+                groupMember.IsFavorite = favorite;
                 await _context.SaveChangesAsync();
 
                 var lastMessage = await _context.Messages
@@ -381,7 +374,7 @@ namespace CosmoBack.Services.Classes
                     AvatarImageId = group.AvatarImageId,
                     CreatedAt = group.CreatedAt,
                     IsActive = group.IsActive,
-                    Favorite = group.Favorite,
+                    IsFavorite = groupMember.IsFavorite,
                     LastMessageAt = lastMessage?.CreatedAt,
                     LastMessage = lastMessage
                 };

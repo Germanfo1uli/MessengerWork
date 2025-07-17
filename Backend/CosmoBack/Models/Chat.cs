@@ -13,9 +13,6 @@ namespace CosmoBack.Models
         public long PublicId { get; set; }
 
         [Required]
-        public bool Favorite { get; set; }
-
-        [Required]
         [ForeignKey("FirstUser")]
         public Guid FirstUserId { get; set; }
 
@@ -30,5 +27,6 @@ namespace CosmoBack.Models
         public User FirstUser { get; set; }
         public User SecondUser { get; set; }
         public ICollection<Message> Messages { get; set; }
+        public List<ChatMember> Members { get; set; } = new();
     }
 }

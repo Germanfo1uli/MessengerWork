@@ -9,24 +9,36 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CosmoBack.Services.Classes
 {
-    public class ChatService(
-        IChatRepository chatRepository,
-        IMessageRepository messageRepository,
-        IUserRepository userRepository,
-        IChatMembersRepository chatMembersRepository,
-        INotificationService notificationService,
-        CosmoDbContext context,
-        ILogger<ChatService> logger,
-        IHubContext<ChatHub> hubContext) : IChatService
+    public class ChatService : IChatService
     {
-        private readonly IChatRepository _chatRepository = chatRepository;
-        private readonly IMessageRepository _messageRepository = messageRepository;
-        private readonly IUserRepository _userRepository = userRepository;
-        private readonly IChatMembersRepository _chatMembersRepository = chatMembersRepository;
-        private readonly INotificationService _notificationService = notificationService;
-        private readonly CosmoDbContext _context = context;
-        private readonly ILogger<ChatService> _logger = logger ;
-        private readonly IHubContext<ChatHub> _hubContext = hubContext;
+        private readonly IChatRepository _chatRepository;
+        private readonly IMessageRepository _messageRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly IChatMembersRepository _chatMembersRepository;
+        private readonly INotificationService _notificationService;
+        private readonly CosmoDbContext _context;
+        private readonly ILogger<ChatService> _logger;
+        private readonly IHubContext<ChatHub> _hubContext;
+
+        public ChatService(
+            IChatRepository chatRepository,
+            IMessageRepository messageRepository,
+            IUserRepository userRepository,
+            IChatMembersRepository chatMembersRepository,
+            INotificationService notificationService,
+            CosmoDbContext context,
+            ILogger<ChatService> logger,
+            IHubContext<ChatHub> hubContext)
+        {
+            _chatRepository = chatRepository;
+            _messageRepository = messageRepository;
+            _userRepository = userRepository;
+            _chatMembersRepository = chatMembersRepository;
+            _notificationService = notificationService;
+            _context = context;
+            _logger = logger;
+            _hubContext = hubContext;
+        }
 
         public async Task<ChatDto> GetChatByIdAsync(Guid id)
         {
@@ -58,11 +70,12 @@ namespace CosmoBack.Services.Classes
                     .OrderByDescending(m => m.CreatedAt)
                     .FirstOrDefaultAsync();
 
+                var chatMember = await _chatMembersRepository.GetByChatAndUserIdAsync(id, chat.FirstUserId); // Используем FirstUserId для примера
                 return new ChatDto
                 {
                     Id = chat.Id,
                     PublicId = chat.PublicId,
-                    Favorite = chat.Favorite,
+                    IsFavorite = chatMember?.IsFavorite ?? false,
                     FirstUserId = chat.FirstUserId,
                     SecondUserId = chat.SecondUserId,
                     CreatedAt = chat.CreatedAt,
@@ -83,34 +96,43 @@ namespace CosmoBack.Services.Classes
             try
             {
                 var chats = await _chatRepository.GetChatsWithDetailsAsync(userId);
-                var chatDtos = chats.Select(c => new ChatDto
+                var chatDtos = new List<ChatDto>();
+
+                foreach (var c in chats)
                 {
-                    Id = (c.GetType().GetProperty("Chat").GetValue(c) as Chat).Id,
-                    PublicId = (c.GetType().GetProperty("Chat").GetValue(c) as Chat).PublicId,
-                    Favorite = (c.GetType().GetProperty("Chat").GetValue(c) as Chat).Favorite,
-                    FirstUserId = (c.GetType().GetProperty("Chat").GetValue(c) as Chat).FirstUserId,
-                    SecondUserId = (c.GetType().GetProperty("Chat").GetValue(c) as Chat).SecondUserId,
-                    CreatedAt = (c.GetType().GetProperty("Chat").GetValue(c) as Chat).CreatedAt,
-                    LastMessageAt = c.GetType().GetProperty("LastMessageData").GetValue(c) != null
-                        ? (c.GetType().GetProperty("LastMessageData").GetValue(c).GetType().GetProperty("Message").GetValue(c.GetType().GetProperty("LastMessageData").GetValue(c)) as Message)?.CreatedAt
-                        : null,
-                    LastMessage = c.GetType().GetProperty("LastMessageData").GetValue(c) != null ? new ChatMessageDto
+                    var chat = c.GetType().GetProperty("Chat").GetValue(c) as Chat;
+                    var chatMember = await _chatMembersRepository.GetByChatAndUserIdAsync(chat.Id, userId);
+                    var lastMessageData = c.GetType().GetProperty("LastMessageData").GetValue(c);
+
+                    chatDtos.Add(new ChatDto
                     {
-                        Id = (c.GetType().GetProperty("LastMessageData").GetValue(c).GetType().GetProperty("Message").GetValue(c.GetType().GetProperty("LastMessageData").GetValue(c)) as Message).Id,
-                        ChatId = (c.GetType().GetProperty("LastMessageData").GetValue(c).GetType().GetProperty("Message").GetValue(c.GetType().GetProperty("LastMessageData").GetValue(c)) as Message).ChatId,
-                        SenderId = (c.GetType().GetProperty("LastMessageData").GetValue(c).GetType().GetProperty("Message").GetValue(c.GetType().GetProperty("LastMessageData").GetValue(c)) as Message).SenderId,
-                        Comment = (c.GetType().GetProperty("LastMessageData").GetValue(c).GetType().GetProperty("Message").GetValue(c.GetType().GetProperty("LastMessageData").GetValue(c)) as Message).Comment,
-                        CreatedAt = (c.GetType().GetProperty("LastMessageData").GetValue(c).GetType().GetProperty("Message").GetValue(c.GetType().GetProperty("LastMessageData").GetValue(c)) as Message).CreatedAt,
-                        Username = c.GetType().GetProperty("LastMessageData").GetValue(c)?.GetType().GetProperty("Username").GetValue(c.GetType().GetProperty("LastMessageData").GetValue(c))?.ToString() ?? string.Empty,
-                        AvatarImageId = c.GetType().GetProperty("LastMessageData").GetValue(c)?.GetType().GetProperty("AvatarImageId").GetValue(c.GetType().GetProperty("LastMessageData").GetValue(c)) as Guid?
-                    } : null,
-                    SecondUser = c.GetType().GetProperty("SecondUser").GetValue(c) != null ? new SecondUserDto
-                    {
-                        Username = c.GetType().GetProperty("SecondUser").GetValue(c).GetType().GetProperty("Username").GetValue(c.GetType().GetProperty("SecondUser").GetValue(c)).ToString(),
-                        OnlineStatus = (OnlineStatus)c.GetType().GetProperty("SecondUser").GetValue(c).GetType().GetProperty("OnlineStatus").GetValue(c.GetType().GetProperty("SecondUser").GetValue(c)),
-                        ContactTag = c.GetType().GetProperty("SecondUser").GetValue(c)?.GetType().GetProperty("ContactTag").GetValue(c.GetType().GetProperty("SecondUser").GetValue(c))?.ToString()
-                    } : null
-                }).ToList();
+                        Id = chat.Id,
+                        PublicId = chat.PublicId,
+                        IsFavorite = chatMember?.IsFavorite ?? false,
+                        FirstUserId = chat.FirstUserId,
+                        SecondUserId = chat.SecondUserId,
+                        CreatedAt = chat.CreatedAt,
+                        LastMessageAt = lastMessageData != null
+                            ? (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message)?.CreatedAt
+                            : null,
+                        LastMessage = lastMessageData != null ? new ChatMessageDto
+                        {
+                            Id = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).Id,
+                            ChatId = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).ChatId,
+                            SenderId = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).SenderId,
+                            Comment = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).Comment,
+                            CreatedAt = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).CreatedAt,
+                            Username = lastMessageData.GetType().GetProperty("Username").GetValue(lastMessageData)?.ToString() ?? string.Empty,
+                            AvatarImageId = lastMessageData.GetType().GetProperty("AvatarImageId").GetValue(lastMessageData) as Guid?
+                        } : null,
+                        SecondUser = c.GetType().GetProperty("SecondUser").GetValue(c) != null ? new SecondUserDto
+                        {
+                            Username = c.GetType().GetProperty("SecondUser").GetValue(c).GetType().GetProperty("Username").GetValue(c.GetType().GetProperty("SecondUser").GetValue(c)).ToString(),
+                            OnlineStatus = (OnlineStatus)c.GetType().GetProperty("SecondUser").GetValue(c).GetType().GetProperty("OnlineStatus").GetValue(c.GetType().GetProperty("SecondUser").GetValue(c)),
+                            ContactTag = c.GetType().GetProperty("SecondUser").GetValue(c)?.GetType().GetProperty("ContactTag").GetValue(c.GetType().GetProperty("SecondUser").GetValue(c))?.ToString()
+                        } : null
+                    });
+                }
 
                 _logger.LogInformation("Retrieved {ChatCount} chats for user {UserId}", chatDtos.Count, userId);
                 return chatDtos;
@@ -157,6 +179,28 @@ namespace CosmoBack.Services.Classes
 
                 await _chatRepository.CreateChatAsync(chat);
 
+                // Создание ChatMember для обоих пользователей
+                var chatMember1 = new ChatMember
+                {
+                    Id = Guid.NewGuid(),
+                    ChatId = chat.Id,
+                    UserId = firstUserId,
+                    Notifications = true,
+                    IsFavorite = false
+                };
+
+                var chatMember2 = new ChatMember
+                {
+                    Id = Guid.NewGuid(),
+                    ChatId = chat.Id,
+                    UserId = secondUserId,
+                    Notifications = true,
+                    IsFavorite = false
+                };
+
+                await _chatMembersRepository.AddAsync(chatMember1);
+                await _chatMembersRepository.AddAsync(chatMember2);
+
                 var notification1 = new Notification
                 {
                     Id = Guid.NewGuid(),
@@ -182,6 +226,7 @@ namespace CosmoBack.Services.Classes
                 {
                     Id = chat.Id,
                     PublicId = chat.PublicId,
+                    IsFavorite = false, // По умолчанию для текущего пользователя
                     FirstUserId = chat.FirstUserId,
                     SecondUserId = chat.SecondUserId,
                     CreatedAt = chat.CreatedAt,
@@ -208,7 +253,6 @@ namespace CosmoBack.Services.Classes
                     throw new KeyNotFoundException($"Чат с ID {chatId} не найден");
                 }
 
-                // Удаление связанных сообщений
                 var messages = await _context.Messages
                     .Where(m => m.ChatId == chatId)
                     .ToListAsync();
@@ -217,11 +261,8 @@ namespace CosmoBack.Services.Classes
                     _context.Messages.RemoveRange(messages);
                 }
 
-                // Удаление участников чата
                 await _chatMembersRepository.DeleteByChatIdAsync(chatId);
-                // Удаление уведомлений
                 await _notificationService.DeleteNotificationsByChatIdAsync(chatId);
-                // Удаление чата
                 await _chatRepository.DeleteChatAsync(chatId);
 
                 await _context.SaveChangesAsync();
@@ -246,7 +287,8 @@ namespace CosmoBack.Services.Classes
                     throw new KeyNotFoundException($"Чат с ID {chatId} не найден");
                 }
 
-                if (chat.FirstUserId != senderId && chat.SecondUserId != senderId)
+                var chatMember = await _chatMembersRepository.GetByChatAndUserIdAsync(chatId, senderId);
+                if (chatMember == null)
                 {
                     _logger.LogWarning("Sender {SenderId} is not a member of chat {ChatId}", senderId, chatId);
                     throw new UnauthorizedAccessException("Отправитель не является участником чата");
@@ -298,15 +340,24 @@ namespace CosmoBack.Services.Classes
             _logger.LogInformation("Toggling favorite for chat {ChatId} to {Favorite}", chatId, favorite);
             try
             {
-                var chat = await _context.Chats.FindAsync(chatId);
+                var userId = Guid.Parse(System.Threading.Thread.CurrentPrincipal?.Identity?.Name
+                    ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
+                var chatMember = await _chatMembersRepository.GetByChatAndUserIdAsync(chatId, userId);
+                if (chatMember == null)
+                {
+                    _logger.LogWarning("User {UserId} is not a member of chat {ChatId}", userId, chatId);
+                    throw new KeyNotFoundException($"Пользователь не является участником чата {chatId}");
+                }
+
+                chatMember.IsFavorite = favorite;
+                await _context.SaveChangesAsync();
+
+                var chat = await _chatRepository.GetChatByIdWithMessagesAsync(chatId);
                 if (chat == null)
                 {
                     _logger.LogWarning("Chat {ChatId} not found", chatId);
                     throw new KeyNotFoundException($"Чат с ID {chatId} не найден");
                 }
-
-                chat.Favorite = favorite;
-                await _context.SaveChangesAsync();
 
                 var lastMessage = await _context.Messages
                     .Where(m => m.ChatId == chatId)
@@ -326,12 +377,12 @@ namespace CosmoBack.Services.Classes
                     .OrderByDescending(m => m.CreatedAt)
                     .FirstOrDefaultAsync();
 
-                _logger.LogInformation("Favorite status for chat {ChatId} updated to {Favorite}", chatId, favorite);
+                _logger.LogInformation("Favorite status for chat {ChatId} updated to {Favorite} for user {UserId}", chatId, favorite, userId);
                 return new ChatDto
                 {
                     Id = chat.Id,
                     PublicId = chat.PublicId,
-                    Favorite = chat.Favorite,
+                    IsFavorite = chatMember.IsFavorite,
                     FirstUserId = chat.FirstUserId,
                     SecondUserId = chat.SecondUserId,
                     CreatedAt = chat.CreatedAt,

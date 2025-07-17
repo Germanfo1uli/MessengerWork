@@ -1,5 +1,4 @@
-﻿using CosmoBack.Models;
-using CosmoBack.Services.Interfaces;
+﻿using CosmoBack.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,14 +7,9 @@ namespace CosmoBack.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class GroupController : ControllerBase
+    public class GroupController(IGroupService groupService) : ControllerBase
     {
-        private readonly IGroupService _groupService;
-
-        public GroupController(IGroupService groupService)
-        {
-            _groupService = groupService ?? throw new ArgumentNullException(nameof(groupService));
-        }
+        private readonly IGroupService _groupService = groupService;
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetGroupById(Guid id)
@@ -118,16 +112,22 @@ namespace CosmoBack.Controllers
         }
 
         [HttpPut("{groupId}/favorite")]
-        public async Task<IActionResult> ToggleFavoriteGroup( Guid groupId, Guid userId, [FromBody] ToggleFavoriteGroupRequest request)
+        public async Task<IActionResult> ToggleFavoriteGroup(Guid groupId, [FromBody] ToggleFavoriteGroupRequest request)
         {
             try
             {
+                var userId = Guid.Parse(User.FindFirst("sub")?.Value
+                    ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
                 var group = await _groupService.ToggleFavoriteGroupAsync(groupId, userId, request.Favorite);
                 return Ok(group);
             }
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (Exception ex)
             {

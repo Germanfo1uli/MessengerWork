@@ -12,7 +12,7 @@ namespace CosmoBack.Models.Dtos
         public Guid? AvatarImageId { get; set; }
         public DateTime CreatedAt { get; set; }
         public bool IsActive { get; set; }
-        public bool Favorite { get; set; }
+        public bool IsFavorite { get; set; }
         public DateTime? LastMessageAt { get; set; }
         public GroupMessageDto? LastMessage { get; set; }
     }

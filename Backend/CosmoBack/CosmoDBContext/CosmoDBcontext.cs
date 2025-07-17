@@ -7,13 +7,10 @@ namespace CosmoBack.CosmoDBContext
     {
         public CosmoDbContext(DbContextOptions<CosmoDbContext> options) : base(options) { }
 
-        // Пользователи и аутентификация
         public DbSet<User> Users { get; set; }
         public DbSet<OAuthProvider> OAuthProviders { get; set; }
         public DbSet<UserOAuth> UserOAuths { get; set; }
         public DbSet<Token> Tokens { get; set; }
-
-        // Социальные сущности
         public DbSet<Channel> Channels { get; set; }
         public DbSet<ChannelMember> ChannelMembers { get; set; }
         public DbSet<Group> Groups { get; set; }
@@ -21,20 +18,14 @@ namespace CosmoBack.CosmoDBContext
         public DbSet<Chat> Chats { get; set; }
         public DbSet<ChatMember> ChatMembers { get; set; }
         public DbSet<Contact> Contacts { get; set; }
-
-        // Контент
         public DbSet<Message> Messages { get; set; }
         public DbSet<Media> Media { get; set; }
         public DbSet<Image> Images { get; set; }
         public DbSet<Reply> Replies { get; set; }
         public DbSet<Reaction> Reactions { get; set; }
-
-        // Платежи и подписки
         public DbSet<Payment> Payments { get; set; }
         public DbSet<PaymentMethod> PaymentMethods { get; set; }
         public DbSet<Subscription> Subscriptions { get; set; }
-
-        // Уведомления
         public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -89,6 +80,10 @@ namespace CosmoBack.CosmoDBContext
                 .HasForeignKey(gm => gm.GroupId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<GroupMember>()
+                .Property(gm => gm.IsFavorite)
+                .HasDefaultValue(false);
+
             modelBuilder.Entity<ChatMember>()
                 .HasKey(cm => new { cm.ChatId, cm.UserId });
 
@@ -108,13 +103,13 @@ namespace CosmoBack.CosmoDBContext
                 .HasIndex(c => c.PublicId)
                 .IsUnique();
 
+            modelBuilder.Entity<ChatMember>()
+                .Property(cm => cm.IsFavorite)
+                .HasDefaultValue(false);
+
             modelBuilder.Entity<Group>()
                 .HasIndex(g => g.PublicId)
                 .IsUnique();
-
-            modelBuilder.Entity<Group>()
-                .Property(g => g.Favorite)
-                .HasDefaultValue(false);
 
             modelBuilder.Entity<Contact>()
                 .HasOne(c => c.Owner)
