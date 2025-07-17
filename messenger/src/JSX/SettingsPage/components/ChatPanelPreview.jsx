@@ -1,3 +1,4 @@
+// ChatPanelPreview.jsx
 import React from 'react';
 import styles from '../styles/ChatPanelPreview.module.css';
 
