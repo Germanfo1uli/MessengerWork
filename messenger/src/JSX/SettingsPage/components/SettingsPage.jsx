@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import styles from '../styles/SettingsPage.module.css';
-import { FiUser, FiGlobe, FiBell, FiShield, FiLogOut, FiEye, FiEyeOff, FiLock, FiTrash2 } from 'react-icons/fi';
-import { RiSpaceShipLine } from 'react-icons/ri';
+import { FiEye, FiEyeOff, FiLock, FiTrash2 } from 'react-icons/fi';
+import Sidebar from './Sidebar';
 
 const Background = () => {
     return (
@@ -95,38 +95,7 @@ const SettingsPage = () => {
     return (
         <div className={styles.container}>
             <Background />
-            <aside className={styles.sidebar}>
-                <div className={styles.sidebarHeader}>
-                    <RiSpaceShipLine className={styles.logoIcon} />
-                    <h2>Космические Настройки</h2>
-                </div>
-                <nav className={styles.navMenu}>
-                    <button className={`${styles.navButton} ${styles.active}`}>
-                        <FiUser className={styles.navIcon} />
-                        <span>Профиль</span>
-                    </button>
-                    <button className={styles.navButton}>
-                        <FiGlobe className={styles.navIcon} />
-                        <span>Язык</span>
-                    </button>
-                    <button className={styles.navButton}>
-                        <FiBell className={styles.navIcon} />
-                        <span>Уведомления</span>
-                    </button>
-                    <button className={styles.navButton}>
-                        <FiShield className={styles.navIcon} />
-                        <span>Безопасность</span>
-                    </button>
-                    <button className={styles.navButton}>
-                        <FiLogOut className={styles.navIcon} />
-                        <span>Выход</span>
-                    </button>
-                </nav>
-                <div className={styles.sidebarFooter}>
-                    <div className={styles.statusLight}></div>
-                    <span>Связь стабильная</span>
-                </div>
-            </aside>
+            <Sidebar />
 
             <main className={styles.mainContent}>
                 <div className={styles.contentWrapper}>

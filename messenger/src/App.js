@@ -7,6 +7,7 @@ import WelcomeScreen from './JSX/WelcomePage/components/WelcomeScreen';
 import AuthScreen from './JSX/WelcomePage/components/AuthScreen';
 import MainPage from './JSX/MainPage/components/MainPage';
 import SettingsPage from "./JSX/SettingsPage/components/SettingsPage";
+import LanguageSettingsPage from "./JSX/SettingsPage/components/LanguageSettingsPage";
 
 const AppContent = () => {
     const [currentScreen, setCurrentScreen] = useState('welcome');
@@ -28,6 +29,7 @@ const AppContent = () => {
                     <Routes>
                         <Route path="/home" element={<MainPage />} />
                         <Route path="/settings" element={<SettingsPage />} />
+                        <Route path="/language" element={<LanguageSettingsPage />} />
                     </Routes>
                 )}
             </div>
