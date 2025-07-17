@@ -9,29 +9,63 @@ import {
 } from 'react-icons/fi';
 import UserProfileModal from './UserProfileModal';
 import cl from '../styles/ChatWindow.module.css';
+import { apiRequest } from '../../../hooks/ApiRequest';
+import { useAuth } from '../../../hooks/UseAuth';
+import useMainHooks from '../../../hooks/UseMainHooks';
+import { useNavigate } from 'react-router-dom';
 
 const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) => {
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const {isLoading, userId, username, isAuthenticated, logout} = useAuth();
+    const {getStatusString} = useMainHooks();
+    const navigate = useNavigate();
+
 
     useEffect(() => {
-        if (activeChat) {
-            setMessages([
-                { id: 1, text: 'Привет! Как дела?', isUser: false, time: '12:30' },
-                { id: 2, text: 'Привет! Все отлично, спасибо!', isUser: true, time: '12:32' },
-                { id: 3, text: 'Что планируешь на выходные?', isUser: false, time: '12:33' },
-                { id: 4, text: 'Пока не решил, может сходим куда-нибудь?', isUser: true, time: '12:35' },
-            ]);
+        const fetchData = async () => {
+            if (!activeChat?.id) return; // Добавляем проверку на наличие activeChat и его id
+            
+            try {
+                const response = await apiRequest(`/api/messages/chat/${activeChat.id}`, {
+                    method: 'GET',
+                    authenticated: isAuthenticated
+                });
+
+                const messages = Array.isArray(response)
+                ? response.map(message => ({
+                      ...message,
+                      isUser: userId === message.lastMessage.senderId,
+                  }))
+                : response;
+
+                console.log(response);
+                console.log(messages);
+                setMessages(messages);
+            } catch (error) {
+                console.error('Failed to fetch messages:', error);
+            }
+        };
+    
+        if (isLoading || !userId) {
+            return; 
         }
-    }, [activeChat]);
+
+        if (!isAuthenticated) {
+            logout();
+            navigate('/');
+        }
+
+        fetchData();
+    }, [isLoading, userId, username, isAuthenticated, logout, activeChat?.id, navigate]);
 
     const handleSendMessage = () => {
         if (message.trim()) {
             const newMessage = {
                 id: messages.length + 1,
-                text: message,
+                comment: message,
                 isUser: true,
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             };
@@ -113,9 +147,9 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                         </div>
                     </button>
                     <div className={cl.userDetails}>
-                        <h3>{activeChat.name}</h3>
-                        <p className={cl.userStatus} data-status={activeChat.status}>
-                            {activeChat.status === 'online' ? 'В сети' : 'Не в сети'}
+                        <h3>{activeChat.secondUser.username}</h3>
+                        <p className={cl.userStatus} data-status={getStatusString(activeChat.secondUser.onlineStatus)}>
+                            {getStatusString(activeChat.secondUser.onlineStatus)}
                         </p>
                     </div>
                 </div>

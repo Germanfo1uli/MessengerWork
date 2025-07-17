@@ -37,7 +37,7 @@ class Program
             Console.WriteLine("Подключение к ChatHub успешно");
 
             // Тестирование методов хаба
-            var chatId = "ae5d35a0-871a-4bff-bcb9-95c54a68c8e2"; // Замените на реальный chatId
+            var chatId = "8e6bbae9-3a47-442c-81e3-e06d134a80d9"; // Замените на реальный chatId
             var senderId = "6aff16a2-43b6-4351-b819-a98e3a472dc4"; // Замените на реальный senderId
             string message = "Я ГЕЙ ПОМОГИТЕ";
 

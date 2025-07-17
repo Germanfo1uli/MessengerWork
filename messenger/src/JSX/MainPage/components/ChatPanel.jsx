@@ -13,6 +13,7 @@ import AddContactModal from './AddContactModal';
 import { apiRequest } from '../../../hooks/ApiRequest';
 import { useAuth } from '../../../hooks/UseAuth';
 import { useNavigate } from 'react-router-dom';
+import useMainHooks from '../../../hooks/UseMainHooks';
 
 const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
     const {isLoading, userId, username, isAuthenticated, logout} = useAuth();
@@ -22,6 +23,7 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
     const [searchQuery, setSearchQuery] = useState(''); // Состояние для поискового запроса
     const [user, setUser] = useState({});
     const [data, setData] = useState([]);
+    const {getStatusString, formatTimeFromISO} = useMainHooks();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -74,7 +76,7 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
         }
 
         fetchData();
-    }, [isLoading, userId, username, isAuthenticated, logout]);
+    }, [isLoading, userId, username, isAuthenticated, logout, navigate]);
 
     useEffect(() => {
         if (connection && isConnected && data.length > 0) {
@@ -132,25 +134,6 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
             };
         }
     }, [connection, isConnected, userId]);
-
-    const getStatusString = (statusCode) => {
-        switch(statusCode) {
-            case 0: return 'offline';
-            case 1: return 'online';
-            case 2: return 'idle';
-            case 3: return 'busy';
-            default: return 'offline';
-        }
-    };
-
-    function formatTimeFromISO(isoString) {
-        if (!isoString) return ""; // Проверяем на пустую строку, null, undefined и т. д.
-        const date = new Date(isoString);
-        if (isNaN(date.getTime())) return ""; 
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        return `${hours}:${minutes}`;
-    }
 
     const toggleModal = () => {
         setIsModalOpen(!isModalOpen);

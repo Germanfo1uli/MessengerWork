@@ -8,8 +8,6 @@ const MainPage = () => {
     const [activeChat, setActiveChat] = useState(null);
     const { connection, isConnected, startConnection, stopConnection } = useSignalR();
 
-    
-
     const handleChatSelect = (chat) => {
         setActiveChat({
             ...chat,
