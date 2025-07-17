@@ -1,4 +1,5 @@
-﻿using CosmoBack.Services.Interfaces;
+﻿using CosmoBack.Models;
+using CosmoBack.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,22 +8,22 @@ namespace CosmoBack.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class ChatController : ControllerBase
+    public class GroupController : ControllerBase
     {
-        private readonly IChatService _chatService;
+        private readonly IGroupService _groupService;
 
-        public ChatController(IChatService chatService)
+        public GroupController(IGroupService groupService)
         {
-            _chatService = chatService ?? throw new ArgumentNullException(nameof(chatService));
+            _groupService = groupService ?? throw new ArgumentNullException(nameof(groupService));
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetChatById(Guid id)
+        public async Task<IActionResult> GetGroupById(Guid id)
         {
             try
             {
-                var chat = await _chatService.GetChatByIdAsync(id);
-                return Ok(chat);
+                var group = await _groupService.GetGroupByIdAsync(id);
+                return Ok(group);
             }
             catch (KeyNotFoundException ex)
             {
@@ -35,12 +36,12 @@ namespace CosmoBack.Controllers
         }
 
         [HttpGet("user/{userId}")]
-        public async Task<IActionResult> GetUserChats(Guid userId)
+        public async Task<IActionResult> GetUserGroups(Guid userId)
         {
             try
             {
-                var chats = await _chatService.GetUserChatsAsync(userId);
-                return Ok(chats);
+                var groups = await _groupService.GetUserGroupsAsync(userId);
+                return Ok(groups);
             }
             catch (Exception ex)
             {
@@ -49,12 +50,18 @@ namespace CosmoBack.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateChat([FromBody] CreateChatRequest request)
+        public async Task<IActionResult> CreateGroup([FromBody] CreateGroupRequest request)
         {
             try
             {
-                var chat = await _chatService.CreateChatAsync(request.FirstUserId, request.SecondUserId);
-                return Ok(chat);
+                var group = await _groupService.CreateGroupAsync(
+                    request.OwnerId,
+                    request.Name,
+                    request.IsPublic,
+                    request.GroupTag,
+                    request.Description,
+                    request.AvatarImageId);
+                return StatusCode(201, group);
             }
             catch (InvalidOperationException ex)
             {
@@ -70,13 +77,13 @@ namespace CosmoBack.Controllers
             }
         }
 
-        [HttpDelete("{chatId}")]
-        public async Task<IActionResult> DeleteChat(Guid chatId)
+        [HttpDelete("{groupId}")]
+        public async Task<IActionResult> DeleteGroup(Guid groupId)
         {
             try
             {
-                await _chatService.DeleteChatAsync(chatId);
-                return Ok("Чат удалён");
+                await _groupService.DeleteGroupAsync(groupId);
+                return Ok("Группа удалена");
             }
             catch (KeyNotFoundException ex)
             {
@@ -89,11 +96,11 @@ namespace CosmoBack.Controllers
         }
 
         [HttpPost("message")]
-        public async Task<IActionResult> SendMessage([FromBody] SendMessageRequest request)
+        public async Task<IActionResult> SendMessage([FromBody] SendGroupMessageRequest request)
         {
             try
             {
-                var message = await _chatService.SendMessageAsync(request.ChatId, request.SenderId, request.Comment);
+                var message = await _groupService.SendMessageAsync(request.GroupId, request.SenderId, request.Comment);
                 return Ok(message);
             }
             catch (KeyNotFoundException ex)
@@ -110,13 +117,13 @@ namespace CosmoBack.Controllers
             }
         }
 
-        [HttpPut("{chatId}/favorite")]
-        public async Task<IActionResult> ToggleFavoriteChat(Guid chatId, [FromBody] ToggleFavoriteChatRequest request)
+        [HttpPut("{groupId}/favorite")]
+        public async Task<IActionResult> ToggleFavoriteGroup( Guid groupId, Guid userId, [FromBody] ToggleFavoriteGroupRequest request)
         {
             try
             {
-                var chat = await _chatService.ToggleFavoriteChatAsync(chatId, request.Favorite);
-                return Ok(chat);
+                var group = await _groupService.ToggleFavoriteGroupAsync(groupId, userId, request.Favorite);
+                return Ok(group);
             }
             catch (KeyNotFoundException ex)
             {
@@ -129,20 +136,24 @@ namespace CosmoBack.Controllers
         }
     }
 
-    public class CreateChatRequest
+    public class CreateGroupRequest
     {
-        public Guid FirstUserId { get; set; }
-        public Guid SecondUserId { get; set; }
+        public Guid OwnerId { get; set; }
+        public string Name { get; set; } = default!;
+        public bool IsPublic { get; set; }
+        public string? GroupTag { get; set; }
+        public string? Description { get; set; }
+        public Guid? AvatarImageId { get; set; }
     }
 
-    public class SendMessageRequest
+    public class SendGroupMessageRequest
     {
-        public Guid ChatId { get; set; }
+        public Guid GroupId { get; set; }
         public Guid SenderId { get; set; }
         public string Comment { get; set; } = default!;
     }
 
-    public class ToggleFavoriteChatRequest
+    public class ToggleFavoriteGroupRequest
     {
         public bool Favorite { get; set; }
     }

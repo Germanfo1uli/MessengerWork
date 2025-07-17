@@ -25,5 +25,12 @@ namespace CosmoBack.Repositories.Classes
                 .Where(n => n.ChatId == chatId)
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<Notification>> GetAllByGroupIdAsync(Guid groupId)
+        {
+            return await _context.Set<Notification>()
+                .Where(n => n.GroupId == groupId)
+                .ToListAsync();
+        }
     }
 }

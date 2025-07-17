@@ -3,6 +3,7 @@ using System;
 using CosmoBack.CosmoDBContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CosmoBack.Migrations
 {
     [DbContext(typeof(CosmoDbContext))]
-    partial class CosmoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250717080214_CascadeChatDeletionFix")]
+    partial class CascadeChatDeletionFix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -104,8 +107,8 @@ namespace CosmoBack.Migrations
                     b.Property<Guid>("FirstUserId")
                         .HasColumnType("uuid");
 
-                    b.Property<long>("PublicId")
-                        .HasColumnType("bigint");
+                    b.Property<int>("PublicId")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("SecondUserId")
                         .HasColumnType("uuid");
@@ -187,11 +190,6 @@ namespace CosmoBack.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
-                    b.Property<bool>("Favorite")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
-
                     b.Property<string>("GroupTag")
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
@@ -202,6 +200,9 @@ namespace CosmoBack.Migrations
                     b.Property<bool>("IsPublic")
                         .HasColumnType("boolean");
 
+                    b.Property<int>("MembersNumber")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -210,17 +211,11 @@ namespace CosmoBack.Migrations
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uuid");
 
-                    b.Property<long>("PublicId")
-                        .HasColumnType("bigint");
-
                     b.HasKey("Id");
 
                     b.HasIndex("AvatarImageId");
 
                     b.HasIndex("OwnerId");
-
-                    b.HasIndex("PublicId")
-                        .IsUnique();
 
                     b.ToTable("Groups");
                 });
@@ -900,8 +895,7 @@ namespace CosmoBack.Migrations
 
                     b.HasOne("CosmoBack.Models.Group", "Group")
                         .WithMany("Messages")
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("GroupId");
 
                     b.HasOne("CosmoBack.Models.User", "Sender")
                         .WithMany("SentMessages")
@@ -922,18 +916,15 @@ namespace CosmoBack.Migrations
                 {
                     b.HasOne("CosmoBack.Models.Channel", "Channel")
                         .WithMany()
-                        .HasForeignKey("ChannelId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("ChannelId");
 
                     b.HasOne("CosmoBack.Models.Chat", "Chat")
                         .WithMany()
-                        .HasForeignKey("ChatId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("ChatId");
 
                     b.HasOne("CosmoBack.Models.Group", "Group")
                         .WithMany()
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("GroupId");
 
                     b.HasOne("CosmoBack.Models.User", "User")
                         .WithMany("Notifications")

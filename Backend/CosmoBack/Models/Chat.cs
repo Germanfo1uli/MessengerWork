@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CosmoBack.Models
 {
@@ -8,6 +8,12 @@ namespace CosmoBack.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; } = Guid.NewGuid();
+
+        [Required]
+        public long PublicId { get; set; }
+
+        [Required]
+        public bool Favorite { get; set; }
 
         [Required]
         [ForeignKey("FirstUser")]
@@ -20,15 +26,9 @@ namespace CosmoBack.Models
         [Required]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        [NotMapped]
-        public DateTime? LastMessageAt { get; set; } 
-
         // Навигационные свойства
         public User FirstUser { get; set; }
         public User SecondUser { get; set; }
-
-        [NotMapped]
-        public Message? LastMessage => Messages?.OrderByDescending(m => m.CreatedAt).FirstOrDefault();
-        public ICollection<Message>? Messages { get; set; }
+        public ICollection<Message> Messages { get; set; }
     }
 }

@@ -1,20 +1,15 @@
-﻿using CosmoBack.Models;
+﻿using CosmoBack.CosmoDBContext;
+using CosmoBack.Models;
+using CosmoBack.Models.Dtos;
 using CosmoBack.Repositories.Interfaces;
 using CosmoBack.Services.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-
+using Microsoft.EntityFrameworkCore;
 namespace CosmoBack.Services
 {
-    public class MessageService : IMessageService
+    public class MessageService(IMessageRepository messageRepository, CosmoDbContext context) : IMessageService
     {
-        private readonly IMessageRepository _messageRepository;
-
-        public MessageService(IMessageRepository messageRepository)
-        {
-            _messageRepository = messageRepository ?? throw new ArgumentNullException(nameof(messageRepository));
-        }
+        private readonly IMessageRepository _messageRepository = messageRepository;
+        private readonly CosmoDbContext _context = context;
 
         public async Task<Message> GetMessageByIdAsync(Guid id)
         {
@@ -54,6 +49,36 @@ namespace CosmoBack.Services
             catch (Exception ex)
             {
                 throw new Exception($"Ошибка при получении сообщений группы: {ex.Message}", ex);
+            }
+        }
+
+        public async Task<IEnumerable<GroupMessageDto>> GetMessagesByGroupWithDetailsAsync(Guid groupId)
+        {
+            try
+            {
+                var messages = await _context.Messages
+                    .Where(m => m.GroupId == groupId)
+                    .Join(_context.Users,
+                        m => m.SenderId,
+                        u => u.Id,
+                        (m, u) => new GroupMessageDto
+                        {
+                            Id = m.Id,
+                            GroupId = m.GroupId,
+                            SenderId = m.SenderId,
+                            Comment = m.Comment,
+                            CreatedAt = m.CreatedAt,
+                            Username = u.Username,
+                            AvatarImageId = u.AvatarImageId
+                        })
+                    .OrderBy(m => m.CreatedAt)
+                    .ToListAsync();
+
+                return messages;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Ошибка при получении сообщений группы с деталями: {ex.Message}", ex);
             }
         }
 

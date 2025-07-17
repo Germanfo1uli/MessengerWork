@@ -9,5 +9,6 @@ namespace CosmoBack.Repositories.Interfaces
         Task<bool> ChatExistsBetweenUsersAsync(Guid firstUserId, Guid secondUserId);
         Task<Chat> CreateChatAsync(Chat chat);
         Task DeleteChatAsync(Guid chatId);
+        Task<IEnumerable<object>> GetChatsWithDetailsAsync(Guid userId);
     }
 }

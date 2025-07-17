@@ -1,4 +1,5 @@
 ﻿using CosmoBack.Models.Dtos;
+
 namespace CosmoBack.Services.Interfaces
 {
     public interface IChatService
@@ -8,5 +9,6 @@ namespace CosmoBack.Services.Interfaces
         Task<ChatDto> CreateChatAsync(Guid firstUserId, Guid secondUserId);
         Task DeleteChatAsync(Guid chatId);
         Task<ChatMessageDto> SendMessageAsync(Guid chatId, Guid senderId, string content);
+        Task<ChatDto> ToggleFavoriteChatAsync(Guid chatId, bool favorite);
     }
 }
