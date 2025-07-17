@@ -23,48 +23,7 @@ const ChatPanel = ({ onChatSelect }) => {
     const [user, setUser] = useState({});
     const navigate = useNavigate();
 
-    const [data, setData] = useState([
-        // {
-        //     name: 'Орбитальная станция',
-        //     unread: 3,
-        //     lastMessage: 'Подготовка к стыковке нового модуля...',
-        //     time: '12:45',
-        //     status: 'online',
-        //     isSentByUser: false,
-        //     messageStatus: 'read',
-        //     isFavorite: true
-        // },
-        // {
-        //     name: 'Марсианская база',
-        //     unread: 0,
-        //     lastMessage: 'Завершены геологические исследования...',
-        //     time: '09:22',
-        //     status: 'idle',
-        //     isSentByUser: true,
-        //     messageStatus: 'delivered',
-        //     isFavorite: false
-        // },
-        // {
-        //     name: 'Центр управления',
-        //     unread: 7,
-        //     lastMessage: 'ТРЕВОГА: обнаружена аномалия в секторе 4...',
-        //     time: '15:18',
-        //     status: 'busy',
-        //     isSentByUser: false,
-        //     messageStatus: 'sent',
-        //     isFavorite: true
-        // },
-        // {
-        //     name: 'Экипаж "Прометей"',
-        //     unread: 0,
-        //     lastMessage: 'Все системы в норме, продолжаем курс...',
-        //     time: '07:33',
-        //     status: 'offline',
-        //     isSentByUser: true,
-        //     messageStatus: 'sending',
-        //     isFavorite: false
-        // },
-    ]);
+    const [data, setData] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -80,14 +39,31 @@ const ChatPanel = ({ onChatSelect }) => {
                     })
                 ]);
 
-                console.log(chatsResponse);
+                const enhancedChats = Array.isArray(chatsResponse)
+                ? chatsResponse.map(chat => ({
+                      ...chat,
+                      // Добавляем isSentByUser к lastMessage (если он есть)
+                      lastMessage: chat.lastMessage
+                          ? {
+                                ...chat.lastMessage,
+                                isSentByUser: userId === chat.lastMessage.senderId,
+                            }
+                          : null,
+                  }))
+                : chatsResponse;
+                
+                console.log(userId, chatsResponse[0].lastMessage.senderId)
+                
+                console.log("Original:", chatsResponse);
+                console.log("Enhanced:", enhancedChats); // Проверяем, что поле добавилось
     
+                // 3. Обновляем состояние
                 setUser({
                     username: profileResponse.username || username,
                     status: getStatusString(profileResponse.onlineStatus),
                     avatarUrl: '/default-avatar.png'
                 });
-                setData(chatsResponse);
+                setData(enhancedChats); // ✅ Теперь должно работать
             } catch (error) {
                 console.error('Failed to fetch user data:', error);
             }
@@ -114,6 +90,15 @@ const ChatPanel = ({ onChatSelect }) => {
             default: return 'offline';
         }
     };
+
+    function formatTimeFromISO(isoString) {
+        if (!isoString) return ""; // Проверяем на пустую строку, null, undefined и т. д.
+        const date = new Date(isoString);
+        if (isNaN(date.getTime())) return ""; 
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${hours}:${minutes}`;
+    }
 
     const toggleModal = () => {
         setIsModalOpen(!isModalOpen);
@@ -160,7 +145,7 @@ const ChatPanel = ({ onChatSelect }) => {
                 </div>
                 <div className={cl.profileInfo}>
                     <h3 className={cl.profileName}>{user.username}</h3>
-                    <p className={cl.profileStatus}>{user.lastSeen}</p>
+                    <p className={cl.profileStatus}>{user.status}</p>
                 </div>
                 <div className={cl.profileActions}>
                     <button className={cl.iconButton}>
@@ -238,11 +223,11 @@ const ChatPanel = ({ onChatSelect }) => {
                             name={chat.secondUser.username}
                             unread={10}
                             lastMessage={chat.lastMessage?.comment ?? "Нет сообщений"}
-                            time={chat.lastMessage?.createdAt ?? "Нет сообщений"}
+                            time={formatTimeFromISO(chat.lastMessage?.createdAt)}
                             status={getStatusString(chat.secondUser.onlineStatus)}
                             isFavorite={false}
                             messageStatus={"sent"}
-                            isSentByUser={true}
+                            isSentByUser={chat.lastMessage?.isSentByUser ?? false}
                         />
                     </div>
                 ))}
