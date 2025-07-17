@@ -10,7 +10,7 @@ class Program
         var hubConnection = new HubConnectionBuilder()
             .WithUrl("https://localhost:7001/chatHub", options =>
             {
-                options.AccessTokenProvider = () => Task.FromResult("Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmZmJjNjhiMy0yZjIxLTRlNWUtYWRjZS00NDIzZTM4OGVlMjgiLCJ1c2VybmFtZSI6IlppcmFnb24iLCJuYmYiOjE3NTI2NTYyNjMsImV4cCI6MTc1NDcyOTg2MywiaWF0IjoxNzUyNjU2MjYzfQ.uxzNN9cjj7nttgT84N_SYhXRdJ9ziSr_CoU1qGZth94"); // Замените на реальный токен
+                options.AccessTokenProvider = () => Task.FromResult("Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YWZmMTZhMi00M2I2LTQzNTEtYjgxOS1hOThlM2E0NzJkYzQiLCJ1c2VybmFtZSI6Ik5pa2l0YSIsIm5iZiI6MTc1Mjc0NTM5NCwiZXhwIjoxNzU0ODE4OTk0LCJpYXQiOjE3NTI3NDUzOTR9.xVwpfqStrSD4P2slmA0kStciQ0WgX9mS8tPZBjFmvOI"); // Замените на реальный токен
             })
             .Build();
 
@@ -39,7 +39,7 @@ class Program
             // Тестирование методов хаба
             var chatId = "ae5d35a0-871a-4bff-bcb9-95c54a68c8e2"; // Замените на реальный chatId
             var senderId = "6aff16a2-43b6-4351-b819-a98e3a472dc4"; // Замените на реальный senderId
-            string message = "Тестовое сообщение";
+            string message = "Я ГЕЙ ПОМОГИТЕ";
 
             // Подключение к чату
             await hubConnection.InvokeAsync("JoinChat", chatId);

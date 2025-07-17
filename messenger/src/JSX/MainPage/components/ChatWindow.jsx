@@ -10,7 +10,7 @@ import {
 import UserProfileModal from './UserProfileModal';
 import cl from '../styles/ChatWindow.module.css';
 
-const ChatWindow = ({ activeChat, onToggleFavorite }) => {
+const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) => {
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');

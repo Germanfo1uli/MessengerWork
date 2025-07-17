@@ -14,16 +14,15 @@ import { apiRequest } from '../../../hooks/ApiRequest';
 import { useAuth } from '../../../hooks/UseAuth';
 import { useNavigate } from 'react-router-dom';
 
-const ChatPanel = ({ onChatSelect }) => {
+const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
     const {isLoading, userId, username, isAuthenticated, logout} = useAuth();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isAddContactModalOpen, setIsAddContactModalOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('favorites'); // Состояние для активной вкладки
     const [searchQuery, setSearchQuery] = useState(''); // Состояние для поискового запроса
     const [user, setUser] = useState({});
-    const navigate = useNavigate();
-
     const [data, setData] = useState([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -52,18 +51,14 @@ const ChatPanel = ({ onChatSelect }) => {
                   }))
                 : chatsResponse;
                 
-                console.log(userId, chatsResponse[0].lastMessage.senderId)
-                
-                console.log("Original:", chatsResponse);
-                console.log("Enhanced:", enhancedChats); // Проверяем, что поле добавилось
-    
-                // 3. Обновляем состояние
+                console.log(enhancedChats)
+
                 setUser({
                     username: profileResponse.username || username,
                     status: getStatusString(profileResponse.onlineStatus),
                     avatarUrl: '/default-avatar.png'
                 });
-                setData(enhancedChats); // ✅ Теперь должно работать
+                setData(enhancedChats);
             } catch (error) {
                 console.error('Failed to fetch user data:', error);
             }
@@ -80,6 +75,63 @@ const ChatPanel = ({ onChatSelect }) => {
 
         fetchData();
     }, [isLoading, userId, username, isAuthenticated, logout]);
+
+    useEffect(() => {
+        if (connection && isConnected && data.length > 0) {
+            const unjoinedChats = data.filter((chat) => !chat.joined);
+
+            unjoinedChats.forEach((chat) => {
+                connection
+                    .invoke('JoinChat', chat.id)
+                    .then(() => {
+                        setData((prev) =>
+                            prev.map((c) => (c.id === chat.id ? { ...c, joined: true } : c))
+                        );
+                    })
+                    .catch((error) => {
+                        console.error(`Failed to join chat ${chat.id}:`, error);
+                    });
+            });
+        }
+    }, [connection, isConnected, data]);
+
+    useEffect(() => {
+        if (connection && isConnected) {
+            connection.on('UpdateChatList', (updatedChat) => {
+                setData((prev) => {
+                    const existingChatIndex = prev.findIndex((chat) => chat.id === updatedChat.id);
+                    if (existingChatIndex !== -1) {
+                        const existingChat = prev[existingChatIndex];
+                        
+                        // Сохраняем информацию о пользователе из существующего чата
+                        const secondUser = existingChat.secondUser || updatedChat.secondUser;
+                        
+                        // Объединяем данные
+                        const mergedChat = {
+                            ...existingChat,
+                            ...updatedChat,
+                            secondUser, // Сохраняем информацию о пользователе
+                            lastMessage: updatedChat.lastMessage
+                                ? {
+                                    ...updatedChat.lastMessage,
+                                    isSentByUser: userId === updatedChat.lastMessage.senderId,
+                                  }
+                                : existingChat.lastMessage,
+                        };
+                        
+                        const newData = [...prev];
+                        newData[existingChatIndex] = mergedChat;
+                        return newData;
+                    }
+                    return [...prev, { ...updatedChat, joined: true }];
+                });
+            });
+    
+            return () => {
+                connection.off('UpdateChatList');
+            };
+        }
+    }, [connection, isConnected, userId]);
 
     const getStatusString = (statusCode) => {
         switch(statusCode) {
