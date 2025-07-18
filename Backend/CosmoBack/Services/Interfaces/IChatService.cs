@@ -8,7 +8,8 @@ namespace CosmoBack.Services.Interfaces
         Task<IEnumerable<ChatDto>> GetUserChatsAsync(Guid userId);
         Task<ChatDto> CreateChatAsync(Guid firstUserId, Guid secondUserId);
         Task DeleteChatAsync(Guid chatId);
-        Task<ChatMessageDto> SendMessageAsync(Guid chatId, Guid senderId, string content);
+        Task<ChatMessageDto> SendMessageAsync(Guid? chatId, Guid senderId, Guid secondUserId, string content);
         Task<ChatDto> ToggleFavoriteChatAsync(Guid chatId, bool favorite);
     }
 }
+

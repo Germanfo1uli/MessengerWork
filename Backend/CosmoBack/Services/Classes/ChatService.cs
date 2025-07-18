@@ -164,14 +164,6 @@ namespace CosmoBack.Services.Classes
             _logger.LogInformation("Creating chat between users {FirstUserId} and {SecondUserId}", firstUserId, secondUserId);
             try
             {
-                var currentUserId = Guid.Parse(_httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                    ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
-                if (firstUserId != currentUserId)
-                {
-                    _logger.LogWarning("User {CurrentUserId} is not authorized to create chat as user {FirstUserId}", currentUserId, firstUserId);
-                    throw new UnauthorizedAccessException("Недостаточно прав для создания чата от имени другого пользователя");
-                }
-
                 var firstUser = await _userRepository.GetByIdAsync(firstUserId);
                 if (firstUser == null)
                 {
@@ -305,33 +297,11 @@ namespace CosmoBack.Services.Classes
             }
         }
 
-        public async Task<ChatMessageDto> SendMessageAsync(Guid chatId, Guid senderId, string content)
+        public async Task<ChatMessageDto> SendMessageAsync(Guid? chatId, Guid senderId, Guid secondUserId, string content)
         {
-            _logger.LogInformation("Sending message in chat {ChatId} by user {SenderId}", chatId, senderId);
+            _logger.LogInformation("Sending message to user {SecondUserId} in chat {ChatId} by user {SenderId}", secondUserId, chatId, senderId);
             try
             {
-                var currentUserId = Guid.Parse(_httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                    ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
-                if (senderId != currentUserId)
-                {
-                    _logger.LogWarning("User {CurrentUserId} is not authorized to send message as {SenderId}", currentUserId, senderId);
-                    throw new UnauthorizedAccessException("Недостаточно прав для отправки сообщения от имени другого пользователя");
-                }
-
-                var chat = await _chatRepository.GetChatByIdWithMessagesAsync(chatId);
-                if (chat == null)
-                {
-                    _logger.LogWarning("Chat {ChatId} not found", chatId);
-                    throw new KeyNotFoundException($"Чат с ID {chatId} не найден");
-                }
-
-                var chatMember = await _chatMembersRepository.GetByChatAndUserIdAsync(chatId, senderId);
-                if (chatMember == null)
-                {
-                    _logger.LogWarning("Sender {SenderId} is not a member of chat {ChatId}", senderId, chatId);
-                    throw new UnauthorizedAccessException("Отправитель не является участником чата");
-                }
-
                 var sender = await _userRepository.GetByIdAsync(senderId);
                 if (sender == null)
                 {
@@ -339,17 +309,108 @@ namespace CosmoBack.Services.Classes
                     throw new KeyNotFoundException($"Пользователь с ID {senderId} не найден");
                 }
 
+                var secondUser = await _userRepository.GetByIdAsync(secondUserId);
+                if (secondUser == null)
+                {
+                    _logger.LogWarning("Second user {SecondUserId} not found", secondUserId);
+                    throw new KeyNotFoundException($"Пользователь с ID {secondUserId} не найден");
+                }
+
+                Chat? chat = null;
+                if (chatId.HasValue)
+                {
+                    chat = await _chatRepository.GetChatByIdWithMessagesAsync(chatId.Value);
+                    if (chat == null)
+                    {
+                        _logger.LogWarning("Chat {ChatId} not found", chatId);
+                        throw new KeyNotFoundException($"Чат с ID {chatId} не найден");
+                    }
+
+                    var chatMember = await _chatMembersRepository.GetByChatAndUserIdAsync(chatId.Value, senderId);
+                    if (chatMember == null)
+                    {
+                        _logger.LogWarning("Sender {SenderId} is not a member of chat {ChatId}", senderId, chatId);
+                        throw new UnauthorizedAccessException("Отправитель не является участником чата");
+                    }
+                }
+                else
+                {
+                    var existingChat = await _context.Chats
+                        .FirstOrDefaultAsync(c =>
+                            (c.FirstUserId == senderId && c.SecondUserId == secondUserId) ||
+                            (c.FirstUserId == secondUserId && c.SecondUserId == senderId));
+
+                    if (existingChat == null)
+                    {
+                        chat = new Chat
+                        {
+                            Id = Guid.NewGuid(),
+                            FirstUserId = senderId,
+                            SecondUserId = secondUserId,
+                            CreatedAt = DateTime.UtcNow
+                        };
+
+                        await _chatRepository.CreateChatAsync(chat);
+
+                        var chatMember1 = new ChatMember
+                        {
+                            Id = Guid.NewGuid(),
+                            ChatId = chat.Id,
+                            UserId = senderId,
+                            Notifications = true,
+                            IsFavorite = false
+                        };
+
+                        var chatMember2 = new ChatMember
+                        {
+                            Id = Guid.NewGuid(),
+                            ChatId = chat.Id,
+                            UserId = secondUserId,
+                            Notifications = true,
+                            IsFavorite = false
+                        };
+
+                        await _chatMembersRepository.AddAsync(chatMember1);
+                        await _chatMembersRepository.AddAsync(chatMember2);
+
+                        var notification1 = new Notification
+                        {
+                            Id = Guid.NewGuid(),
+                            UserId = senderId,
+                            ChatId = chat.Id,
+                            IsEnabled = true
+                        };
+
+                        var notification2 = new Notification
+                        {
+                            Id = Guid.NewGuid(),
+                            UserId = secondUserId,
+                            ChatId = chat.Id,
+                            IsEnabled = true
+                        };
+
+                        await _notificationService.CreateNotificationAsync(notification1);
+                        await _notificationService.CreateNotificationAsync(notification2);
+
+                        _logger.LogInformation("Chat {ChatId} created successfully between users {FirstUserId} and {SecondUserId}", chat.Id, senderId, secondUserId);
+                    }
+                    else
+                    {
+                        chat = existingChat;
+                    }
+                }
+
                 var message = new Message
                 {
                     Id = Guid.NewGuid(),
-                    ChatId = chatId,
+                    ChatId = chat.Id,
                     SenderId = senderId,
                     Comment = content,
                     CreatedAt = DateTime.UtcNow
                 };
 
                 await _messageRepository.AddAsync(message);
-                _logger.LogInformation("Message {MessageId} sent in chat {ChatId} by user {SenderId}", message.Id, chatId, senderId);
+                _logger.LogInformation("Message {MessageId} sent in chat {ChatId} by user {SenderId}", message.Id, chat.Id, senderId);
 
                 var messageDto = new ChatMessageDto
                 {
@@ -362,7 +423,7 @@ namespace CosmoBack.Services.Classes
                     AvatarImageId = sender.AvatarImageId
                 };
 
-                await _hubContext.Clients.Group(chatId.ToString()).SendAsync("ReceiveMessage", messageDto);
+                await _hubContext.Clients.Group(chat.Id.ToString()).SendAsync("ReceiveMessage", messageDto);
 
                 return messageDto;
             }

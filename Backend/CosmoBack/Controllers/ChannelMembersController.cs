@@ -26,8 +26,7 @@ namespace CosmoBack.Controllers
         {
             try
             {
-                var currentUserId = Guid.Parse(System.Threading.Thread.CurrentPrincipal?.Identity?.Name
-                    ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
+                var currentUserId = User.GetUserId();
 
                 var channel = await _channelRepository.GetChannelByIdWithMessagesAsync(request.ChannelId);
                 if (channel == null)
@@ -75,8 +74,7 @@ namespace CosmoBack.Controllers
         {
             try
             {
-                var currentUserId = Guid.Parse(System.Threading.Thread.CurrentPrincipal?.Identity?.Name
-                    ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
+                var currentUserId = User.GetUserId();
 
                 var channel = await _channelRepository.GetChannelByIdWithMessagesAsync(channelId);
                 if (channel == null)
@@ -116,8 +114,7 @@ namespace CosmoBack.Controllers
         {
             try
             {
-                var currentUserId = Guid.Parse(System.Threading.Thread.CurrentPrincipal?.Identity?.Name
-                    ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
+                var currentUserId = User.GetUserId();
 
                 var channel = await _channelRepository.GetChannelByIdWithMessagesAsync(channelId);
                 if (channel == null)

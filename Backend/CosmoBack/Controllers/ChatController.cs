@@ -1,6 +1,7 @@
 ﻿using CosmoBack.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CosmoBack.Controllers
 {
@@ -9,7 +10,7 @@ namespace CosmoBack.Controllers
     [Route("api/[controller]")]
     public class ChatController(IChatService chatService) : ControllerBase
     {
-        private readonly IChatService _chatService = chatService ?? throw new ArgumentNullException(nameof(chatService));
+        private readonly IChatService _chatService = chatService;
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetChatById(Guid id)
@@ -42,13 +43,13 @@ namespace CosmoBack.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
         [HttpPost]
         public async Task<IActionResult> CreateChat([FromBody] CreateChatRequest request)
         {
             try
             {
-                var chat = await _chatService.CreateChatAsync(request.FirstUserId, request.SecondUserId);
+                var currentUserId = User.GetUserId();
+                var chat = await _chatService.CreateChatAsync(currentUserId, request.SecondUserId);
                 return Ok(chat);
             }
             catch (InvalidOperationException ex)
@@ -88,12 +89,16 @@ namespace CosmoBack.Controllers
         {
             try
             {
-                var message = await _chatService.SendMessageAsync(request.ChatId, request.SenderId, request.Comment);
+
+                var senderId = User.GetUserId();
+
+                var message = await _chatService.SendMessageAsync(
+                    request.ChatId,
+                    senderId,
+                    request.SecondUserId,
+                    request.Comment);
+
                 return Ok(message);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -104,6 +109,7 @@ namespace CosmoBack.Controllers
                 return BadRequest(ex.Message);
             }
         }
+    
 
         [HttpPut("{chatId}/favorite")]
         public async Task<IActionResult> ToggleFavoriteChat(Guid chatId, [FromBody] ToggleFavoriteChatRequest request)
@@ -136,8 +142,8 @@ namespace CosmoBack.Controllers
 
     public class SendMessageRequest
     {
-        public Guid ChatId { get; set; }
-        public Guid SenderId { get; set; }
+        public Guid? ChatId { get; set; }
+        public Guid SecondUserId { get; set; }
         public string Comment { get; set; } = default!;
     }
 

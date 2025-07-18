@@ -116,9 +116,8 @@ namespace CosmoBack.Controllers
         {
             try
             {
-                var userId = Guid.Parse(User.FindFirst("sub")?.Value
-                    ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
-                var group = await _groupService.ToggleFavoriteGroupAsync(groupId, userId, request.Favorite);
+                var currentUserId = User.GetUserId();
+                var group = await _groupService.ToggleFavoriteGroupAsync(groupId, currentUserId, request.Favorite);
                 return Ok(group);
             }
             catch (KeyNotFoundException ex)
