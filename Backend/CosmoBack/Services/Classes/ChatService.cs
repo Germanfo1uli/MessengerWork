@@ -6,6 +6,7 @@ using CosmoBack.Repositories.Interfaces;
 using CosmoBack.Services.Interfaces;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace CosmoBack.Services.Classes
 {
@@ -19,6 +20,7 @@ namespace CosmoBack.Services.Classes
         private readonly CosmoDbContext _context;
         private readonly ILogger<ChatService> _logger;
         private readonly IHubContext<ChatHub> _hubContext;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public ChatService(
             IChatRepository chatRepository,
@@ -28,7 +30,8 @@ namespace CosmoBack.Services.Classes
             INotificationService notificationService,
             CosmoDbContext context,
             ILogger<ChatService> logger,
-            IHubContext<ChatHub> hubContext)
+            IHubContext<ChatHub> hubContext,
+            IHttpContextAccessor httpContextAccessor)
         {
             _chatRepository = chatRepository;
             _messageRepository = messageRepository;
@@ -38,6 +41,7 @@ namespace CosmoBack.Services.Classes
             _context = context;
             _logger = logger;
             _hubContext = hubContext;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<ChatDto> GetChatByIdAsync(Guid id)
@@ -45,12 +49,16 @@ namespace CosmoBack.Services.Classes
             _logger.LogInformation("Getting chat with ID {ChatId}", id);
             try
             {
+                var currentUserId = Guid.Parse(_httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                    ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
                 var chat = await _chatRepository.GetChatByIdWithMessagesAsync(id);
                 if (chat == null)
                 {
                     _logger.LogWarning("Chat with ID {ChatId} not found", id);
                     throw new KeyNotFoundException($"Чат с ID {id} не найден");
                 }
+
+                var chatMember = await _chatMembersRepository.GetByChatAndUserIdAsync(id, currentUserId);
 
                 var lastMessage = await _context.Messages
                     .Where(m => m.ChatId == id)
@@ -70,7 +78,6 @@ namespace CosmoBack.Services.Classes
                     .OrderByDescending(m => m.CreatedAt)
                     .FirstOrDefaultAsync();
 
-                var chatMember = await _chatMembersRepository.GetByChatAndUserIdAsync(id, chat.FirstUserId); // Используем FirstUserId для примера
                 return new ChatDto
                 {
                     Id = chat.Id,
@@ -95,6 +102,14 @@ namespace CosmoBack.Services.Classes
             _logger.LogInformation("Getting chats for user {UserId}", userId);
             try
             {
+                var currentUserId = Guid.Parse(_httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                    ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
+                if (userId != currentUserId)
+                {
+                    _logger.LogWarning("User {UserId} is not authorized to access chats for user {RequestedUserId}", currentUserId, userId);
+                    throw new UnauthorizedAccessException("Недостаточно прав для получения чатов другого пользователя");
+                }
+
                 var chats = await _chatRepository.GetChatsWithDetailsAsync(userId);
                 var chatDtos = new List<ChatDto>();
 
@@ -149,6 +164,14 @@ namespace CosmoBack.Services.Classes
             _logger.LogInformation("Creating chat between users {FirstUserId} and {SecondUserId}", firstUserId, secondUserId);
             try
             {
+                var currentUserId = Guid.Parse(_httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                    ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
+                if (firstUserId != currentUserId)
+                {
+                    _logger.LogWarning("User {CurrentUserId} is not authorized to create chat as user {FirstUserId}", currentUserId, firstUserId);
+                    throw new UnauthorizedAccessException("Недостаточно прав для создания чата от имени другого пользователя");
+                }
+
                 var firstUser = await _userRepository.GetByIdAsync(firstUserId);
                 if (firstUser == null)
                 {
@@ -179,7 +202,6 @@ namespace CosmoBack.Services.Classes
 
                 await _chatRepository.CreateChatAsync(chat);
 
-                // Создание ChatMember для обоих пользователей
                 var chatMember1 = new ChatMember
                 {
                     Id = Guid.NewGuid(),
@@ -226,7 +248,7 @@ namespace CosmoBack.Services.Classes
                 {
                     Id = chat.Id,
                     PublicId = chat.PublicId,
-                    IsFavorite = false, // По умолчанию для текущего пользователя
+                    IsFavorite = false,
                     FirstUserId = chat.FirstUserId,
                     SecondUserId = chat.SecondUserId,
                     CreatedAt = chat.CreatedAt,
@@ -246,11 +268,19 @@ namespace CosmoBack.Services.Classes
             _logger.LogInformation("Deleting chat {ChatId}", chatId);
             try
             {
+                var currentUserId = Guid.Parse(_httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                    ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
                 var chat = await _chatRepository.GetChatByIdWithMessagesAsync(chatId);
                 if (chat == null)
                 {
                     _logger.LogWarning("Chat {ChatId} not found", chatId);
                     throw new KeyNotFoundException($"Чат с ID {chatId} не найден");
+                }
+
+                if (chat.FirstUserId != currentUserId && chat.SecondUserId != currentUserId)
+                {
+                    _logger.LogWarning("User {CurrentUserId} is not authorized to delete chat {ChatId}", currentUserId, chatId);
+                    throw new UnauthorizedAccessException("Недостаточно прав для удаления чата");
                 }
 
                 var messages = await _context.Messages
@@ -280,6 +310,14 @@ namespace CosmoBack.Services.Classes
             _logger.LogInformation("Sending message in chat {ChatId} by user {SenderId}", chatId, senderId);
             try
             {
+                var currentUserId = Guid.Parse(_httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                    ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
+                if (senderId != currentUserId)
+                {
+                    _logger.LogWarning("User {CurrentUserId} is not authorized to send message as {SenderId}", currentUserId, senderId);
+                    throw new UnauthorizedAccessException("Недостаточно прав для отправки сообщения от имени другого пользователя");
+                }
+
                 var chat = await _chatRepository.GetChatByIdWithMessagesAsync(chatId);
                 if (chat == null)
                 {
@@ -340,12 +378,13 @@ namespace CosmoBack.Services.Classes
             _logger.LogInformation("Toggling favorite for chat {ChatId} to {Favorite}", chatId, favorite);
             try
             {
-                var userId = Guid.Parse(System.Threading.Thread.CurrentPrincipal?.Identity?.Name
+                var currentUserId = Guid.Parse(_httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
                     ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
-                var chatMember = await _chatMembersRepository.GetByChatAndUserIdAsync(chatId, userId);
+
+                var chatMember = await _chatMembersRepository.GetByChatAndUserIdAsync(chatId, currentUserId);
                 if (chatMember == null)
                 {
-                    _logger.LogWarning("User {UserId} is not a member of chat {ChatId}", userId, chatId);
+                    _logger.LogWarning("User {UserId} is not a member of chat {ChatId}", currentUserId, chatId);
                     throw new KeyNotFoundException($"Пользователь не является участником чата {chatId}");
                 }
 
@@ -377,7 +416,7 @@ namespace CosmoBack.Services.Classes
                     .OrderByDescending(m => m.CreatedAt)
                     .FirstOrDefaultAsync();
 
-                _logger.LogInformation("Favorite status for chat {ChatId} updated to {Favorite} for user {UserId}", chatId, favorite, userId);
+                _logger.LogInformation("Favorite status for chat {ChatId} updated to {Favorite} for user {UserId}", chatId, favorite, currentUserId);
                 return new ChatDto
                 {
                     Id = chat.Id,

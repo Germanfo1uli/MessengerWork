@@ -1,5 +1,6 @@
 using CosmoBack.CosmoDBContext;
 using CosmoBack.Hubs;
+using CosmoBack.Models;
 using CosmoBack.Repositories.Classes;
 using CosmoBack.Repositories.Interfaces;
 using CosmoBack.Services;
@@ -32,6 +33,8 @@ builder.Services.AddScoped<IContactRepository, ContactRepository>();
 builder.Services.AddScoped<IChatMembersRepository, ChatMembersRepository>();
 builder.Services.AddScoped<IGroupRepository, GroupRepository>();
 builder.Services.AddScoped<IGroupMembersRepository, GroupMembersRepository>();
+builder.Services.AddScoped<IChannelRepository, ChannelRepository>();
+builder.Services.AddScoped<IChannelMembersRepository, ChannelMembersRepository>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IChatService, ChatService>();
@@ -43,6 +46,7 @@ builder.Services.AddScoped<IContactService, ContactService>();
 builder.Services.AddScoped<IChatMembersService, ChatMembersService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddScoped<IGroupMembersService, GroupMembersService>();
+builder.Services.AddScoped<IChannelService, ChannelService>();
 
 builder.Services.AddDbContext<CosmoDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQL")));
@@ -98,6 +102,8 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
+
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 

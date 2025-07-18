@@ -20,10 +20,21 @@ namespace CosmoBack.Models
         [Required]
         public bool Notifications { get; set; } = true;
 
+        [Required]
+        public bool IsFavorite { get; set; } = false; // Новое поле
+
+        [Required]
+        public ChannelRole Role { get; set; } = ChannelRole.Member;
+
         // Навигационные свойства
         public  Channel Channel { get; set; }
         public  User User { get; set; }
 
-        
+        public enum ChannelRole
+        {
+            Owner,
+            Moderator,
+            Member
+        }
     }
 }

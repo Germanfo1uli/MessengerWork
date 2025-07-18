@@ -62,14 +62,35 @@ namespace CosmoBack.CosmoDBContext
 
         private void ConfigureSocialStructure(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Channel>()
+                .HasIndex(c => c.PublicId)
+                .IsUnique();
+
             modelBuilder.Entity<ChannelMember>()
-                .HasKey(cm => new { cm.ChannelId, cm.UserId });
+                .HasKey(cm => cm.Id);
 
             modelBuilder.Entity<ChannelMember>()
                 .HasOne(cm => cm.Channel)
                 .WithMany(c => c.Members)
                 .HasForeignKey(cm => cm.ChannelId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ChannelMember>()
+                .HasOne(cm => cm.User)
+                .WithMany(u => u.ChannelMember)
+                .HasForeignKey(cm => cm.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ChannelMember>()
+                .HasIndex(cm => cm.Role);
+
+            modelBuilder.Entity<ChannelMember>()
+                .Property(cm => cm.IsFavorite)
+                .HasDefaultValue(false);
+
+            modelBuilder.Entity<ChannelMember>()
+                .Property(cm => cm.Notifications)
+                .HasDefaultValue(true);
 
             modelBuilder.Entity<GroupMember>()
                 .HasKey(gm => new { gm.GroupId, gm.UserId });
@@ -142,6 +163,12 @@ namespace CosmoBack.CosmoDBContext
                 .HasOne(m => m.Group)
                 .WithMany(g => g.Messages)
                 .HasForeignKey(m => m.GroupId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Message>()
+                .HasOne(m => m.Channel)
+                .WithMany(c => c.Messages)
+                .HasForeignKey(m => m.ChannelId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Message>()

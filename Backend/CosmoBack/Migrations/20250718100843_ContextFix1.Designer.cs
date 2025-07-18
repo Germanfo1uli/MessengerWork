@@ -3,6 +3,7 @@ using System;
 using CosmoBack.CosmoDBContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CosmoBack.Migrations
 {
     [DbContext(typeof(CosmoDbContext))]
-    partial class CosmoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250718100843_ContextFix1")]
+    partial class ContextFix1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,7 +31,7 @@ namespace CosmoBack.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("AvatarImageId")
+                    b.Property<Guid>("AvatarImageId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("ChannelTag")
@@ -771,7 +774,9 @@ namespace CosmoBack.Migrations
                 {
                     b.HasOne("CosmoBack.Models.Image", "AvatarImage")
                         .WithMany()
-                        .HasForeignKey("AvatarImageId");
+                        .HasForeignKey("AvatarImageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("CosmoBack.Models.User", "Owner")
                         .WithMany("OwnedChannels")
