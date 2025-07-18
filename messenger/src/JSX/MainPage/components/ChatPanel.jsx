@@ -19,10 +19,11 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
     const {isLoading, userId, username, isAuthenticated, logout} = useAuth();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isAddContactModalOpen, setIsAddContactModalOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState('favorites'); // Состояние для активной вкладки
-    const [searchQuery, setSearchQuery] = useState(''); // Состояние для поискового запроса
+    const [activeTab, setActiveTab] = useState('favorites');
+    const [searchQuery, setSearchQuery] = useState('');
     const [user, setUser] = useState({});
     const [data, setData] = useState([]);
+    const [avatarError, setAvatarError] = useState(false);
     const {getStatusString, formatTimeFromISO} = useMainHooks();
     const navigate = useNavigate();
 
@@ -41,24 +42,21 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                 ]);
 
                 const enhancedChats = Array.isArray(chatsResponse)
-                ? chatsResponse.map(chat => ({
-                      ...chat,
-                      // Добавляем isSentByUser к lastMessage (если он есть)
-                      lastMessage: chat.lastMessage
-                          ? {
+                    ? chatsResponse.map(chat => ({
+                        ...chat,
+                        lastMessage: chat.lastMessage
+                            ? {
                                 ...chat.lastMessage,
                                 isSentByUser: userId === chat.lastMessage.senderId,
                             }
-                          : null,
-                  }))
-                : chatsResponse;
-                
-                console.log(enhancedChats)
+                            : null,
+                    }))
+                    : chatsResponse;
 
                 setUser({
                     username: profileResponse.username || username,
                     status: getStatusString(profileResponse.onlineStatus),
-                    avatarUrl: '/default-avatar.png'
+                    avatarUrl: profileResponse.avatarUrl || '/default-avatar.png'
                 });
                 setData(enhancedChats);
             } catch (error) {
@@ -67,7 +65,7 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
         };
 
         if (isLoading || !userId) {
-            return; 
+            return;
         }
 
         if (!isAuthenticated) {
@@ -104,23 +102,18 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                     const existingChatIndex = prev.findIndex((chat) => chat.id === updatedChat.id);
                     if (existingChatIndex !== -1) {
                         const existingChat = prev[existingChatIndex];
-                        
-                        // Сохраняем информацию о пользователе из существующего чата
                         const secondUser = existingChat.secondUser || updatedChat.secondUser;
-                        
-                        // Объединяем данные
                         const mergedChat = {
                             ...existingChat,
                             ...updatedChat,
-                            secondUser, // Сохраняем информацию о пользователе
+                            secondUser,
                             lastMessage: updatedChat.lastMessage
                                 ? {
                                     ...updatedChat.lastMessage,
                                     isSentByUser: userId === updatedChat.lastMessage.senderId,
-                                  }
+                                }
                                 : existingChat.lastMessage,
                         };
-                        
                         const newData = [...prev];
                         newData[existingChatIndex] = mergedChat;
                         return newData;
@@ -128,7 +121,7 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                     return [...prev, { ...updatedChat, joined: true }];
                 });
             });
-    
+
             return () => {
                 connection.off('UpdateChatList');
             };
@@ -162,20 +155,30 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
         setData([...data, newChat]);
     };
 
-    // Функция для фильтрации чатов
+    const handleAvatarError = () => {
+        setAvatarError(true);
+    };
+
     const filteredChats = (activeTab === 'favorites'
-            ? data.filter((chat) => chat.isFavorite)
-            : data)
-    // ).filter((chat) =>
-    //     chat.name.toLowerCase().includes(searchQuery.toLowerCase())
-    // );
+        ? data.filter((chat) => chat.isFavorite)
+        : data);
 
     return (
         <div className={cl.container}>
-            {/* Шапка профиля с модальным окном */}
             <div className={cl.profileHeader}>
                 <div className={cl.avatarContainer} onClick={toggleModal} style={{ cursor: 'pointer' }}>
-                    <img src={user.avatarUrl} alt="Аватар" className={cl.avatarImage} />
+                    {avatarError || !user.avatarUrl ? (
+                        <div className={cl.avatarPlaceholder}>
+                            {user.username?.charAt(0).toUpperCase() || 'U'}
+                        </div>
+                    ) : (
+                        <img
+                            src={user.avatarUrl}
+                            alt="Аватар"
+                            className={cl.avatarImage}
+                            onError={handleAvatarError}
+                        />
+                    )}
                     <div className={`${cl.statusBadge} ${cl[user.status]}`}></div>
                 </div>
                 <div className={cl.profileInfo}>
@@ -183,7 +186,10 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                     <p className={cl.profileStatus}>{user.status}</p>
                 </div>
                 <div className={cl.profileActions}>
-                    <button className={cl.iconButton}>
+                    <button
+                        className={cl.iconButton}
+                        onClick={() => navigate('/settings')}
+                    >
                         <IoSettingsOutline />
                     </button>
                     <button className={cl.iconButton}>
@@ -192,21 +198,18 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                 </div>
             </div>
 
-            {/* Модальное окно профиля */}
             <Modal
                 isOpen={isModalOpen}
                 onClose={toggleModal}
                 user={user}
             />
 
-            {/* Модальное окно добавления контакта */}
             <AddContactModal
                 isOpen={isAddContactModalOpen}
                 onClose={toggleAddContactModal}
                 onAddContact={handleAddContact}
             />
 
-            {/* Кнопки "Подарки" и "Добавить чат" */}
             <div className={cl.actionButtons}>
                 <button className={cl.actionButton}>
                     <FaGift className={cl.actionIcon} />
@@ -218,7 +221,6 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                 </button>
             </div>
 
-            {/* Поиск */}
             <div className={cl.searchPanel}>
                 <div className={cl.searchInputContainer}>
                     <IoSearchOutline className={cl.searchIcon} />
@@ -232,7 +234,6 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                 </div>
             </div>
 
-            {/* Вкладки */}
             <div className={cl.tabsContainer}>
                 <button
                     className={`${cl.tabButton} ${activeTab === 'favorites' ? cl.active : ''}`}
@@ -250,7 +251,6 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                 </button>
             </div>
 
-            {/* Список чатов */}
             <div className={cl.chatsList}>
                 {filteredChats.map((chat, index) => (
                     <div key={index} onClick={() => handleChatClick(chat)} style={{ cursor: 'pointer' }}>

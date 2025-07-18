@@ -256,3 +256,18 @@
     background-color: rgba(138, 43, 226, 0.5);
     border-radius: 2px;
 }
+/* Стиль для заглушки аватара */
+.avatarPlaceholder {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid #8a2be2;
+    background: linear-gradient(135deg, #9370DB, #8A2BE2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFFACD;
+    font-weight: bold;
+    font-size: 18px;
+    text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+}

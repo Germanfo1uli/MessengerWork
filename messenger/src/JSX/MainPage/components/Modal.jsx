@@ -6,6 +6,7 @@ import styles from '../styles/Modal.module.css';
 const Modal = ({ isOpen, onClose, user }) => {
     const [isStatusHidden, setIsStatusHidden] = useState(false);
     const [copied, setCopied] = useState(false);
+    const [avatarError, setAvatarError] = useState(false);
 
     useEffect(() => {
         if (isOpen) document.body.style.overflow = "hidden";
@@ -23,6 +24,10 @@ const Modal = ({ isOpen, onClose, user }) => {
         setIsStatusHidden(!isStatusHidden);
     };
 
+    const handleAvatarError = () => {
+        setAvatarError(true);
+    };
+
     if (!isOpen) return null;
 
     const gifts = [
@@ -30,6 +35,24 @@ const Modal = ({ isOpen, onClose, user }) => {
         { id: 2, image: "https://avatars.mds.yandex.net/get-mpic/13527901/2a000001971b61fbaf300b399920a6a840f3/orig", name: "Никита" },
         { id: 3, image: "https://avatars.mds.yandex.net/i?id=3eaffa6d84e0523f6ed1786307f4e0a4_l-5295169-images-thumbs&n=13", name: "Лабуба" }
     ];
+
+    const getAvatarContent = () => {
+        if (avatarError || !user.avatarUrl) {
+            return (
+                <div className={styles.avatarPlaceholder}>
+                    {user.username?.charAt(0).toUpperCase() || 'U'}
+                </div>
+            );
+        }
+        return (
+            <img
+                src={user.avatarUrl}
+                alt="Аватар"
+                className={styles.avatar}
+                onError={handleAvatarError}
+            />
+        );
+    };
 
     return (
         <div className={styles.overlay} onClick={onClose}>
@@ -42,11 +65,7 @@ const Modal = ({ isOpen, onClose, user }) => {
 
                 {/* Аватар с индикатором онлайн-статуса */}
                 <div className={styles.avatarWrapper}>
-                    <img
-                        src={user.avatarUrl || "https://i.imgur.com/3Zq3Z8L.png"}
-                        alt="Аватар"
-                        className={styles.avatar}
-                    />
+                    {getAvatarContent()}
                     {!isStatusHidden ? (
                         <FaCircle className={styles.statusOnline} />
                     ) : (
@@ -83,6 +102,10 @@ const Modal = ({ isOpen, onClose, user }) => {
                                     src={gift.image}
                                     alt={gift.name}
                                     className={styles.giftImage}
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = "https://i.imgur.com/3Zq3Z8L.png";
+                                    }}
                                 />
                                 <div className={styles.giftName}>{gift.name}</div>
                             </div>
