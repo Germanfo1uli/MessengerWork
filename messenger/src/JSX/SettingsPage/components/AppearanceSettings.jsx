@@ -16,6 +16,8 @@ const AppearanceSettings = () => {
     const [customBackground, setCustomBackground] = useState(null);
     const [backgroundBlur, setBackgroundBlur] = useState(0);
     const [backgroundOpacity, setBackgroundOpacity] = useState(0.8);
+    const [backgroundSize, setBackgroundSize] = useState('cover');
+    const [backgroundPosition, setBackgroundPosition] = useState('center');
 
     // ChatPanel settings
     const [panelAccentColor, setPanelAccentColor] = useState('#6a5acd');
@@ -48,6 +50,26 @@ const AppearanceSettings = () => {
         { id: 'pattern', name: 'Узор' },
     ];
 
+    const backgroundSizes = [
+        { id: 'cover', name: 'Растянуть' },
+        { id: 'contain', name: 'Вместить' },
+        { id: 'auto', name: 'Оригинал' },
+        { id: '100%', name: '100%' },
+        { id: '50%', name: '50%' },
+    ];
+
+    const backgroundPositions = [
+        { id: 'left top', name: 'Лево Верх' },
+        { id: 'center top', name: 'Центр Верх' },
+        { id: 'right top', name: 'Право Верх' },
+        { id: 'left center', name: 'Лево Центр' },
+        { id: 'center center', name: 'Центр' },
+        { id: 'right center', name: 'Право Центр' },
+        { id: 'left bottom', name: 'Лево Низ' },
+        { id: 'center bottom', name: 'Центр Низ' },
+        { id: 'right bottom', name: 'Право Низ' },
+    ];
+
     const chatStyles = [
         { id: 'bubbles', name: 'Пузыри' },
         { id: 'minimal', name: 'Минимализм' },
@@ -55,15 +77,8 @@ const AppearanceSettings = () => {
     ];
 
     const accentColors = [
-        '#6a5acd', // slateblue
-        '#4b0082', // indigo
-        '#ff6b6b', // coral
-        '#48dbfb', // neon blue
-        '#1dd1a1', // aqua
-        '#feca57', // yellow
-        '#ff9ff3', // pink
-        '#54a0ff', // blue
-        '#00d2d3', // teal
+        '#6a5acd', '#4b0082', '#ff6b6b', '#48dbfb',
+        '#1dd1a1', '#feca57', '#ff9ff3', '#54a0ff', '#00d2d3'
     ];
 
     const fontSizes = [12, 14, 16, 18, 20, 22];
@@ -97,13 +112,13 @@ const AppearanceSettings = () => {
         setCustomBackground(null);
         setBackgroundBlur(0);
         setBackgroundOpacity(0.8);
-
+        setBackgroundSize('cover');
+        setBackgroundPosition('center');
         setPanelAccentColor('#6a5acd');
         setPanelFontSize(16);
         setPanelFontFamily('default');
         setPanelSpacing('normal');
         setPanelAvatarShape('round');
-
         setWindowChatStyle('bubbles');
         setWindowAccentColor('#6a5acd');
         setWindowFontSize(16);
@@ -114,13 +129,26 @@ const AppearanceSettings = () => {
 
     const handleBackgroundUpload = (e) => {
         const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                setCustomBackground(event.target.result);
-            };
-            reader.readAsDataURL(file);
+        if (!file) return;
+
+        if (!file.type.match('image.*')) {
+            alert('Пожалуйста, выберите файл изображения (jpg, png, gif)');
+            return;
         }
+
+        if (file.size > 5 * 1024 * 1024) {
+            alert('Размер файла не должен превышать 5MB');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            setCustomBackground(event.target.result);
+        };
+        reader.onerror = () => {
+            alert('Ошибка при чтении файла');
+        };
+        reader.readAsDataURL(file);
     };
 
     const triggerFileInput = () => {
@@ -129,6 +157,10 @@ const AppearanceSettings = () => {
 
     const removeCustomBackground = () => {
         setCustomBackground(null);
+        setBackgroundBlur(0);
+        setBackgroundOpacity(0.8);
+        setBackgroundSize('cover');
+        setBackgroundPosition('center');
     };
 
     return (
@@ -198,6 +230,8 @@ const AppearanceSettings = () => {
                                                     className={styles.imagePreview}
                                                     style={{
                                                         backgroundImage: `url(${customBackground})`,
+                                                        backgroundSize: backgroundSize,
+                                                        backgroundPosition: backgroundPosition,
                                                         filter: `blur(${backgroundBlur}px)`,
                                                         opacity: backgroundOpacity
                                                     }}
@@ -228,6 +262,7 @@ const AppearanceSettings = () => {
                                                     <line x1="12" y1="3" x2="12" y2="15"></line>
                                                 </svg>
                                                 <span>Загрузить изображение</span>
+                                                <p className={styles.uploadHint}>JPG, PNG до 5MB</p>
                                             </div>
                                         )}
                                     </div>
@@ -253,6 +288,34 @@ const AppearanceSettings = () => {
                                                     value={backgroundOpacity * 100}
                                                     onChange={(e) => setBackgroundOpacity(parseInt(e.target.value) / 100)}
                                                 />
+                                            </div>
+                                            <div className={styles.subSettingGroup}>
+                                                <h4>Размер изображения</h4>
+                                                <div className={styles.styleOptions}>
+                                                    {backgroundSizes.map((size) => (
+                                                        <div
+                                                            key={size.id}
+                                                            className={`${styles.styleOption} ${backgroundSize === size.id ? styles.active : ''}`}
+                                                            onClick={() => setBackgroundSize(size.id)}
+                                                        >
+                                                            {size.name}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <div className={styles.subSettingGroup}>
+                                                <h4>Положение изображения</h4>
+                                                <div className={styles.styleOptions}>
+                                                    {backgroundPositions.map((pos) => (
+                                                        <div
+                                                            key={pos.id}
+                                                            className={`${styles.styleOption} ${backgroundPosition === pos.id ? styles.active : ''}`}
+                                                            onClick={() => setBackgroundPosition(pos.id)}
+                                                        >
+                                                            {pos.name}
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
                                         </>
                                     )}
@@ -493,6 +556,8 @@ const AppearanceSettings = () => {
                                     customBackground={backgroundType === 'image' ? customBackground : null}
                                     backgroundBlur={backgroundBlur}
                                     backgroundOpacity={backgroundOpacity}
+                                    backgroundSize={backgroundType === 'image' ? backgroundSize : 'cover'}
+                                    backgroundPosition={backgroundType === 'image' ? backgroundPosition : 'center'}
                                 />
                             </div>
                         </div>

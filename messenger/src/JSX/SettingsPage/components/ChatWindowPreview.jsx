@@ -11,7 +11,9 @@ const ChatWindowPreview = ({
                                showShadow = true,
                                customBackground = null,
                                backgroundBlur = 0,
-                               backgroundOpacity = 1
+                               backgroundOpacity = 1,
+                               backgroundSize = 'cover',
+                               backgroundPosition = 'center'
                            }) => {
     const getMessageStyle = () => {
         switch (chatStyle) {
@@ -34,10 +36,24 @@ const ChatWindowPreview = ({
                 ...(customBackground && {
                     '--background-image': `url(${customBackground})`,
                     '--background-filter': `blur(${backgroundBlur}px)`,
-                    '--background-opacity': backgroundOpacity
+                    '--background-opacity': backgroundOpacity,
+                    '--background-size': backgroundSize,
+                    '--background-position': backgroundPosition
                 })
             }}
         >
+            {customBackground && (
+                <div
+                    className={styles.backgroundOverlay}
+                    style={{
+                        backgroundImage: `url(${customBackground})`,
+                        backgroundSize: backgroundSize,
+                        backgroundPosition: backgroundPosition,
+                        filter: `blur(${backgroundBlur}px)`,
+                        opacity: backgroundOpacity
+                    }}
+                />
+            )}
             <div className={styles.chatHeader}>
                 <div className={styles.userInfo}>
                     <div className={styles.avatar}></div>
