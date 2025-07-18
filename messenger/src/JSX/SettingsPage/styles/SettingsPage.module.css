@@ -660,3 +660,172 @@
     display: flex;
     gap: 12px;
 }
+
+/* Стили для секции витрины подарков */
+/* Стили для секции витрины подарков */
+.giftsSection {
+    background: rgba(15, 26, 46, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(77, 121, 246, 0.2);
+    position: relative;
+}
+
+.sectionHeader {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    color: #a0a8ff;
+    flex-wrap: wrap;
+}
+
+.sectionIcon {
+    font-size: 20px;
+    color: #4d79f6;
+}
+
+.giftsCounter {
+
+    font-size: 14px;
+    color: #6a7a9a;
+    background: rgba(10, 14, 23, 0.7);
+    padding: 4px 8px;
+    border-radius: 12px;
+}
+
+.sectionDescription {
+    color: #6a7a9a;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.maxGiftsWarning {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    background: rgba(255, 77, 77, 0.2);
+    color: #ff6a6a;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    animation: shake 0.5s ease;
+    border: 1px solid rgba(255, 77, 77, 0.3);
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-5px); }
+    40%, 80% { transform: translateX(5px); }
+}
+
+.giftsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 15px;
+}
+
+.giftCard {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(10, 14, 23, 0.7);
+    border-radius: 8px;
+    padding: 15px 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(77, 121, 246, 0.1);
+}
+
+.giftCard:hover {
+    transform: translateY(-3px);
+    background: rgba(77, 121, 246, 0.1);
+    border-color: rgba(77, 121, 246, 0.3);
+    box-shadow: 0 5px 15px rgba(77, 121, 246, 0.2);
+}
+
+.selectedGift {
+    border: 1px solid rgba(77, 121, 246, 0.7);
+    background: rgba(77, 121, 246, 0.15);
+
+}
+
+.giftGlow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    background: radial-gradient(circle at center, rgba(77, 121, 246, 0.15), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.giftCard:hover .giftGlow {
+    opacity: 0.5;
+}
+
+.selectedGift .giftGlow {
+    opacity: 0.3;
+}
+
+.giftImage {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: all 0.3s;
+}
+
+.giftCard:hover .giftImage {
+    transform: scale(1.1);
+}
+
+.giftName {
+    font-size: 13px;
+    color: #d0d4ff;
+    text-align: center;
+    transition: all 0.3s;
+}
+
+.giftCard:hover .giftName {
+    color: #ffffff;
+}
+
+.giftCheckbox {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 18px;
+    height: 18px;
+    background: rgba(10, 14, 23, 0.9);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(77, 121, 246, 0.3);
+}
+
+.giftCheckbox input {
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+    accent-color: #4d79f6;
+}
+
+/* Стиль для невыбираемых подарков при достижении лимита */
+.giftCard.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.giftCard.disabled:hover {
+    transform: none;
+    background: rgba(10, 14, 23, 0.7);
+    border-color: rgba(77, 121, 246, 0.1);
+    box-shadow: none;
+}

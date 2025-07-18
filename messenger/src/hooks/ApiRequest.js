@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const API_BASE_URL = 'https://localhost:7001';
+export const API_BASE_URL = 'http://localhost:5144';
 
 export const apiRequest = async (endpoint, options = {}) => {
   const {

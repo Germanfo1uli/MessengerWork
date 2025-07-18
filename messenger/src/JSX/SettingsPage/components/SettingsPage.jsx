@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import styles from '../styles/SettingsPage.module.css';
-import { FiEye, FiEyeOff } from 'react-icons/fi';
+import { FiEye, FiEyeOff, FiGift } from 'react-icons/fi';
 import Sidebar from './Sidebar';
 
 const Background = () => {
@@ -20,6 +20,7 @@ const SettingsPage = () => {
     const [avatarBorderType, setAvatarBorderType] = useState('color');
     const [avatarBorderColor, setAvatarBorderColor] = useState('#4d79f6');
     const [avatarBorderImage, setAvatarBorderImage] = useState(null);
+    const [maxGiftsSelected, setMaxGiftsSelected] = useState(false);
 
     const { register, handleSubmit, formState: { errors } } = useForm({
         defaultValues: {
@@ -30,6 +31,16 @@ const SettingsPage = () => {
             status: 'Опытный командир с 15-летним стажем. Специализация: дальние космические миссии.',
         }
     });
+
+    // Состояние для витрины подарков
+    const [gifts, setGifts] = useState([
+        { id: 1, image: "https://cdn1.ozone.ru/s3/multimedia-1-h/7548608069.jpg", name: "Золотой лабубу", selected: true },
+        { id: 2, image: "https://avatars.mds.yandex.net/get-mpic/13527901/2a000001971b61fbaf300b399920a6a840f3/orig", name: "Никита", selected: false },
+        { id: 3, image: "https://avatars.mds.yandex.net/i?id=3eaffa6d84e0523f6ed1786307f4e0a4_l-5295169-images-thumbs&n=13", name: "Лабуба", selected: true },
+        { id: 4, image: "https://i.imgur.com/JQ9qX1z.png", name: "Космический шлем", selected: false },
+        { id: 5, image: "https://i.imgur.com/8Km9tLL.png", name: "Звездный меч", selected: true },
+        { id: 6, image: "https://i.imgur.com/3Zq3Z8L.png", name: "Галактический щит", selected: false },
+    ]);
 
     const handleBannerChange = (e) => {
         const file = e.target.files[0];
@@ -68,8 +79,26 @@ const SettingsPage = () => {
         setAvatarBorderColor(e.target.value);
     };
 
+    // Обработчик выбора подарка с ограничением
+    const toggleGiftSelection = (id) => {
+        const selectedCount = gifts.filter(gift => gift.selected).length;
+        const isCurrentlySelected = gifts.find(gift => gift.id === id)?.selected;
+
+        if (!isCurrentlySelected && selectedCount >= 3) {
+            setMaxGiftsSelected(true);
+            setTimeout(() => setMaxGiftsSelected(false), 2000);
+            return;
+        }
+
+        setGifts(gifts.map(gift =>
+            gift.id === id ? { ...gift, selected: !gift.selected } : gift
+        ));
+    };
+
     const onSubmit = (data) => {
         console.log('Form submitted:', data);
+        const selectedGifts = gifts.filter(gift => gift.selected);
+        console.log('Selected gifts:', selectedGifts);
     };
 
     const maskPhoneNumber = (phone) => {
@@ -284,6 +313,61 @@ const SettingsPage = () => {
                                 className={styles.formTextarea}
                             ></textarea>
                             {errors.status && <p className={styles.error}>{errors.status.message}</p>}
+                        </div>
+
+                        {/* Секция витрины подарков */}
+                        <div className={styles.giftsSection}>
+                            <div className={styles.sectionHeader}>
+                                <FiGift className={styles.sectionIcon} />
+                                <h3>Витрина подарков</h3>
+                                <span className={styles.giftsCounter}>
+                                    {gifts.filter(gift => gift.selected).length}/3 выбрано
+                                </span>
+                            </div>
+                            <p className={styles.sectionDescription}>
+                                Выберите до 3 подарков, которые будут отображаться в вашем профиле
+                            </p>
+
+                            {maxGiftsSelected && (
+                                <div className={styles.maxGiftsWarning}>
+                                    Можно выбрать не более 3 подарков
+                                </div>
+                            )}
+
+                            <div className={styles.giftsGrid}>
+                                {gifts.map(gift => {
+                                    const selectedCount = gifts.filter(g => g.selected).length;
+                                    const isDisabled = !gift.selected && selectedCount >= 3;
+
+                                    return (
+                                        <div
+                                            key={gift.id}
+                                            className={`${styles.giftCard} ${gift.selected ? styles.selectedGift : ''} ${isDisabled ? styles.disabled : ''}`}
+                                            onClick={() => !isDisabled && toggleGiftSelection(gift.id)}
+                                        >
+                                            <div className={styles.giftGlow}></div>
+                                            <img
+                                                src={gift.image}
+                                                alt={gift.name}
+                                                className={styles.giftImage}
+                                            />
+                                            <div className={styles.giftName}>{gift.name}</div>
+                                            <div className={styles.giftCheckbox}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={gift.selected}
+                                                    onChange={() => !isDisabled && toggleGiftSelection(gift.id)}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    disabled={isDisabled}
+                                                />
+                                            </div>
+                                            {isDisabled && (
+                                                <div className={styles.giftOverlay}></div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </div>
 
                         <div className={styles.actionButtons}>
