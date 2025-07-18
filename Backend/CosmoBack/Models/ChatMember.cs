@@ -21,6 +21,9 @@ namespace CosmoBack.Models
         [Required]
         public bool Notifications { get; set; } = true;
 
+        [Required]
+        public bool IsFavorite { get; set; } = false;
+
         // Навигационные свойства
         public  Chat Chat { get; set; }
         public  User User { get; set; }

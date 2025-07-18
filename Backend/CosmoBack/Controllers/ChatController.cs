@@ -7,14 +7,9 @@ namespace CosmoBack.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class ChatController : ControllerBase
+    public class ChatController(IChatService chatService) : ControllerBase
     {
-        private readonly IChatService _chatService;
-
-        public ChatController(IChatService chatService)
-        {
-            _chatService = chatService ?? throw new ArgumentNullException(nameof(chatService));
-        }
+        private readonly IChatService _chatService = chatService ?? throw new ArgumentNullException(nameof(chatService));
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetChatById(Guid id)
@@ -115,12 +110,16 @@ namespace CosmoBack.Controllers
         {
             try
             {
-                var chat = await _chatService.ToggleFavoriteChatAsync(chatId, request.Favorite);
+                var chat = await _chatService.ToggleFavoriteChatAsync(chatId, request.IsFavorite);
                 return Ok(chat);
             }
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (Exception ex)
             {
@@ -144,6 +143,6 @@ namespace CosmoBack.Controllers
 
     public class ToggleFavoriteChatRequest
     {
-        public bool Favorite { get; set; }
+        public bool IsFavorite { get; set; }
     }
 }

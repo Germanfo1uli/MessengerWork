@@ -2,9 +2,12 @@
 
 namespace CosmoBack.Repositories.Interfaces
 {
-    public interface IChatMembersRepository : IRepository<ChatMember>
+    public interface IChatMembersRepository
     {
-        Task<ChatMember> GetByChatAndUserIdAsync(Guid chatId, Guid userId);
+        Task AddAsync(ChatMember chatMember);
         Task DeleteByChatIdAsync(Guid chatId);
+        Task<ChatMember> GetByChatAndUserIdAsync(Guid chatId, Guid userId);
+        Task UpdateAsync(ChatMember chatMember); 
+        Task DeleteAsync(Guid chatMemberId);
     }
 }

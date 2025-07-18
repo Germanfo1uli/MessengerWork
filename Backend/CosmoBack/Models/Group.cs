@@ -31,9 +31,6 @@ namespace CosmoBack.Models
         [ForeignKey("AvatarImage")]
         public Guid? AvatarImageId { get; set; }
 
-        [Required]
-        public bool Favorite { get; set; }
-
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public bool IsActive { get; set; } = true;
