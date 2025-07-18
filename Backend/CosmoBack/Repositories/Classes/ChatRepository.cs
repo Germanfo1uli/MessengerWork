@@ -91,6 +91,50 @@ namespace CosmoBack.Repositories.Classes
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<object>> GetChatsWithDetailsByQueryAsync(Guid userId, string searchQuery)
+        {
+            return await _context.Users
+                .AsNoTracking()
+                .Where(u => u.Username.ToLower().Contains(searchQuery.ToLower())) // Поиск по подстроке без учета регистра
+                .OrderBy(u => u.Username.ToLower().StartsWith(searchQuery.ToLower()) ? 0 : 1) // Сначала точные совпадения
+                .ThenBy(u => u.Username.Length) // Затем по длине имени
+                .Select(u => new
+                {
+                    User = new
+                    {
+                        u.Id,
+                        u.Username,
+                        u.OnlineStatus,
+                        ContactTag = _context.Contacts
+                            .Where(con => con.OwnerId == userId && con.ContactId == u.Id)
+                            .Select(con => con.ContactTag)
+                            .FirstOrDefault()
+                    },
+                    Chat = _context.Chats
+                        .Where(c => (c.FirstUserId == userId && c.SecondUserId == u.Id) ||
+                                    (c.SecondUserId == userId && c.FirstUserId == u.Id))
+                        .Select(c => new
+                        {
+                            Chat = c,
+                            LastMessageData = c.Messages
+                                .Join(_context.Users,
+                                    m => m.SenderId,
+                                    user => user.Id,
+                                    (m, user) => new
+                                    {
+                                        Message = m,
+                                        Username = user.Username,
+                                        AvatarImageId = user.AvatarImageId
+                                    })
+                                .OrderByDescending(m => m.Message.CreatedAt)
+                                .FirstOrDefault()
+                        })
+                        .FirstOrDefault()
+                })
+                .Take(10) // Ограничиваем до 10 результатов
+                .ToListAsync();
+        }
+
         private async Task<long> GenerateUniquePublicIdAsync()
         {
             var random = new Random();
