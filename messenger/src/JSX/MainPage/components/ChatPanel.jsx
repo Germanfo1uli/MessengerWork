@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import cl from '../styles/ChatPanel.module.css';
 import ChatBox from './ChatBox';
 import { IoSettingsOutline } from 'react-icons/io5';
@@ -14,18 +14,77 @@ import { apiRequest } from '../../../hooks/ApiRequest';
 import { useAuth } from '../../../hooks/UseAuth';
 import { useNavigate } from 'react-router-dom';
 import useMainHooks from '../../../hooks/UseMainHooks';
+import debounce from 'lodash.debounce';
 
 const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
-    const {isLoading, userId, username, isAuthenticated, logout} = useAuth();
+    const { isLoading, userId, username, isAuthenticated, logout } = useAuth();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isAddContactModalOpen, setIsAddContactModalOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('favorites');
     const [searchQuery, setSearchQuery] = useState('');
     const [user, setUser] = useState({});
     const [data, setData] = useState([]);
+    const [searchResults, setSearchResults] = useState([]);
+    const [isSearching, setIsSearching] = useState(false);
     const [avatarError, setAvatarError] = useState(false);
-    const {getStatusString, formatTimeFromISO} = useMainHooks();
+    const { getStatusString, formatTimeFromISO } = useMainHooks();
     const navigate = useNavigate();
+
+    const debouncedServerSearch = useMemo(
+        () =>
+            debounce(async (query) => {
+                if (query.length <= 1) {
+                    setSearchResults([]);
+                    setIsSearching(false);
+                    return;
+                }
+
+                setIsSearching(true);
+                try {
+                    const response = await apiRequest(`/api/chat/search?userId=${userId}&query=${encodeURIComponent(query.substring(1))}`, {
+                        method: 'GET',
+                        authenticated: isAuthenticated
+                    });
+
+                    const enhancedChats = Array.isArray(response)
+                        ? response.map(chat => ({
+                            id: chat.id,
+                            publicId: chat.publicId,
+                            isFavorite: chat.isFavorite,
+                            firstUserId: chat.firstUserId,
+                            secondUserId: chat.secondUserId,
+                            createdAt: chat.createdAt,
+                            lastMessageAt: chat.lastMessageAt,
+                            lastMessage: chat.lastMessage
+                                ? {
+                                    id: chat.lastMessage.id,
+                                    chatId: chat.lastMessage.chatId,
+                                    senderId: chat.lastMessage.senderId,
+                                    comment: chat.lastMessage.comment,
+                                    createdAt: chat.lastMessage.createdAt,
+                                    username: chat.lastMessage.username,
+                                    avatarImageId: chat.lastMessage.avatarImageId,
+                                    isSentByUser: userId === chat.lastMessage.senderId
+                                }
+                                : null,
+                            secondUser: {
+                                username: chat.secondUser?.username ?? '',
+                                onlineStatus: chat.secondUser?.onlineStatus ?? 0,
+                                contactTag: chat.secondUser?.contactTag
+                            },
+                            joined: false
+                        }))
+                        : [];
+                    setSearchResults(enhancedChats);
+                } catch (error) {
+                    console.error('Failed to search chats:', error);
+                    setSearchResults([]);
+                } finally {
+                    setIsSearching(false);
+                }
+            }, 500),
+        [isAuthenticated, userId]
+    );
 
     useEffect(() => {
         const fetchData = async () => {
@@ -47,11 +106,12 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                         lastMessage: chat.lastMessage
                             ? {
                                 ...chat.lastMessage,
-                                isSentByUser: userId === chat.lastMessage.senderId,
+                                isSentByUser: userId === chat.lastMessage.senderId
                             }
                             : null,
+                        joined: false
                     }))
-                    : chatsResponse;
+                    : [];
 
                 setUser({
                     username: profileResponse.username || username,
@@ -110,15 +170,15 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                             lastMessage: updatedChat.lastMessage
                                 ? {
                                     ...updatedChat.lastMessage,
-                                    isSentByUser: userId === updatedChat.lastMessage.senderId,
+                                    isSentByUser: userId === updatedChat.lastMessage.senderId
                                 }
-                                : existingChat.lastMessage,
+                                : existingChat.lastMessage
                         };
                         const newData = [...prev];
                         newData[existingChatIndex] = mergedChat;
                         return newData;
                     }
-                    return [...prev, { ...updatedChat, joined: true }];
+                    return [...prev, { ...updatedChat, joined: false }];
                 });
             });
 
@@ -127,6 +187,12 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
             };
         }
     }, [connection, isConnected, userId]);
+
+    useEffect(() => {
+        return () => {
+            debouncedServerSearch.cancel();
+        };
+    }, [debouncedServerSearch]);
 
     const toggleModal = () => {
         setIsModalOpen(!isModalOpen);
@@ -137,21 +203,34 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
     };
 
     const handleChatClick = (chat) => {
+        if (chat.id === '00000000-0000-0000-0000-000000000000') {
+            setData((prev) => {
+                if (!prev.some(c => c.secondUserId === chat.secondUserId)) {
+                    return [...prev, { ...chat, joined: false }];
+                }
+                return prev;
+            });
+        }
         onChatSelect(chat);
     };
 
     const handleAddContact = (contactData) => {
         const newChat = {
-            name: contactData.username || `Новый контакт (${contactData.phone})`,
-            unread: 0,
-            lastMessage: contactData.message || 'Новый контакт добавлен',
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            status: 'online',
-            isSentByUser: false,
-            messageStatus: 'sent',
-            isFavorite: false
+            id: '00000000-0000-0000-0000-000000000000',
+            publicId: 0,
+            isFavorite: false,
+            firstUserId: userId,
+            secondUserId: contactData.userId || '00000000-0000-0000-0000-000000000000',
+            createdAt: new Date().toISOString(),
+            lastMessageAt: null,
+            lastMessage: null,
+            secondUser: {
+                username: contactData.username || `Новый контакт (${contactData.phone})`,
+                onlineStatus: 1,
+                contactTag: null
+            },
+            joined: false
         };
-
         setData([...data, newChat]);
     };
 
@@ -159,9 +238,32 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
         setAvatarError(true);
     };
 
-    const filteredChats = (activeTab === 'favorites'
-        ? data.filter((chat) => chat.isFavorite)
-        : data);
+    const handleSearchChange = (e) => {
+        const query = e.target.value;
+        setSearchQuery(query);
+
+        if (query.startsWith('@')) {
+            debouncedServerSearch(query);
+        } else {
+            setSearchResults([]);
+            setIsSearching(false);
+        }
+    };
+
+    const filteredChats = useMemo(() => {
+        const source = searchQuery.startsWith('@') ? searchResults : data;
+        return (activeTab === 'favorites' ? source.filter((chat) => chat.isFavorite) : source)
+            .filter((chat) =>
+                chat.secondUser.username.toLowerCase().includes(
+                    searchQuery.startsWith('@') ? searchQuery.substring(1).toLowerCase() : searchQuery.toLowerCase()
+                )
+            )
+            .sort((a, b) => {
+                if (!a.lastMessage || !a.lastMessage.createdAt) return 1;
+                if (!b.lastMessage || !b.lastMessage.createdAt) return -1;
+                return new Date(b.lastMessage.createdAt) - new Date(a.lastMessage.createdAt);
+            });
+    }, [data, searchResults, activeTab, searchQuery]);
 
     return (
         <div className={cl.container}>
@@ -229,8 +331,9 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                         placeholder="Поиск по каналам..."
                         className={cl.searchInput}
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onChange={handleSearchChange}
                     />
+                    {isSearching && <span className={cl.searchLoading}>Поиск...</span>}
                 </div>
             </div>
 
@@ -252,20 +355,34 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
             </div>
 
             <div className={cl.chatsList}>
-                {filteredChats.map((chat, index) => (
-                    <div key={index} onClick={() => handleChatClick(chat)} style={{ cursor: 'pointer' }}>
-                        <ChatBox
-                            name={chat.secondUser.username}
-                            unread={10}
-                            lastMessage={chat.lastMessage?.comment ?? "Нет сообщений"}
-                            time={formatTimeFromISO(chat.lastMessage?.createdAt)}
-                            status={getStatusString(chat.secondUser.onlineStatus)}
-                            isFavorite={false}
-                            messageStatus={"sent"}
-                            isSentByUser={chat.lastMessage?.isSentByUser ?? false}
-                        />
+                {filteredChats.length > 0 ? (
+                    filteredChats.map((chat, index) => (
+                        <div key={index} onClick={() => handleChatClick(chat)} style={{ cursor: 'pointer' }}>
+                            <ChatBox
+                                name={chat.secondUser.username}
+                                unread={10}
+                                lastMessage={chat.lastMessage?.comment ?? "Нет сообщений"}
+                                time={formatTimeFromISO(chat.lastMessage?.createdAt)}
+                                status={getStatusString(chat.secondUser.onlineStatus)}
+                                isFavorite={false}
+                                messageStatus={"sent"}
+                                isSentByUser={chat.lastMessage?.isSentByUser ?? false}
+                            />
+                        </div>
+                    ))
+                ) : searchQuery ? (
+                    <div className={cl.noResultsContainer}>
+                        <div className={cl.noResultsIcon}>
+                            <IoSearchOutline />
+                        </div>
+                        <h4 className={cl.noResultsTitle}>Ничего не найдено</h4>
+                        <p className={cl.noResultsText}>
+                            {searchQuery.startsWith('@')
+                                ? `Пользователь "${searchQuery.substring(1)}" не найден`
+                                : `Чаты по запросу "${searchQuery}" не найдены`}
+                        </p>
                     </div>
-                ))}
+                ) : null}
             </div>
         </div>
     );

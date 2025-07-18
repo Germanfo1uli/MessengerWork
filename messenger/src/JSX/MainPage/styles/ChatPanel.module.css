@@ -271,3 +271,50 @@
     font-size: 18px;
     text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
 }
+
+/* Стили для сообщения "Ничего не найдено" */
+
+.noResultsContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 20px;
+    text-align: center;
+    color: #b0b0ff;
+    background: rgba(30, 30, 70, 0.3);
+    border-radius: 10px;
+    margin: 20px;
+    border: 1px dashed rgba(138, 43, 226, 0.3);
+    animation: fadeIn 0.3s ease-out;
+}
+
+.noResultsIcon {
+    font-size: 40px;
+    color: #8a2be2;
+    margin-bottom: 15px;
+    opacity: 0.7;
+}
+
+.noResultsTitle {
+    margin: 0 0 8px 0;
+    color: #e0e0ff;
+    font-size: 16px;
+}
+
+.noResultsText {
+    margin: 0;
+    font-size: 13px;
+    opacity: 0.8;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

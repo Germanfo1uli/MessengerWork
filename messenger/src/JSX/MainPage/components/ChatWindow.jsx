@@ -33,17 +33,12 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                     authenticated: isAuthenticated
                 });
 
-                console.log(response);
-
                 const messages = Array.isArray(response)
                 ? response.map(message => ({
                       ...message,
                       isUser: userId === message.senderId,
                   }))
                 : response;
-
-                console.log(response);
-                console.log(messages);
 
                 setMessages(messages);
             } catch (error) {
@@ -98,6 +93,7 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
         
         // Оптимистичное обновление UI
         const newMessage = {
+            id: tempId.toString(),
             tempId: tempId,
             comment: message,
             isUser: true,
