@@ -53,8 +53,6 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                   }))
                 : chatsResponse;
                 
-                console.log(enhancedChats)
-
                 setUser({
                     username: profileResponse.username || username,
                     status: getStatusString(profileResponse.onlineStatus),
@@ -164,11 +162,18 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
 
     // Функция для фильтрации чатов
     const filteredChats = (activeTab === 'favorites'
-            ? data.filter((chat) => chat.isFavorite)
-            : data)
-    // ).filter((chat) =>
-    //     chat.name.toLowerCase().includes(searchQuery.toLowerCase())
-    // );
+        ? data.filter((chat) => chat.isFavorite)
+        : data)
+        .filter((chat) => 
+            chat.secondUser.username.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        .sort((a, b) => {
+            // Если у чата нет lastMessage, ставим его в конец
+            if (!a.lastMessage || !a.lastMessage.createdAt) return 1;
+            if (!b.lastMessage || !b.lastMessage.createdAt) return -1;
+            // Сортировка по убыванию времени (последние сообщения сверху)
+            return new Date(b.lastMessage.createdAt) - new Date(a.lastMessage.createdAt);
+        });
 
     return (
         <div className={cl.container}>

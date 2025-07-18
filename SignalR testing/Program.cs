@@ -37,10 +37,10 @@ class Program
             Console.WriteLine("Подключение к ChatHub успешно");
 
             // Тестирование методов хаба
-            var chatId = "4fb5dc96-39e5-45bd-adf9-4b8f467e8391"; // Замените на реальный chatId
-            var senderId = "6aff16a2-43b6-4351-b819-a98e3a472dc4"; // Замените на реальный senderId
+            var chatId = "9ac34cf3-5863-47ef-aa1d-ce3be7c9712e"; // Замените на реальный chatId
+            var senderId = "ee403031-a58c-4873-86f8-8baf9b5241ea"; // Замените на реальный senderId
             int tempId = 12345678;
-            string message = "Я ГЕЙ ПОМОГИТЕ";
+            string message = "Герман долбаеб";
 
             // Подключение к чату
             await hubConnection.InvokeAsync("JoinChat", chatId);
