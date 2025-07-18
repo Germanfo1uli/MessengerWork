@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { FiShield, FiLock, FiKey, FiLink2, FiGithub, FiMail, FiTrash2, FiEye, FiEyeOff } from 'react-icons/fi';
-import { FaGoogle, FaMicrosoft } from 'react-icons/fa';
+import { FiShield, FiLock, FiKey, FiLink2, FiGithub, FiMail, FiTrash2 } from 'react-icons/fi';
+import { FaGoogle } from 'react-icons/fa';
 import styles from '../styles/SecurityPage.module.css';
 import Sidebar from '../components/Sidebar';
 
 const SecurityPage = () => {
     const [connectedAccounts, setConnectedAccounts] = useState({
         google: false,
-        github: false,
-        microsoft: false
+        github: false
     });
     const [showChangePassword, setShowChangePassword] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [activeSessions, setActiveSessions] = useState([
+        { id: 1, device: 'Chrome on Windows', location: 'New York, USA', lastActive: '2025-07-18' },
+        { id: 2, device: 'Safari on iPhone', location: 'London, UK', lastActive: '2025-07-17' }
+    ]);
 
     const { register, handleSubmit, formState: { errors }, getValues } = useForm({
         defaultValues: {
@@ -37,6 +40,11 @@ const SecurityPage = () => {
     const onDeleteAccount = () => {
         console.log('Account deletion confirmed');
         setShowDeleteConfirm(false);
+    };
+
+    const terminateSession = (sessionId) => {
+        setActiveSessions(prev => prev.filter(session => session.id !== sessionId));
+        console.log(`Terminated session ${sessionId}`);
     };
 
     return (
@@ -206,40 +214,29 @@ const SecurityPage = () => {
                                         {connectedAccounts.github ? 'Отвязать' : 'Привязать'}
                                     </button>
                                 </div>
-
-                                <div className={`${styles.accountCard} ${connectedAccounts.microsoft ? styles.connected : ''}`}>
-                                    <div className={styles.accountHeader}>
-                                        <FaMicrosoft className={styles.accountIcon} style={{ color: '#0078D7' }} />
-                                        <span>Microsoft</span>
-                                    </div>
-                                    <p className={styles.accountStatus}>
-                                        {connectedAccounts.microsoft ? 'Привязан' : 'Не привязан'}
-                                    </p>
-                                    <button
-                                        onClick={() => toggleAccountConnection('microsoft')}
-                                        className={styles.accountButton}
-                                    >
-                                        {connectedAccounts.microsoft ? 'Отвязать' : 'Привязать'}
-                                    </button>
-                                </div>
                             </div>
                         </div>
 
                         <div className={styles.settingGroup}>
-                            <h3><FiMail className={styles.settingIcon} /> Уведомления о безопасности</h3>
-                            <div className={styles.notificationSettings}>
-                                <div className={styles.checkboxOption}>
-                                    <input type="checkbox" id="loginNotifications" defaultChecked />
-                                    <label htmlFor="loginNotifications">Уведомлять о новых входах в аккаунт</label>
-                                </div>
-                                <div className={styles.checkboxOption}>
-                                    <input type="checkbox" id="passwordChangeNotifications" defaultChecked />
-                                    <label htmlFor="passwordChangeNotifications">Уведомлять об изменении пароля</label>
-                                </div>
-                                <div className={styles.checkboxOption}>
-                                    <input type="checkbox" id="deviceNotifications" />
-                                    <label htmlFor="deviceNotifications">Уведомлять о новых устройствах</label>
-                                </div>
+                            <h3><FiMail className={styles.settingIcon} /> Активные сессии</h3>
+                            <p className={styles.settingDescription}>
+                                Просматривайте и управляйте активными сессиями на устройствах
+                            </p>
+                            <div className={styles.sessionList}>
+                                {activeSessions.map(session => (
+                                    <div key={session.id} className={styles.sessionItem}>
+                                        <div>
+                                            <h4>{session.device}</h4>
+                                            <p>{session.location} - Последняя активность: {session.lastActive}</p>
+                                        </div>
+                                        <button
+                                            className={styles.terminateButton}
+                                            onClick={() => terminateSession(session.id)}
+                                        >
+                                            Завершить
+                                        </button>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     </div>
