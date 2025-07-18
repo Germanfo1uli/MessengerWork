@@ -6,16 +6,20 @@ import * as Yup from 'yup';
 import styles from '../styles/AuthScreen.module.css';
 import { FcGoogle } from 'react-icons/fc';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../hooks/UseAuth.js';
+import { apiRequest } from '../../../hooks/ApiRequest.js';
 
 const AuthScreen = ({ onBack }) => {
+    const {login} = useAuth();
+    const [authError, setAuthError] = useState();
     const [showPassword, setShowPassword] = useState(false);
     const [activeTab, setActiveTab] = useState('login');
     const navigate = useNavigate();
 
     // Схема валидации для входа
     const loginSchema = Yup.object().shape({
-        email: Yup.string()
-            .email('Некорректный email')
+        phone: Yup.string()
+            .matches(/^\+7\d{10}$/, 'Формат: +7XXXXXXXXXX')
             .required('Обязательное поле'),
         password: Yup.string()
             .min(6, 'Пароль должен содержать минимум 6 символов')
@@ -27,8 +31,8 @@ const AuthScreen = ({ onBack }) => {
         username: Yup.string()
             .min(3, 'Имя должно содержать минимум 3 символа')
             .required('Обязательное поле'),
-        email: Yup.string()
-            .email('Некорректный email')
+        phone: Yup.string()
+            .matches(/^\+7\d{10}$/, 'Формат: +7XXXXXXXXXX')
             .required('Обязательное поле'),
         password: Yup.string()
             .min(6, 'Пароль должен содержать минимум 6 символов')
@@ -50,21 +54,48 @@ const AuthScreen = ({ onBack }) => {
         register: registerRegister,
         handleSubmit: handleRegisterSubmit,
         formState: { errors: registerErrors, isSubmitting: isRegisterSubmitting },
-        watch
     } = useForm({
         resolver: yupResolver(registerSchema)
     });
 
-    const handleLogin = (data) => {
-        console.log('Вход:', data);
-        // Здесь будет логика входа
-        navigate('/home');
+    const handleLogin = async (data) => {
+        try {
+            const response = await apiRequest('/api/auth/login/phone', {
+                method: 'POST',
+                body: { Phone: data.phone, Password: data.password },
+                authenticated: false
+            });
+
+            const jwtToken = response.token.tokenValue;
+            const refreshToken = response.token.clientSecret;
+
+            await login(jwtToken, refreshToken);
+
+            navigate('/home');
+        }
+        catch (error) {
+            setAuthError(error.message);
+        }
     };
 
-    const handleRegister = (data) => {
-        console.log('Регистрация:', data);
-        // Здесь будет логика регистрации
-        navigate('/home');
+    const handleRegister = async (data) => {
+        try {
+            const response = await apiRequest('/api/auth/register', {
+                method: 'POST',
+                body: { Phone: data.phone, Username: data.username, Password: data.password },
+                authenticated: false
+            });
+
+            const jwtToken = response.token.tokenValue;
+            const refreshToken = response.token.clientSecret;
+
+            await login(jwtToken, refreshToken);
+
+            navigate('/home');
+        }
+        catch (error) {
+            setAuthError(error.message);
+        }
     };
 
     const handleGoogleLogin = () => {
@@ -114,23 +145,24 @@ const AuthScreen = ({ onBack }) => {
                             {/* Форма входа */}
                             {activeTab === 'login' && (
                                 <div className={styles.tabContent}>
+                                    {authError && <div className={styles.errorMessage}>{authError}</div>}
                                     <form onSubmit={handleLoginSubmit(handleLogin)} className={styles.authForm}>
                                         <div className={styles.inputGroup}>
-                                            <label htmlFor="email" className={styles.inputLabel}>
-                                                Email
+                                            <label htmlFor="phone" className={styles.inputLabel}>
+                                                Номер телефона
                                             </label>
                                             <div className={styles.inputWrapper}>
                                                 <Mail className={styles.inputIcon} />
                                                 <input
-                                                    id="email"
-                                                    type="email"
-                                                    placeholder="ваш@email.com"
+                                                    id="phone"
+                                                    type="tel"
+                                                    placeholder="+..."
                                                     className={styles.authInput}
-                                                    {...loginRegister("email")}
+                                                    {...loginRegister("phone")}
                                                 />
                                             </div>
-                                            {loginErrors.email && (
-                                                <div className={styles.errorMessage}>{loginErrors.email.message}</div>
+                                            {loginErrors.phone && (
+                                                <div className={styles.errorMessage}>{loginErrors.phone.message}</div>
                                             )}
                                         </div>
 
@@ -207,21 +239,21 @@ const AuthScreen = ({ onBack }) => {
                                         </div>
 
                                         <div className={styles.inputGroup}>
-                                            <label htmlFor="email" className={styles.inputLabel}>
-                                                Email
+                                            <label htmlFor="phone" className={styles.inputLabel}>
+                                                Номер телефона
                                             </label>
                                             <div className={styles.inputWrapper}>
                                                 <Mail className={styles.inputIcon} />
                                                 <input
-                                                    id="email"
-                                                    type="email"
-                                                    placeholder="ваш@email.com"
+                                                    id="phone"
+                                                    type="tel"
+                                                    placeholder="+..."
                                                     className={styles.authInput}
-                                                    {...registerRegister("email")}
+                                                    {...registerRegister("phone")} // Исправлено на registerRegister
                                                 />
                                             </div>
-                                            {registerErrors.email && (
-                                                <div className={styles.errorMessage}>{registerErrors.email.message}</div>
+                                            {registerErrors.phone && (
+                                                <div className={styles.errorMessage}>{registerErrors.phone.message}</div>
                                             )}
                                         </div>
 

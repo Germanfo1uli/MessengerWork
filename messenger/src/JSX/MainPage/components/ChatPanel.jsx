@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import cl from '../styles/ChatPanel.module.css';
 import ChatBox from './ChatBox';
 import { IoSettingsOutline } from 'react-icons/io5';
@@ -11,78 +10,130 @@ import { FaGift } from 'react-icons/fa';
 import { IoAddCircleOutline } from 'react-icons/io5';
 import Modal from './Modal';
 import AddContactModal from './AddContactModal';
+import { apiRequest } from '../../../hooks/ApiRequest';
+import { useAuth } from '../../../hooks/UseAuth';
+import { useNavigate } from 'react-router-dom';
+import useMainHooks from '../../../hooks/UseMainHooks';
 
-const ChatPanel = ({ onChatSelect }) => {
-    const navigate = useNavigate();
+const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
+    const {isLoading, userId, username, isAuthenticated, logout} = useAuth();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isAddContactModalOpen, setIsAddContactModalOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState('favorites');
-    const [searchQuery, setSearchQuery] = useState('');
-    const [user, setUser] = useState({
-        username: 'Командир Ковальски',
-        avatarUrl: 'https://i.pravatar.cc/150?img=3',
-        bannerUrl: 'https://picsum.photos/600/200?random=1',
-        lastSeen: 'На связи',
-        status: 'online',
-        quote: 'Каждый шаг становится бременем... Я теряю себя в лабиринте своих сомнений.',
-        playingWorktest: true,
-        editProfile: true,
-        doNotDisturb: false,
-        switchAccounts: false,
-        copyUserId: false
-    });
+    const [activeTab, setActiveTab] = useState('favorites'); // Состояние для активной вкладки
+    const [searchQuery, setSearchQuery] = useState(''); // Состояние для поискового запроса
+    const [user, setUser] = useState({});
+    const [data, setData] = useState([]);
+    const {getStatusString, formatTimeFromISO} = useMainHooks();
+    const navigate = useNavigate();
 
-    const [data, setData] = useState([
-        {
-            name: 'Орбитальная станция',
-            unread: 3,
-            lastMessage: 'Подготовка к стыковке нового модуля...',
-            time: '12:45',
-            status: 'online',
-            isSentByUser: false,
-            messageStatus: 'read',
-            isFavorite: true
-        },
-        {
-            name: 'Марсианская база',
-            unread: 0,
-            lastMessage: 'Завершены геологические исследования...',
-            time: '09:22',
-            status: 'idle',
-            isSentByUser: true,
-            messageStatus: 'delivered',
-            isFavorite: false
-        },
-        {
-            name: 'Центр управления',
-            unread: 7,
-            lastMessage: 'ТРЕВОГА: обнаружена аномалия в секторе 4...',
-            time: '15:18',
-            status: 'busy',
-            isSentByUser: false,
-            messageStatus: 'sent',
-            isFavorite: true
-        },
-        {
-            name: 'Экипаж "Прометей"',
-            unread: 0,
-            lastMessage: 'Все системы в норме, продолжаем курс...',
-            time: '07:33',
-            status: 'offline',
-            isSentByUser: true,
-            messageStatus: 'sending',
-            isFavorite: false
-        },
-    ]);
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [profileResponse, chatsResponse] = await Promise.all([
+                    apiRequest(`/api/user/${userId}`, {
+                        method: 'GET',
+                        authenticated: isAuthenticated
+                    }),
+                    apiRequest(`/api/chat/user/${userId}`, {
+                        method: 'GET',
+                        authenticated: isAuthenticated
+                    })
+                ]);
 
-    const defaultAvatarUrl = 'https://via.placeholder.com/150?text=Default';
+                const enhancedChats = Array.isArray(chatsResponse)
+                ? chatsResponse.map(chat => ({
+                      ...chat,
+                      // Добавляем isSentByUser к lastMessage (если он есть)
+                      lastMessage: chat.lastMessage
+                          ? {
+                                ...chat.lastMessage,
+                                isSentByUser: userId === chat.lastMessage.senderId,
+                            }
+                          : null,
+                  }))
+                : chatsResponse;
+                
+                console.log(enhancedChats)
 
-    const handleAvatarError = () => {
-        setUser((prevUser) => ({
-            ...prevUser,
-            avatarUrl: defaultAvatarUrl
-        }));
-    };
+                setUser({
+                    username: profileResponse.username || username,
+                    status: getStatusString(profileResponse.onlineStatus),
+                    avatarUrl: '/default-avatar.png'
+                });
+                setData(enhancedChats);
+            } catch (error) {
+                console.error('Failed to fetch user data:', error);
+            }
+        };
+
+        if (isLoading || !userId) {
+            return; 
+        }
+
+        if (!isAuthenticated) {
+            logout();
+            navigate('/');
+        }
+
+        fetchData();
+    }, [isLoading, userId, username, isAuthenticated, logout, navigate]);
+
+    useEffect(() => {
+        if (connection && isConnected && data.length > 0) {
+            const unjoinedChats = data.filter((chat) => !chat.joined);
+
+            unjoinedChats.forEach((chat) => {
+                connection
+                    .invoke('JoinChat', chat.id)
+                    .then(() => {
+                        setData((prev) =>
+                            prev.map((c) => (c.id === chat.id ? { ...c, joined: true } : c))
+                        );
+                    })
+                    .catch((error) => {
+                        console.error(`Failed to join chat ${chat.id}:`, error);
+                    });
+            });
+        }
+    }, [connection, isConnected, data]);
+
+    useEffect(() => {
+        if (connection && isConnected) {
+            connection.on('UpdateChatList', (updatedChat) => {
+                setData((prev) => {
+                    const existingChatIndex = prev.findIndex((chat) => chat.id === updatedChat.id);
+                    if (existingChatIndex !== -1) {
+                        const existingChat = prev[existingChatIndex];
+                        
+                        // Сохраняем информацию о пользователе из существующего чата
+                        const secondUser = existingChat.secondUser || updatedChat.secondUser;
+                        
+                        // Объединяем данные
+                        const mergedChat = {
+                            ...existingChat,
+                            ...updatedChat,
+                            secondUser, // Сохраняем информацию о пользователе
+                            lastMessage: updatedChat.lastMessage
+                                ? {
+                                    ...updatedChat.lastMessage,
+                                    isSentByUser: userId === updatedChat.lastMessage.senderId,
+                                  }
+                                : existingChat.lastMessage,
+                        };
+                        
+                        const newData = [...prev];
+                        newData[existingChatIndex] = mergedChat;
+                        return newData;
+                    }
+                    return [...prev, { ...updatedChat, joined: true }];
+                });
+            });
+    
+            return () => {
+                connection.off('UpdateChatList');
+            };
+        }
+    }, [connection, isConnected, userId]);
 
     const toggleModal = () => {
         setIsModalOpen(!isModalOpen);
@@ -111,32 +162,28 @@ const ChatPanel = ({ onChatSelect }) => {
         setData([...data, newChat]);
     };
 
+    // Функция для фильтрации чатов
     const filteredChats = (activeTab === 'favorites'
             ? data.filter((chat) => chat.isFavorite)
-            : data
-    ).filter((chat) =>
-        chat.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+            : data)
+    // ).filter((chat) =>
+    //     chat.name.toLowerCase().includes(searchQuery.toLowerCase())
+    // );
 
     return (
         <div className={cl.container}>
             {/* Шапка профиля с модальным окном */}
             <div className={cl.profileHeader}>
                 <div className={cl.avatarContainer} onClick={toggleModal} style={{ cursor: 'pointer' }}>
-                    <img
-                        src={user.avatarUrl}
-                        alt="Аватар"
-                        className={cl.avatarImage}
-                        onError={handleAvatarError}
-                    />
+                    <img src={user.avatarUrl} alt="Аватар" className={cl.avatarImage} />
                     <div className={`${cl.statusBadge} ${cl[user.status]}`}></div>
                 </div>
                 <div className={cl.profileInfo}>
                     <h3 className={cl.profileName}>{user.username}</h3>
-                    <p className={cl.profileStatus}>{user.lastSeen}</p>
+                    <p className={cl.profileStatus}>{user.status}</p>
                 </div>
                 <div className={cl.profileActions}>
-                    <button className={cl.iconButton} onClick={() => navigate('/settings')}>
+                    <button className={cl.iconButton}>
                         <IoSettingsOutline />
                     </button>
                     <button className={cl.iconButton}>
@@ -208,14 +255,14 @@ const ChatPanel = ({ onChatSelect }) => {
                 {filteredChats.map((chat, index) => (
                     <div key={index} onClick={() => handleChatClick(chat)} style={{ cursor: 'pointer' }}>
                         <ChatBox
-                            name={chat.name}
-                            unread={chat.unread}
-                            lastMessage={chat.lastMessage}
-                            time={chat.time}
-                            status={chat.status}
-                            isFavorite={chat.isFavorite}
-                            messageStatus={chat.messageStatus}
-                            isSentByUser={chat.isSentByUser}
+                            name={chat.secondUser.username}
+                            unread={10}
+                            lastMessage={chat.lastMessage?.comment ?? "Нет сообщений"}
+                            time={formatTimeFromISO(chat.lastMessage?.createdAt)}
+                            status={getStatusString(chat.secondUser.onlineStatus)}
+                            isFavorite={false}
+                            messageStatus={"sent"}
+                            isSentByUser={chat.lastMessage?.isSentByUser ?? false}
                         />
                     </div>
                 ))}

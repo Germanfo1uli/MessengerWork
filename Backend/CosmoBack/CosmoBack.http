@@ -1,0 +1,6 @@
+@CosmoBack_HostAddress = http://localhost:5144
+
+GET {{CosmoBack_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

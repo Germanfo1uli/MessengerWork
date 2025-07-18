@@ -6,6 +6,7 @@ import StarField from './JSX/WelcomePage/components/StarField';
 import WelcomeScreen from './JSX/WelcomePage/components/WelcomeScreen';
 import AuthScreen from './JSX/WelcomePage/components/AuthScreen';
 import MainPage from './JSX/MainPage/components/MainPage';
+import { AuthProvider } from './hooks/UseAuth';
 import SettingsPage from "./JSX/SettingsPage/components/SettingsPage";
 import LanguageSettingsPage from "./JSX/SettingsPage/components/LanguageSettingsPage";
 import AppearanceSettings from "./JSX/SettingsPage/components/AppearanceSettings";
@@ -17,7 +18,7 @@ const AppContent = () => {
 
     return (
         <div className={styles.appContainer}>
-            {location.pathname !== '/home' || '/settings'  || '/language' || '/appearance' && <StarField />}
+            {location.pathname !== '/home' || '/settings'  || '/language' || '/appearance' || '/security' && <StarField />}
             <div className={styles.spaceOverlay} />
 
             <div className={styles.contentContainer}>
@@ -40,12 +41,13 @@ const AppContent = () => {
         </div>
     );
 };
-
 const App = () => {
     return (
-        <Router>
-            <AppContent />
-        </Router>
+        <AuthProvider>
+            <Router>
+                <AppContent />
+            </Router>
+        </AuthProvider>
     );
 };
 

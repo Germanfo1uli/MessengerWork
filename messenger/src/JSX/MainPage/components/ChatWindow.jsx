@@ -9,34 +9,119 @@ import {
 } from 'react-icons/fi';
 import UserProfileModal from './UserProfileModal';
 import cl from '../styles/ChatWindow.module.css';
+import { apiRequest } from '../../../hooks/ApiRequest';
+import { useAuth } from '../../../hooks/UseAuth';
+import useMainHooks from '../../../hooks/UseMainHooks';
+import { useNavigate } from 'react-router-dom';
 
-const ChatWindow = ({ activeChat, onToggleFavorite }) => {
+const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) => {
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const {isLoading, userId, username, isAuthenticated, logout} = useAuth();
+    const {getStatusString, formatTimeFromISO} = useMainHooks();
+    const navigate = useNavigate();
 
     useEffect(() => {
-        if (activeChat) {
-            setMessages([
-                { id: 1, text: 'Привет! Как дела?', isUser: false, time: '12:30' },
-                { id: 2, text: 'Привет! Все отлично, спасибо!', isUser: true, time: '12:32' },
-                { id: 3, text: 'Что планируешь на выходные?', isUser: false, time: '12:33' },
-                { id: 4, text: 'Пока не решил, может сходим куда-нибудь?', isUser: true, time: '12:35' },
-            ]);
-        }
-    }, [activeChat]);
+        const fetchData = async () => {
+            if (!activeChat?.id) return; // Добавляем проверку на наличие activeChat и его id
+            
+            try {
+                const response = await apiRequest(`/api/messages/chat/${activeChat.id}`, {
+                    method: 'GET',
+                    authenticated: isAuthenticated
+                });
 
-    const handleSendMessage = () => {
-        if (message.trim()) {
-            const newMessage = {
-                id: messages.length + 1,
-                text: message,
-                isUser: true,
-                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            };
-            setMessages([...messages, newMessage]);
-            setMessage('');
+                console.log(response);
+
+                const messages = Array.isArray(response)
+                ? response.map(message => ({
+                      ...message,
+                      isUser: userId === message.senderId,
+                  }))
+                : response;
+
+                console.log(response);
+                console.log(messages);
+
+                setMessages(messages);
+            } catch (error) {
+                console.error('Failed to fetch messages:', error);
+            }
+        };
+    
+        if (isLoading || !userId) {
+            return; 
+        }
+
+        if (!isAuthenticated) {
+            logout();
+            navigate('/');
+        }
+
+        fetchData();
+    }, [isLoading, userId, username, isAuthenticated, logout, activeChat?.id, navigate]);
+
+    useEffect(() => {
+        if (!activeChat?.id || !connection || !isConnected) return;
+    
+        const handleNewMessage = (newMessage) => {
+            if (activeChat.id === newMessage.chatId) {
+                setMessages(prevMessages => {
+                    // Пропускаем временные сообщения (они уже отображены)
+                    if (newMessage.isTemporary) return prevMessages;
+                    
+                    // Проверяем дубликаты по ID или времени+отправителю
+                    const isDuplicate = prevMessages.some(msg => 
+                        msg.tempId === newMessage.tempId && 
+                        msg.senderId === newMessage.senderId
+                    );
+                    
+                    return isDuplicate ? prevMessages : [...prevMessages, {
+                        ...newMessage,
+                        isUser: userId === newMessage.senderId
+                    }];
+                });
+            }
+        };
+    
+        connection.on('ReceiveMessage', handleNewMessage);
+        return () => connection.off('ReceiveMessage', handleNewMessage);
+    }, [connection, isConnected, activeChat?.id, userId]);
+
+    const handleSendMessage = async () => {
+        if (!message.trim() || !activeChat?.id || !userId) return;
+    
+        // Генерируем временный ID для сообщения
+        const tempId = Math.floor(10000000 + Math.random() * 90000000);
+        
+        // Оптимистичное обновление UI
+        const newMessage = {
+            tempId: tempId,
+            comment: message,
+            isUser: true,
+            createdAt: new Date().toISOString(),
+            senderId: userId,
+            chatId: activeChat.id,
+            isTemporary: true // Флаг для временных сообщений
+        };
+    
+        setMessages(prev => [...prev, newMessage]);
+        setMessage('');
+    
+        try {
+            // Отправка на сервер
+            await connection.invoke("SendMessage", activeChat.id, userId, message, tempId);
+            
+            // После успешной отправки помечаем сообщение как постоянное
+            setMessages(prev => prev.map(msg => 
+                msg.id === tempId ? { ...msg, isTemporary: false } : msg
+            ));
+        } catch (error) {
+            console.error("Ошибка отправки:", error);
+            // Удаляем временное сообщение при ошибке
+            setMessages(prev => prev.filter(msg => msg.id !== tempId));
         }
     };
 
@@ -113,9 +198,9 @@ const ChatWindow = ({ activeChat, onToggleFavorite }) => {
                         </div>
                     </button>
                     <div className={cl.userDetails}>
-                        <h3>{activeChat.name}</h3>
-                        <p className={cl.userStatus} data-status={activeChat.status}>
-                            {activeChat.status === 'online' ? 'В сети' : 'Не в сети'}
+                        <h3>{activeChat.secondUser.username}</h3>
+                        <p className={cl.userStatus} data-status={getStatusString(activeChat.secondUser.onlineStatus)}>
+                            {getStatusString(activeChat.secondUser.onlineStatus)}
                         </p>
                     </div>
                 </div>
@@ -153,8 +238,8 @@ const ChatWindow = ({ activeChat, onToggleFavorite }) => {
                         className={`${cl.message} ${msg.isUser ? cl.userMessage : cl.contactMessage}`}
                     >
                         <div className={cl.messageContent}>
-                            <p>{msg.text}</p>
-                            <span className={cl.messageTime}>{msg.time}</span>
+                            <p>{msg.comment}</p>
+                            <span className={cl.messageTime}>{formatTimeFromISO(msg.createdAt)}</span>
                         </div>
                     </div>
                 ))}
