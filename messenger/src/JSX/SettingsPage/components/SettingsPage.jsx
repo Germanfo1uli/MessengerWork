@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import styles from '../styles/SettingsPage.module.css';
-import { FiEye, FiEyeOff, FiLock, FiTrash2 } from 'react-icons/fi';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 import Sidebar from './Sidebar';
 
 const Background = () => {
@@ -20,8 +20,6 @@ const SettingsPage = () => {
     const [avatarBorderType, setAvatarBorderType] = useState('color');
     const [avatarBorderColor, setAvatarBorderColor] = useState('#4d79f6');
     const [avatarBorderImage, setAvatarBorderImage] = useState(null);
-    const [showChangePassword, setShowChangePassword] = useState(false);
-    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     const { register, handleSubmit, formState: { errors } } = useForm({
         defaultValues: {
@@ -30,9 +28,6 @@ const SettingsPage = () => {
             email: 'commander@starfleet.com',
             phone: '+7 (999) 123-45-67',
             status: 'Опытный командир с 15-летним стажем. Специализация: дальние космические миссии.',
-            currentPassword: '',
-            newPassword: '',
-            confirmPassword: ''
         }
     });
 
@@ -75,16 +70,6 @@ const SettingsPage = () => {
 
     const onSubmit = (data) => {
         console.log('Form submitted:', data);
-    };
-
-    const onPasswordChange = (data) => {
-        console.log('Password change submitted:', data);
-        setShowChangePassword(false);
-    };
-
-    const onDeleteAccount = () => {
-        console.log('Account deletion confirmed');
-        setShowDeleteConfirm(false);
     };
 
     const maskPhoneNumber = (phone) => {
@@ -262,7 +247,7 @@ const SettingsPage = () => {
                                 {errors.email && <p className={styles.error}>{errors.email.message}</p>}
                             </div>
                             <div className={styles.formGroup}>
-                                <label>Номер телефона (НЕ РАБОТАЕТ ЦЕНЗУРА)</label>
+                                <label>Номер телефона</label>
                                 <div className={styles.phoneInputWrapper}>
                                     <input
                                         {...register('phone', {
@@ -273,7 +258,7 @@ const SettingsPage = () => {
                                             }
                                         })}
                                         className={styles.formInput}
-                                        value={showPhone ? undefined : maskPhoneNumber}
+                                        value={showPhone ? undefined : maskPhoneNumber('+7 (999) 123-45-67')}
                                     />
                                     <button
                                         type="button"
@@ -308,118 +293,6 @@ const SettingsPage = () => {
                             <button type="button" className={styles.cancelButton}>
                                 Отменить
                             </button>
-                        </div>
-
-                        <div className={styles.securitySection}>
-                            <div className={styles.securityHeader}>
-                                <FiLock className={styles.securityIcon} />
-                                <h3>Изменить пароль</h3>
-                            </div>
-                            {showChangePassword ? (
-                                <div className={styles.passwordForm}>
-                                    <div className={styles.formGroup}>
-                                        <label>Текущий пароль</label>
-                                        <input
-                                            type="password"
-                                            {...register('currentPassword', { required: 'Текущий пароль обязателен' })}
-                                            className={styles.formInput}
-                                        />
-                                        {errors.currentPassword && <p className={styles.error}>{errors.currentPassword.message}</p>}
-                                    </div>
-                                    <div className={styles.formGroup}>
-                                        <label>Новый пароль</label>
-                                        <input
-                                            type="password"
-                                            {...register('newPassword', {
-                                                required: 'Новый пароль обязателен',
-                                                minLength: {
-                                                    value: 8,
-                                                    message: 'Пароль должен содержать минимум 8 символов'
-                                                }
-                                            })}
-                                            className={styles.formInput}
-                                        />
-                                        {errors.newPassword && <p className={styles.error}>{errors.newPassword.message}</p>}
-                                    </div>
-                                    <div className={styles.formGroup}>
-                                        <label>Подтвердите пароль</label>
-                                        <input
-                                            type="password"
-                                            {...register('confirmPassword', {
-                                                required: 'Подтверждение пароля обязательно',
-                                                validate: value =>
-                                                    value === document.querySelector('input[name="newPassword"]')?.value ||
-                                                    'Пароли не совпадают'
-                                            })}
-                                            className={styles.formInput}
-                                        />
-                                        {errors.confirmPassword && <p className={styles.error}>{errors.confirmPassword.message}</p>}
-                                    </div>
-                                    <div className={styles.passwordButtons}>
-                                        <button
-                                            type="button"
-                                            className={styles.saveButton}
-                                            onClick={handleSubmit(onPasswordChange)}
-                                        >
-                                            Сохранить пароль
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className={styles.cancelButton}
-                                            onClick={() => setShowChangePassword(false)}
-                                        >
-                                            Отмена
-                                        </button>
-                                    </div>
-                                </div>
-                            ) : (
-                                <button
-                                    type="button"
-                                    className={styles.changePasswordButton}
-                                    onClick={() => setShowChangePassword(true)}
-                                >
-                                    Изменить пароль
-                                </button>
-                            )}
-                        </div>
-
-                        <div className={styles.deleteSection}>
-                            <div className={styles.securityHeader}>
-                                <FiTrash2 className={styles.deleteIcon} />
-                                <h3>Удалить учётную запись</h3>
-                            </div>
-                            <p className={styles.deleteWarning}>
-                                Удаление учётной записи приведёт к безвозвратной потере всех данных. Это действие нельзя отменить.
-                            </p>
-                            {showDeleteConfirm ? (
-                                <div className={styles.deleteConfirm}>
-                                    <p>Вы уверены, что хотите удалить свою учётную запись?</p>
-                                    <div className={styles.deleteButtons}>
-                                        <button
-                                            type="button"
-                                            className={styles.deleteButton}
-                                            onClick={onDeleteAccount}
-                                        >
-                                            Да, удалить
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className={styles.cancelButton}
-                                            onClick={() => setShowDeleteConfirm(false)}
-                                        >
-                                            Отмена
-                                        </button>
-                                    </div>
-                                </div>
-                            ) : (
-                                <button
-                                    type="button"
-                                    className={styles.deleteButton}
-                                    onClick={() => setShowDeleteConfirm(true)}
-                                >
-                                    Удалить учётную запись
-                                </button>
-                            )}
                         </div>
                     </form>
                 </div>
