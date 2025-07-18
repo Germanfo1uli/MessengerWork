@@ -15,6 +15,7 @@ const Sidebar = () => {
         if (path.startsWith('/language')) return 'language';
         if (path.startsWith('/appearance')) return 'appearance';
         if (path.startsWith('/security')) return 'security';
+        if (path.startsWith('/home')) return 'exit';
         return 'settings'; // по умолчанию
     };
 
@@ -55,7 +56,10 @@ const Sidebar = () => {
                     <FiShield className={styles.navIcon} />
                     <span>Безопасность</span>
                 </button>
-                <button className={styles.navButton}>
+                <button
+                    className={`${styles.navButton} ${activePath === 'exit' ? styles.active : ''}`}
+                    onClick={() => navigate('/home')}
+                >
                     <FiLogOut className={styles.navIcon} />
                     <span>Выход</span>
                 </button>

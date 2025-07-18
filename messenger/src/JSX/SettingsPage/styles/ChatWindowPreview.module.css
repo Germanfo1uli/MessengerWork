@@ -6,7 +6,7 @@
     font-family: var(--font-family, system-ui);
     font-size: var(--font-size, 16px);
     position: relative;
-    background: #0f0c29;
+    background: var(--theme-background, #0f0c29);
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
@@ -27,21 +27,13 @@
     z-index: -1;
 }
 
-.previewWindow[data-theme="light"] {
-    background: #ffffff;
-}
-
-.previewWindow[data-theme="cosmic"] {
-    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-}
-
 .chatHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 15px 20px;
-    background: linear-gradient(to right, #0f0c29, #1a1547);
-    border-bottom: 1px solid rgba(255, 176, 255, 0.2);
+    background: var(--header-background, linear-gradient(to right, #0f0c29, #1a1547));
+    border-bottom: 1px solid var(--border-color, rgba(255, 176, 255, 0.2));
 }
 
 .userInfo {
@@ -54,12 +46,12 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: #6a5acd;
+    background: var(--accent-color, #6a5acd);
 }
 
 .userInfo h4 {
     margin: 0;
-    color: #e0e0ff;
+    color: var(--text-color, #e0e0ff);
     font-size: 16px;
 }
 
@@ -81,6 +73,7 @@
     position: relative;
     word-wrap: break-word;
 }
+
 .message.bubbles {
     padding: 12px 16px;
     margin-bottom: 8px;
@@ -91,7 +84,7 @@
     padding: 8px 12px;
     margin-bottom: 4px;
     background: transparent !important;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border-color, rgba(255, 176, 255, 0.2));
     max-width: 90%;
 }
 
@@ -103,119 +96,147 @@
 
 .incoming {
     align-self: flex-start;
-    background: #3a1c71;
-    color: #e0e0ff;
+    background: var(--incoming-background, #3a1c71);
+    color: var(--text-color, #e0e0ff);
     border-bottom-left-radius: 5px;
 }
 
 .outgoing {
     align-self: flex-end;
-    color: white;
+    color: var(--outgoing-text-color, white);
     border-bottom-right-radius: 5px;
-}
-
-/* Message styles */
-.bubbles {
-    border-radius: 18px;
-}
-
-.minimal {
-    border-radius: 8px;
-    background: transparent !important;
-    border: 1px solid;
-    padding: 8px 12px;
-}
-
-.compact {
-    border-radius: 4px;
-    padding: 6px 10px;
-    margin: 2px 0;
 }
 
 .inputArea {
     padding: 12px;
-    background: linear-gradient(to top, rgba(26, 21, 71, 0.9), rgba(15, 12, 41, 0.95));
-    border-top: 1px solid rgba(74, 20, 140, 0.5);
+    background: var(--input-background, linear-gradient(to top, rgba(26, 21, 71, 0.9), rgba(15, 12, 41, 0.95)));
+    border-top: 1px solid var(--border-color, rgba(138, 43, 226, 0.3));
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.inputArea:focus-within {
+    border-top-color: var(--accent-color, #8a2be2);
+    box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.2);
+}
+
+.input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--text-color, #e0e0ff);
+    font-size: var(--font-size, 13px);
+    font-family: var(--font-family, system-ui);
+    outline: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: var(--input-field-background, rgba(30, 30, 70, 0.7));
+    border: 1px solid var(--border-color, rgba(138, 43, 226, 0.3));
+    transition: all 0.3s ease;
+}
+
+.input::placeholder {
+    color: var(--placeholder-color, #b0b0ff);
+}
+
+.input:focus {
+    border-color: var(--accent-color, #8a2be2);
+    box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.2);
+}
+
+.sendButton {
+    background: transparent;
+    border: none;
+    color: var(--accent-color, #8a2be2);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.sendButton:hover {
+    color: var(--hover-color, #00d4ff);
+    background: var(--hover-background, rgba(138, 43, 226, 0.2));
 }
 
 /* Theme-specific styles */
+.previewWindow[data-theme="dark"] {
+    --theme-background: #1e1e2d;
+    --header-background: linear-gradient(to right, #0f0c29, #1a1547);
+    --incoming-background: #3a1c71;
+    --text-color: #e0e0ff;
+    --outgoing-text-color: white;
+    --border-color: rgba(255, 176, 255, 0.2);
+    --input-background: linear-gradient(to top, rgba(26, 21, 71, 0.9), rgba(15, 12, 41, 0.95));
+    --input-field-background: rgba(30, 30, 70, 0.7);
+    --placeholder-color: #b0b0ff;
+    --hover-background: rgba(138, 43, 226, 0.2);
+}
+
 .previewWindow[data-theme="light"] {
-    background: #ffffff;
+    --theme-background: #ffffff;
+    --header-background: linear-gradient(to right, #f5f5f5, #e0e0e0);
+    --incoming-background: #e0e0e0;
+    --text-color: #333;
+    --outgoing-text-color: white;
+    --border-color: rgba(0, 0, 0, 0.1);
+    --input-background: linear-gradient(to top, #f5f5f5, #e0e0e0);
+    --input-field-background: rgba(200, 200, 200, 0.7);
+    --placeholder-color: #666;
+    --hover-background: rgba(0, 0, 0, 0.1);
 }
 
-.previewWindow[data-theme="light"] .chatHeader {
-    background: linear-gradient(to right, #f5f5f5, #e0e0e0);
-    border-bottom-color: rgba(0, 0, 0, 0.1);
+.previewWindow[data-theme="cosmic"] {
+    --theme-background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    --header-background: linear-gradient(to right, #0f0c29, #302b63);
+    --incoming-background: rgba(58, 28, 113, 0.7);
+    --text-color: #e0e0ff;
+    --outgoing-text-color: white;
+    --border-color: rgba(106, 90, 205, 0.5);
+    --input-background: linear-gradient(to top, rgba(58, 28, 113, 0.9), rgba(15, 12, 41, 0.95));
+    --input-field-background: rgba(30, 30, 70, 0.7);
+    --placeholder-color: #b0b0ff;
+    --hover-background: rgba(106, 90, 205, 0.2);
 }
 
-.previewWindow[data-theme="light"] .userInfo h4 {
-    color: #333;
+.previewWindow[data-theme="sunset"] {
+    --theme-background: linear-gradient(135deg, #ff7e5f, #feb47b);
+    --header-background: linear-gradient(to right, #ff7e5f, #feb47b);
+    --incoming-background: rgba(255, 126, 95, 0.7);
+    --text-color: #3c2f2f;
+    --outgoing-text-color: white;
+    --border-color: rgba(255, 126, 95, 0.3);
+    --input-background: linear-gradient(to top, rgba(255, 126, 95, 0.9), rgba(254, 180, 123, 0.9));
+    --input-field-background: rgba(255, 126, 95, 0.5);
+    --placeholder-color: #7b4e2f;
+    --hover-background: rgba(255, 126, 95, 0.2);
 }
 
-.previewWindow[data-theme="light"] .incoming {
-    background: #e0e0e0;
-    color: #333;
+.previewWindow[data-theme="ocean"] {
+    --theme-background: linear-gradient(135deg, #00c6fb, #005bea);
+    --header-background: linear-gradient(to right, #00c6fb, #005bea);
+    --incoming-background: rgba(0, 198, 251, 0.7);
+    --text-color: #1a2e5f;
+    --outgoing-text-color: white;
+    --border-color: rgba(0, 91, 234, 0.3);
+    --input-background: linear-gradient(to top, rgba(0, 198, 251, 0.9), rgba(0, 91, 234, 0.9));
+    --input-field-background: rgba(0, 198, 251, 0.5);
+    --placeholder-color: #4a6a9f;
+    --hover-background: rgba(0, 91, 234, 0.2);
 }
 
-.previewWindow[data-theme="light"] .outgoing {
-    background: #6a5acd;
-    color: white;
-}
-
-.previewWindow[data-theme="light"] .inputArea {
-    background: #f5f5f5;
-    border-top-color: rgba(0, 0, 0, 0.1);
-}
-
-.previewWindow[data-theme="light"] .minimal.incoming {
-    border-color: #ddd;
-}
-
-.previewWindow[data-theme="cosmic"] .incoming {
-    background: rgba(58, 28, 113, 0.7);
-    border: 1px solid rgba(106, 90, 205, 0.5);
-}
-
-/* Добавьте эти стили */
-.previewPanel {
-    font-family: var(--font-family, system-ui);
-    font-size: var(--font-size, 16px);
-}
-
-/* Стили для разных вариантов расстояний */
-.previewPanel.normal .chatItem {
-    padding: 12px;
-}
-
-.previewPanel.compact .chatItem {
-    padding: 8px;
-}
-
-.previewPanel.spacious .chatItem {
-    padding: 16px;
-}
-
-/* Стили для аватаров */
-.avatar.round {
-    border-radius: 50%;
-}
-
-.avatar.square {
-    border-radius: 0;
-}
-
-.avatar.roundedSquare {
-    border-radius: 12px;
-}
-
-.chatAvatar.round {
-    border-radius: 50%;
-}
-
-.chatAvatar.square {
-    border-radius: 0;
-}
-
-.chatAvatar.roundedSquare {
-    border-radius: 12px;
+.previewWindow[data-theme="forest"] {
+    --theme-background: linear-gradient(135deg, #11998e, #38ef7d);
+    --header-background: linear-gradient(to right, #11998e, #38ef7d);
+    --incoming-background: rgba(17, 153, 142, 0.7);
+    --text-color: #1f3a2e;
+    --outgoing-text-color: white;
+    --border-color: rgba(17, 153, 142, 0.3);
+    --input-background: linear-gradient(to top, rgba(17, 153, 142, 0.9), rgba(56, 239, 125, 0.9));
+    --input-field-background: rgba(17, 153, 142, 0.5);
+    --placeholder-color: #4a7a6a;
+    --hover-background: rgba(17, 153, 142, 0.2);
 }

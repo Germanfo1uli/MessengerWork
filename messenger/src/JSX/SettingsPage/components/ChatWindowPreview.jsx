@@ -56,7 +56,11 @@ const ChatWindowPreview = ({
                 </div>
             </div>
             <div className={styles.inputArea}>
-                <input type="text" placeholder="Написать сообщение..." />
+                <input
+                    type="text"
+                    className={styles.input}
+                    placeholder="Написать сообщение..."
+                />
                 <button className={styles.sendButton}>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>

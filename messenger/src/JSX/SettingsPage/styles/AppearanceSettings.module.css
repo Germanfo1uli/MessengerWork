@@ -70,8 +70,11 @@
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    max-width: 800px; /* Ограничиваем максимальную ширину панели предпросмотра */
-    overflow: hidden; /* Скрываем переполнение */
+    max-width: 800px;
+    position: sticky;
+    top: 20px;
+    height: fit-content;
+    overflow: hidden;
 }
 
 .previewPanel h3 {
