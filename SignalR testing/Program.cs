@@ -37,8 +37,9 @@ class Program
             Console.WriteLine("Подключение к ChatHub успешно");
 
             // Тестирование методов хаба
-            var chatId = "8e6bbae9-3a47-442c-81e3-e06d134a80d9"; // Замените на реальный chatId
+            var chatId = "4fb5dc96-39e5-45bd-adf9-4b8f467e8391"; // Замените на реальный chatId
             var senderId = "6aff16a2-43b6-4351-b819-a98e3a472dc4"; // Замените на реальный senderId
+            int tempId = 12345678;
             string message = "Я ГЕЙ ПОМОГИТЕ";
 
             // Подключение к чату
@@ -46,7 +47,7 @@ class Program
             Console.WriteLine($"Подключен к чату {chatId}");
 
             // Отправка сообщения
-            await hubConnection.InvokeAsync("SendMessage", chatId, senderId, message);
+            await hubConnection.InvokeAsync("SendMessage", chatId, senderId, message, tempId);
             Console.WriteLine($"Отправлено сообщение: {message}");
 
             // Ожидание ввода для выхода

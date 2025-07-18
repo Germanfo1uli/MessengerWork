@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using CosmoBack.Models.Dtos;
 using CosmoBack.Services.Interfaces;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CosmoBack.Hubs
 {
@@ -23,11 +24,21 @@ namespace CosmoBack.Hubs
         }
 
         // Отправка сообщения в чат
-        public async Task SendMessage(Guid chatId, Guid senderId, string message)
+        public async Task SendMessage(Guid chatId, Guid senderId, string message, int tempId)
         {
             var chatMessage = await _chatService.SendMessageAsync(chatId, senderId, message);
 
-            await Clients.Group(chatId.ToString()).SendAsync("ReceiveMessage", chatMessage);
+            var response = new
+            {
+                chatMessage.Id,
+                chatMessage.ChatId,
+                chatMessage.SenderId,
+                chatMessage.Comment,
+                chatMessage.CreatedAt,
+                tempId
+            };
+
+            await Clients.Group(chatId.ToString()).SendAsync("ReceiveMessage", response);
 
             var chat = await _chatService.GetChatByIdAsync(chatId);
 
