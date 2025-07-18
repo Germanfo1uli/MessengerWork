@@ -35,6 +35,7 @@
     border-radius: 50%;
     border: 2px solid #8a2be2;
     object-fit: cover;
+    background-color: #2a2a4a; /* Фон для дефолтного аватара */
 }
 
 .avatarContainer:hover {
@@ -158,8 +159,6 @@
 .searchInputContainer {
     display: flex;
     align-items: center;
-
-
     background: rgba(30, 30, 70, 0.7);
     border-radius: 8px;
     padding: 8px 12px;

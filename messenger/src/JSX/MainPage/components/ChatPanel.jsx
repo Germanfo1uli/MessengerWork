@@ -18,7 +18,7 @@ const ChatPanel = ({ onChatSelect }) => {
     const [isAddContactModalOpen, setIsAddContactModalOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('favorites');
     const [searchQuery, setSearchQuery] = useState('');
-    const [user] = useState({
+    const [user, setUser] = useState({
         username: 'Командир Ковальски',
         avatarUrl: 'https://i.pravatar.cc/150?img=3',
         bannerUrl: 'https://picsum.photos/600/200?random=1',
@@ -75,6 +75,15 @@ const ChatPanel = ({ onChatSelect }) => {
         },
     ]);
 
+    const defaultAvatarUrl = 'https://via.placeholder.com/150?text=Default';
+
+    const handleAvatarError = () => {
+        setUser((prevUser) => ({
+            ...prevUser,
+            avatarUrl: defaultAvatarUrl
+        }));
+    };
+
     const toggleModal = () => {
         setIsModalOpen(!isModalOpen);
     };
@@ -114,7 +123,12 @@ const ChatPanel = ({ onChatSelect }) => {
             {/* Шапка профиля с модальным окном */}
             <div className={cl.profileHeader}>
                 <div className={cl.avatarContainer} onClick={toggleModal} style={{ cursor: 'pointer' }}>
-                    <img src={user.avatarUrl} alt="Аватар" className={cl.avatarImage} />
+                    <img
+                        src={user.avatarUrl}
+                        alt="Аватар"
+                        className={cl.avatarImage}
+                        onError={handleAvatarError}
+                    />
                     <div className={`${cl.statusBadge} ${cl[user.status]}`}></div>
                 </div>
                 <div className={cl.profileInfo}>
