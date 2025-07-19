@@ -7,7 +7,6 @@ import { IoSearchOutline } from 'react-icons/io5';
 import { IoStarOutline } from 'react-icons/io5';
 import { FaEnvelope } from 'react-icons/fa';
 import { FaGift } from 'react-icons/fa';
-import { IoAddCircleOutline } from 'react-icons/io5';
 import Modal from './Modal';
 import AddContactModal from './AddContactModal';
 import { apiRequest } from '../../../hooks/ApiRequest';
@@ -289,6 +288,13 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                 </div>
                 <div className={cl.profileActions}>
                     <button
+                        className={`${cl.iconButton} ${cl.giftButton}`}
+                        onClick={() => navigate('/gift')}
+                        title="Подарки"
+                    >
+                        <FaGift className={cl.giftIcon} />
+                    </button>
+                    <button
                         className={cl.iconButton}
                         onClick={() => navigate('/settings')}
                     >
@@ -311,17 +317,6 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                 onClose={toggleAddContactModal}
                 onAddContact={handleAddContact}
             />
-
-            <div className={cl.actionButtons}>
-                <button className={cl.actionButton}>
-                    <FaGift className={cl.actionIcon} />
-                    <span>Подарки</span>
-                </button>
-                <button className={cl.actionButton} onClick={toggleAddContactModal}>
-                    <IoAddCircleOutline className={cl.actionIcon} />
-                    <span>Добавить чат</span>
-                </button>
-            </div>
 
             <div className={cl.searchPanel}>
                 <div className={cl.searchInputContainer}>

@@ -318,3 +318,25 @@
         transform: translateY(0);
     }
 }
+/* Добавьте эти стили в ваш ChatPanel.module.css */
+
+.giftButton {
+    color: #8a2be2; /* Такой же цвет, как у других иконок */
+    font-size: 18px; /* Такой же размер, как у других иконок */
+    transition: all 0.2s; /* Такая же анимация */
+    padding: 5px;
+    border-radius: 4px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.giftButton:hover {
+    color: #00d4ff; /* Такой же hover-эффект, как у других кнопок */
+    background: rgba(138, 43, 226, 0.2); /* Такой же фон при наведении */
+    transform: none; /* Убираем масштабирование */
+}
+
+.giftIcon {
+    font-size: inherit; /* Используем размер родителя */
+}

@@ -574,10 +574,34 @@
 
 .modalSubtitle {
     color: #8a9aba;
-    margin: 0 0 2rem 0;
+    margin: 0 0 1rem 0;
     font-size: 1.1rem;
     text-align: center;
     font-weight: 400;
+}
+
+.starHighlight {
+    color: #FFD700;
+    font-weight: 600;
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+}
+
+.starLearnMore {
+    font-size: 1rem;
+    text-align: center;
+    margin: 1rem 0 2rem 0;
+    background: linear-gradient(90deg, #FFD700, #FFA500);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 600;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.starLearnMore:hover {
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.9);
+    transform: scale(1.05);
 }
 
 .starPackages {
@@ -664,6 +688,21 @@
     margin-top: 0.5rem;
     display: inline-block;
     border: 1px solid rgba(0, 200, 0, 0.4);
+}
+
+.termsLink {
+    display: block;
+    text-align: center;
+    margin-top: 1.5rem;
+    color: #8a9aba;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.termsLink:hover {
+    color: #e0e0ff;
+    text-decoration: underline;
 }
 
 /* Анимации */
