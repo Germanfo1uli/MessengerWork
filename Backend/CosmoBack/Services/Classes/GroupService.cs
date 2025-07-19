@@ -65,6 +65,9 @@ namespace CosmoBack.Services.Classes
                     throw new UnauthorizedAccessException("Пользователь не является участником группы");
                 }
 
+                var membersCount = await _context.GroupMembers
+                    .CountAsync(gm => gm.GroupId == group.Id);
+
                 var lastMessage = await _context.Messages
                     .Where(m => m.GroupId == id)
                     .Join(_context.Users,
@@ -97,7 +100,8 @@ namespace CosmoBack.Services.Classes
                     IsActive = group.IsActive,
                     IsFavorite = groupMember.IsFavorite,
                     LastMessageAt = lastMessage?.CreatedAt,
-                    LastMessage = lastMessage
+                    LastMessage = lastMessage,
+                    MembersCount = membersCount
                 };
             }
             catch (Exception ex)
@@ -144,6 +148,9 @@ namespace CosmoBack.Services.Classes
                         .OrderByDescending(m => m.CreatedAt)
                         .FirstOrDefaultAsync();
 
+                    var membersCount = await _context.GroupMembers
+                        .CountAsync(gm => gm.GroupId == group.Id);
+
                     groupDtos.Add(new GroupDto
                     {
                         Id = group.Id,
@@ -158,7 +165,8 @@ namespace CosmoBack.Services.Classes
                         IsActive = group.IsActive,
                         IsFavorite = groupMember?.IsFavorite ?? false,
                         LastMessageAt = lastMessage?.CreatedAt,
-                        LastMessage = lastMessage
+                        LastMessage = lastMessage,
+                        MembersCount = membersCount 
                     });
                 }
 
@@ -253,7 +261,8 @@ namespace CosmoBack.Services.Classes
                     IsActive = group.IsActive,
                     IsFavorite = false,
                     LastMessageAt = null,
-                    LastMessage = null
+                    LastMessage = null,
+                    MembersCount = 1
                 };
             }
             catch (Exception ex)
@@ -423,6 +432,9 @@ namespace CosmoBack.Services.Classes
 
                 _logger.LogInformation("Favorite status for group {GroupId} updated to {Favorite} for user {UserId}", groupId, favorite, userId);
 
+                var membersCount = await _context.GroupMembers
+                    .CountAsync(gm => gm.GroupId == group.Id);
+
                 return new GroupDto
                 {
                     Id = group.Id,
@@ -437,7 +449,8 @@ namespace CosmoBack.Services.Classes
                     IsActive = group.IsActive,
                     IsFavorite = groupMember.IsFavorite,
                     LastMessageAt = lastMessage?.CreatedAt,
-                    LastMessage = lastMessage
+                    LastMessage = lastMessage,
+                    MembersCount = membersCount
                 };
             }
             catch (Exception ex)

@@ -13,6 +13,7 @@ namespace CosmoBack.Models.Dtos
         public DateTime CreatedAt { get; set; }
         public bool IsActive { get; set; }
         public bool IsFavorite { get; set; }
+        public int MembersCount { get; set; }
         public DateTime? LastMessageAt { get; set; }
         public GroupMessageDto? LastMessage { get; set; }
     }

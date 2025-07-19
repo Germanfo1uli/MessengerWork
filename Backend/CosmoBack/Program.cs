@@ -48,6 +48,7 @@ builder.Services.AddScoped<IChatMembersService, ChatMembersService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddScoped<IGroupMembersService, GroupMembersService>();
 builder.Services.AddScoped<IChannelService, ChannelService>();
+builder.Services.AddScoped<ITagSearchService, TagSearchService>();
 
 builder.Services.AddDbContext<CosmoDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQL")));
