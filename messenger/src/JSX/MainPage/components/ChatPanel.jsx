@@ -5,9 +5,7 @@ import { IoSettingsOutline } from 'react-icons/io5';
 import { IoIosMore } from 'react-icons/io';
 import { IoSearchOutline } from 'react-icons/io5';
 import { IoStarOutline } from 'react-icons/io5';
-import { FaEnvelope } from 'react-icons/fa';
-import { FaGift } from 'react-icons/fa';
-import { FaShoppingCart, FaUser, FaAddressBook, FaQuestionCircle } from 'react-icons/fa';
+import { FaEnvelope, FaGift, FaShoppingCart, FaBox, FaAddressBook, FaQuestionCircle } from 'react-icons/fa';
 import Modal from './Modal';
 import AddContactModal from './AddContactModal';
 import { apiRequest } from '../../../hooks/ApiRequest';
@@ -339,10 +337,10 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                                 </button>
                                 <button
                                     className={cl.moreMenuItem}
-                                    onClick={() => navigate('/profile')}
+                                    onClick={() => navigate('/inventory')}
                                 >
-                                    <FaUser className={cl.moreMenuIcon} />
-                                    <span>Профиль</span>
+                                    <FaBox className={cl.moreMenuIcon} />
+                                    <span>Инвентарь</span>
                                 </button>
                                 <button
                                     className={cl.moreMenuItem}
