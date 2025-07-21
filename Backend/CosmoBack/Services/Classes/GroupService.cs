@@ -6,33 +6,51 @@ using CosmoBack.Repositories.Interfaces;
 using CosmoBack.Services.Interfaces;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace CosmoBack.Services.Classes
 {
-    public class GroupService(
-        IGroupRepository groupRepository,
-        IMessageRepository messageRepository,
-        IUserRepository userRepository,
-        IGroupMembersRepository groupMembersRepository,
-        INotificationService notificationService,
-        CosmoDbContext context,
-        ILogger<GroupService> logger,
-        IHubContext<ChatHub> hubContext) : IGroupService
+    public class GroupService : IGroupService
     {
-        private readonly IGroupRepository _groupRepository = groupRepository;
-        private readonly IMessageRepository _messageRepository = messageRepository;
-        private readonly IUserRepository _userRepository = userRepository;
-        private readonly IGroupMembersRepository _groupMembersRepository = groupMembersRepository;
-        private readonly INotificationService _notificationService = notificationService;
-        private readonly CosmoDbContext _context = context;
-        private readonly ILogger<GroupService> _logger = logger;
-        private readonly IHubContext<ChatHub> _hubContext = hubContext;
+        private readonly IGroupRepository _groupRepository;
+        private readonly IMessageRepository _messageRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly IGroupMembersRepository _groupMembersRepository;
+        private readonly INotificationService _notificationService;
+        private readonly CosmoDbContext _context;
+        private readonly ILogger<GroupService> _logger;
+        private readonly IHubContext<ChatHub> _hubContext;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public GroupService(
+            IGroupRepository groupRepository,
+            IMessageRepository messageRepository,
+            IUserRepository userRepository,
+            IGroupMembersRepository groupMembersRepository,
+            INotificationService notificationService,
+            CosmoDbContext context,
+            ILogger<GroupService> logger,
+            IHubContext<ChatHub> hubContext,
+            IHttpContextAccessor httpContextAccessor)
+        {
+            _groupRepository = groupRepository;
+            _messageRepository = messageRepository;
+            _userRepository = userRepository;
+            _groupMembersRepository = groupMembersRepository;
+            _notificationService = notificationService;
+            _context = context;
+            _logger = logger;
+            _hubContext = hubContext;
+            _httpContextAccessor = httpContextAccessor;
+        }
 
         public async Task<GroupDto> GetGroupByIdAsync(Guid id)
         {
             _logger.LogInformation("Getting group with ID {GroupId}", id);
             try
             {
+                var currentUserId = Guid.Parse(_httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                    ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
                 var group = await _groupRepository.GetGroupByIdWithMessagesAsync(id);
                 if (group == null)
                 {
@@ -40,9 +58,15 @@ namespace CosmoBack.Services.Classes
                     throw new KeyNotFoundException($"Группа с ID {id} не найдена");
                 }
 
-                var userId = Guid.Parse(System.Threading.Thread.CurrentPrincipal?.Identity?.Name
-                    ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
-                var groupMember = await _groupMembersRepository.GetByGroupAndUserIdAsync(id, userId);
+                var groupMember = await _groupMembersRepository.GetByGroupAndUserIdAsync(id, currentUserId);
+                if (groupMember == null)
+                {
+                    _logger.LogWarning("User {UserId} is not a member of group {GroupId}", currentUserId, id);
+                    throw new UnauthorizedAccessException("Пользователь не является участником группы");
+                }
+
+                var membersCount = await _context.GroupMembers
+                    .CountAsync(gm => gm.GroupId == group.Id);
 
                 var lastMessage = await _context.Messages
                     .Where(m => m.GroupId == id)
@@ -74,9 +98,10 @@ namespace CosmoBack.Services.Classes
                     AvatarImageId = group.AvatarImageId,
                     CreatedAt = group.CreatedAt,
                     IsActive = group.IsActive,
-                    IsFavorite = groupMember?.IsFavorite ?? false,
+                    IsFavorite = groupMember.IsFavorite,
                     LastMessageAt = lastMessage?.CreatedAt,
-                    LastMessage = lastMessage
+                    LastMessage = lastMessage,
+                    MembersCount = membersCount
                 };
             }
             catch (Exception ex)
@@ -91,6 +116,14 @@ namespace CosmoBack.Services.Classes
             _logger.LogInformation("Getting groups for user {UserId}", userId);
             try
             {
+                var currentUserId = Guid.Parse(_httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                    ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
+                if (userId != currentUserId)
+                {
+                    _logger.LogWarning("User {CurrentUserId} is not authorized to access groups for user {RequestedUserId}", currentUserId, userId);
+                    throw new UnauthorizedAccessException("Недостаточно прав для получения групп другого пользователя");
+                }
+
                 var groups = await _groupRepository.GetGroupsByUserIdAsync(userId);
                 var groupDtos = new List<GroupDto>();
 
@@ -115,6 +148,9 @@ namespace CosmoBack.Services.Classes
                         .OrderByDescending(m => m.CreatedAt)
                         .FirstOrDefaultAsync();
 
+                    var membersCount = await _context.GroupMembers
+                        .CountAsync(gm => gm.GroupId == group.Id);
+
                     groupDtos.Add(new GroupDto
                     {
                         Id = group.Id,
@@ -129,7 +165,8 @@ namespace CosmoBack.Services.Classes
                         IsActive = group.IsActive,
                         IsFavorite = groupMember?.IsFavorite ?? false,
                         LastMessageAt = lastMessage?.CreatedAt,
-                        LastMessage = lastMessage
+                        LastMessage = lastMessage,
+                        MembersCount = membersCount 
                     });
                 }
 
@@ -148,6 +185,14 @@ namespace CosmoBack.Services.Classes
             _logger.LogInformation("Creating group with name {Name} by owner {OwnerId}", name, ownerId);
             try
             {
+                var currentUserId = Guid.Parse(_httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                    ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
+                if (ownerId != currentUserId)
+                {
+                    _logger.LogWarning("User {CurrentUserId} is not authorized to create group as owner {OwnerId}", currentUserId, ownerId);
+                    throw new UnauthorizedAccessException("Недостаточно прав для создания группы от имени другого пользователя");
+                }
+
                 var owner = await _userRepository.GetByIdAsync(ownerId);
                 if (owner == null)
                 {
@@ -183,7 +228,7 @@ namespace CosmoBack.Services.Classes
                     UserId = ownerId,
                     Role = GroupRole.Owner,
                     Notifications = true,
-                    IsFavorite = false // По умолчанию не избранное
+                    IsFavorite = false
                 };
 
                 await _groupMembersRepository.AddAsync(groupMember);
@@ -216,7 +261,8 @@ namespace CosmoBack.Services.Classes
                     IsActive = group.IsActive,
                     IsFavorite = false,
                     LastMessageAt = null,
-                    LastMessage = null
+                    LastMessage = null,
+                    MembersCount = 1
                 };
             }
             catch (Exception ex)
@@ -231,11 +277,19 @@ namespace CosmoBack.Services.Classes
             _logger.LogInformation("Deleting group {GroupId}", groupId);
             try
             {
+                var currentUserId = Guid.Parse(_httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                    ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
                 var group = await _groupRepository.GetGroupByIdWithMessagesAsync(groupId);
                 if (group == null)
                 {
                     _logger.LogWarning("Group with ID {GroupId} not found", groupId);
                     throw new KeyNotFoundException($"Группа с ID {groupId} не найдена");
+                }
+
+                if (group.OwnerId != currentUserId)
+                {
+                    _logger.LogWarning("User {CurrentUserId} is not authorized to delete group {GroupId}", currentUserId, groupId);
+                    throw new UnauthorizedAccessException("Недостаточно прав для удаления группы");
                 }
 
                 var messages = await _context.Messages
@@ -265,6 +319,14 @@ namespace CosmoBack.Services.Classes
             _logger.LogInformation("Sending message in group {GroupId} by user {SenderId}", groupId, senderId);
             try
             {
+                var currentUserId = Guid.Parse(_httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                    ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
+                if (senderId != currentUserId)
+                {
+                    _logger.LogWarning("User {CurrentUserId} is not authorized to send message as {SenderId}", currentUserId, senderId);
+                    throw new UnauthorizedAccessException("Недостаточно прав для отправки сообщения от имени другого пользователя");
+                }
+
                 var group = await _groupRepository.GetGroupByIdWithMessagesAsync(groupId);
                 if (group == null)
                 {
@@ -325,6 +387,14 @@ namespace CosmoBack.Services.Classes
             _logger.LogInformation("Toggling favorite status for group {GroupId} for user {UserId} to {Favorite}", groupId, userId, favorite);
             try
             {
+                var currentUserId = Guid.Parse(_httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                    ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
+                if (userId != currentUserId)
+                {
+                    _logger.LogWarning("User {CurrentUserId} is not authorized to toggle favorite for user {UserId}", currentUserId, userId);
+                    throw new UnauthorizedAccessException("Недостаточно прав для изменения статуса избранного от имени другого пользователя");
+                }
+
                 var group = await _groupRepository.GetGroupByIdWithMessagesAsync(groupId);
                 if (group == null)
                 {
@@ -362,6 +432,9 @@ namespace CosmoBack.Services.Classes
 
                 _logger.LogInformation("Favorite status for group {GroupId} updated to {Favorite} for user {UserId}", groupId, favorite, userId);
 
+                var membersCount = await _context.GroupMembers
+                    .CountAsync(gm => gm.GroupId == group.Id);
+
                 return new GroupDto
                 {
                     Id = group.Id,
@@ -376,12 +449,13 @@ namespace CosmoBack.Services.Classes
                     IsActive = group.IsActive,
                     IsFavorite = groupMember.IsFavorite,
                     LastMessageAt = lastMessage?.CreatedAt,
-                    LastMessage = lastMessage
+                    LastMessage = lastMessage,
+                    MembersCount = membersCount
                 };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error toggling favorite status for group {GroupId} for user {UserId}", groupId, userId);
+                _logger.LogError(ex, "Error toggling favorite for group {GroupId} for user {UserId}", groupId, userId);
                 throw new Exception($"Ошибка при изменении статуса избранного для группы: {ex.Message}", ex);
             }
         }

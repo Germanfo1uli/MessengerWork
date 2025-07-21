@@ -79,9 +79,8 @@ namespace CosmoBack.Controllers
         {
             try
             {
-                var userIdFromToken = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                    ?? throw new UnauthorizedAccessException("Пользователь не аутентифицирован"));
-                if (userIdFromToken != updateUserDto.Id)
+                var currentUserId = User.GetUserId();
+                if (currentUserId != updateUserDto.Id)
                 {
                     return Forbid("Вы можете обновлять только свой профиль");
                 }

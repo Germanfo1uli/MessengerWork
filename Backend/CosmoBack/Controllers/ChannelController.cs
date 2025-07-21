@@ -7,21 +7,25 @@ namespace CosmoBack.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class GroupController(IGroupService groupService) : ControllerBase
+    public class ChannelsController(IChannelService channelService) : ControllerBase
     {
-        private readonly IGroupService _groupService = groupService;
+        private readonly IChannelService _channelService = channelService;
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetGroupById(Guid id)
+        public async Task<IActionResult> GetChannelById(Guid id)
         {
             try
             {
-                var group = await _groupService.GetGroupByIdAsync(id);
-                return Ok(group);
+                var channel = await _channelService.GetChannelByIdAsync(id);
+                return Ok(channel);
             }
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (Exception ex)
             {
@@ -30,12 +34,16 @@ namespace CosmoBack.Controllers
         }
 
         [HttpGet("user/{userId}")]
-        public async Task<IActionResult> GetUserGroups(Guid userId)
+        public async Task<IActionResult> GetUserChannels(Guid userId)
         {
             try
             {
-                var groups = await _groupService.GetUserGroupsAsync(userId);
-                return Ok(groups);
+                var channels = await _channelService.GetUserChannelsAsync(userId);
+                return Ok(channels);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (Exception ex)
             {
@@ -44,18 +52,18 @@ namespace CosmoBack.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateGroup([FromBody] CreateGroupRequest request)
+        public async Task<IActionResult> CreateChannel([FromBody] CreateChannelRequest request)
         {
             try
             {
-                var group = await _groupService.CreateGroupAsync(
+                var channel = await _channelService.CreateChannelAsync(
                     request.OwnerId,
                     request.Name,
                     request.IsPublic,
-                    request.GroupTag,
+                    request.ChannelTag,
                     request.Description,
                     request.AvatarImageId);
-                return StatusCode(201, group);
+                return StatusCode(201, channel);
             }
             catch (InvalidOperationException ex)
             {
@@ -65,23 +73,9 @@ namespace CosmoBack.Controllers
             {
                 return NotFound(ex.Message);
             }
-            catch (Exception ex)
+            catch (UnauthorizedAccessException ex)
             {
-                return BadRequest(ex.Message);
-            }
-        }
-
-        [HttpDelete("{groupId}")]
-        public async Task<IActionResult> DeleteGroup(Guid groupId)
-        {
-            try
-            {
-                await _groupService.DeleteGroupAsync(groupId);
-                return Ok("Группа удалена");
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
+                return Unauthorized(ex.Message);
             }
             catch (Exception ex)
             {
@@ -89,12 +83,12 @@ namespace CosmoBack.Controllers
             }
         }
 
-        [HttpPost("message")]
-        public async Task<IActionResult> SendMessage([FromBody] SendGroupMessageRequest request)
+        [HttpPost("{channelId}/message")]
+        public async Task<IActionResult> SendChannelMessage(Guid channelId, [FromBody] SendChannelMessageRequest request)
         {
             try
             {
-                var message = await _groupService.SendMessageAsync(request.GroupId, request.SenderId, request.Comment);
+                var message = await _channelService.SendChannelMessageAsync(channelId, request.SenderId, request.Comment);
                 return Ok(message);
             }
             catch (KeyNotFoundException ex)
@@ -111,14 +105,35 @@ namespace CosmoBack.Controllers
             }
         }
 
-        [HttpPut("{groupId}/favorite")]
-        public async Task<IActionResult> ToggleFavoriteGroup(Guid groupId, [FromBody] ToggleFavoriteGroupRequest request)
+        [HttpDelete("{channelId}")]
+        public async Task<IActionResult> DeleteChannel(Guid channelId)
         {
             try
             {
-                var currentUserId = User.GetUserId();
-                var group = await _groupService.ToggleFavoriteGroupAsync(groupId, currentUserId, request.Favorite);
-                return Ok(group);
+                await _channelService.DeleteChannelAsync(channelId);
+                return Ok("Канал удалён");
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("{channelId}/favorite")]
+        public async Task<IActionResult> ToggleFavoriteChannel(Guid channelId, [FromBody] ToggleFavoriteChannelRequest request)
+        {
+            try
+            {
+                var channel = await _channelService.ToggleFavoriteChannelAsync(channelId, request.UserId, request.Favorite);
+                return Ok(channel);
             }
             catch (KeyNotFoundException ex)
             {
@@ -135,25 +150,25 @@ namespace CosmoBack.Controllers
         }
     }
 
-    public class CreateGroupRequest
+    public class CreateChannelRequest
     {
         public Guid OwnerId { get; set; }
         public string Name { get; set; } = default!;
         public bool IsPublic { get; set; }
-        public string? GroupTag { get; set; }
+        public string? ChannelTag { get; set; }
         public string? Description { get; set; }
         public Guid? AvatarImageId { get; set; }
     }
 
-    public class SendGroupMessageRequest
+    public class SendChannelMessageRequest
     {
-        public Guid GroupId { get; set; }
         public Guid SenderId { get; set; }
         public string Comment { get; set; } = default!;
     }
 
-    public class ToggleFavoriteGroupRequest
+    public class ToggleFavoriteChannelRequest
     {
+        public Guid UserId { get; set; }
         public bool Favorite { get; set; }
     }
 }

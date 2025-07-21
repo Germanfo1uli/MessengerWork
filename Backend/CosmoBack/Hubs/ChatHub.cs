@@ -24,9 +24,12 @@ namespace CosmoBack.Hubs
         }
 
         // Отправка сообщения в чат
-        public async Task SendMessage(Guid chatId, Guid senderId, string message, int tempId)
+        public async Task SendMessage(Guid? chatId, Guid secondUserId, string message, int tempId)
         {
-            var chatMessage = await _chatService.SendMessageAsync(chatId, senderId, message);
+            var senderId = Guid.Parse(Context.User?.FindFirst("sub")?.Value
+                ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
+
+            var chatMessage = await _chatService.SendMessageAsync(chatId, senderId, secondUserId, message);
 
             var response = new
             {
@@ -43,7 +46,7 @@ namespace CosmoBack.Hubs
             var chat = await _chatService.GetChatByIdAsync(chatId);
 
             // Уведомляем всех участников чата, что список чатов нужно обновить
-            await Clients.Group(chatId.ToString()).SendAsync("UpdateChatList", chat);
+            await Clients.Group(chatMessage.ChatId.ToString()).SendAsync("UpdateChatList");
         }
     }
 }

@@ -47,8 +47,8 @@ namespace CosmoBack.Models
         public ICollection<Chat>? ChatsAsSecondUser { get; set; }
         public ICollection<Group>? OwnedGroups { get; set; }
         public ICollection<Channel>? OwnedChannels { get; set; }
-        public ICollection<GroupMember>? GroupMemberships { get; set; }
-        public ICollection<ChannelMember>? ChannelMemberships { get; set; }
+        public ICollection<GroupMember>? GroupMember { get; set; }
+        public ICollection<ChannelMember>? ChannelMember { get; set; }
         public ICollection<Message>? SentMessages { get; set; }
         public ICollection<Contact> Contacts { get; set; } = new List<Contact>();
         public ICollection<Contact> ContactOf { get; set; } = new List<Contact>();

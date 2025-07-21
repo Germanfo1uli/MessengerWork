@@ -17,9 +17,11 @@ namespace CosmoBack.Models
         [MaxLength(255)]
         public string Name { get; set; }
 
+        [Required]
+        public long PublicId { get; set; }
+
         public string? Description { get; set; }
 
-        [Required]
         [ForeignKey("AvatarImage")]
         public Guid? AvatarImageId { get; set; }
 

@@ -29,6 +29,6 @@ namespace CosmoBack.Models
         public User User { get; set; } = default!;
         public Chat? Chat { get; set; }
         public Group? Group { get; set; }
-        public Channel? Channel { get; set; }
+        public Channel? Channel { get; set; }  
     }
 }

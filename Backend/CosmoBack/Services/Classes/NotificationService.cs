@@ -4,18 +4,12 @@ using CosmoBack.Services.Interfaces;
 
 namespace CosmoBack.Services.Classes
 {
-    public class NotificationService : INotificationService
+    public class NotificationService(
+        INotificationsRepository notificationRepository,
+        ILogger<NotificationService> logger) : INotificationService
     {
-        private readonly INotificationsRepository _notificationRepository;
-        private readonly ILogger<NotificationService> _logger;
-
-        public NotificationService(
-            INotificationsRepository notificationRepository,
-            ILogger<NotificationService> logger)
-        {
-            _notificationRepository = notificationRepository;
-            _logger = logger;
-        }
+        private readonly INotificationsRepository _notificationRepository = notificationRepository;
+        private readonly ILogger<NotificationService> _logger = logger;
 
         public async Task<IEnumerable<Notification>> GetUserNotificationsAsync(Guid userId)
         {
@@ -33,8 +27,6 @@ namespace CosmoBack.Services.Classes
 
         public async Task<Notification> CreateNotificationAsync(Notification notification)
         {
-            _logger.LogInformation("Creating notification for user {UserId} in chat {ChatId} or group {GroupId}",
-                notification.UserId, notification.ChatId, notification.GroupId);
             try
             {
                 await _notificationRepository.AddAsync(notification);
@@ -42,7 +34,6 @@ namespace CosmoBack.Services.Classes
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating notification for user {UserId}", notification.UserId);
                 throw new Exception($"Ошибка при создании уведомления: {ex.Message}", ex);
             }
         }
@@ -120,6 +111,25 @@ namespace CosmoBack.Services.Classes
             {
                 _logger.LogError(ex, "Error deleting notifications for group {GroupId}", groupId);
                 throw new Exception($"Ошибка при удалении уведомлений для группы: {ex.Message}", ex);
+            }
+        }
+
+        public async Task DeleteNotificationsByChannelIdAsync(Guid channelId)
+        {
+            _logger.LogInformation("Deleting notifications for channel {ChannelId}", channelId);
+            try
+            {
+                var notifications = await _notificationRepository.GetAllByChannelIdAsync(channelId);
+                foreach (var notification in notifications)
+                {
+                    await _notificationRepository.DeleteAsync(notification.Id);
+                }
+                _logger.LogInformation("All notifications for channel {ChannelId} deleted successfully", channelId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting notifications for channel {ChannelId}", channelId);
+                throw new Exception($"Ошибка при удалении уведомлений для канала: {ex.Message}", ex);
             }
         }
     }

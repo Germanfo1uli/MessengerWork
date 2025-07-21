@@ -1,6 +1,4 @@
-﻿using CosmoBack.Models;
-using CosmoBack.Models.Dtos;
-using CosmoBack.Services.Interfaces;
+﻿using CosmoBack.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -51,6 +49,20 @@ namespace CosmoBack.Controllers
             try
             {
                 var messages = await _messageService.GetMessagesByGroupWithDetailsAsync(groupId);
+                return Ok(messages);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("channel/{channelId}")]
+        public async Task<IActionResult> GetMessagesByChannel(Guid ChannelId)
+        {
+            try
+            {
+                var messages = await _messageService.GetMessagesByChannelAsync(ChannelId);
                 return Ok(messages);
             }
             catch (Exception ex)
