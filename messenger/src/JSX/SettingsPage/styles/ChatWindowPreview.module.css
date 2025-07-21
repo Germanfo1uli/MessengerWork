@@ -1,0 +1,274 @@
+.previewWindow {
+    width: 400px;
+    height: 500px;
+    display: flex;
+    flex-direction: column;
+    font-family: var(--font-family, system-ui);
+    font-size: var(--font-size, 16px);
+    position: relative;
+    background: var(--theme-background, #0f0c29);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.backgroundOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-size: var(--background-size, cover);
+    background-position: var(--background-position, center);
+    background-repeat: no-repeat;
+    z-index: 0;
+}
+
+.previewWindow::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: var(--background-image, none);
+    background-size: var(--background-size, cover);
+    background-position: var(--background-position, center);
+    background-repeat: no-repeat;
+    filter: var(--background-filter, none);
+    opacity: var(--background-opacity, 1);
+    z-index: -1;
+}
+
+.chatHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: var(--header-background, linear-gradient(to right, #0f0c29, #1a1547));
+    border-bottom: 1px solid var(--border-color, rgba(255, 176, 255, 0.2));
+    position: relative;
+    z-index: 1;
+}
+
+.userInfo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--accent-color, #6a5acd);
+}
+
+.userInfo h4 {
+    margin: 0;
+    color: var(--text-color, #e0e0ff);
+    font-size: 16px;
+}
+
+.messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border-radius: var(--corner-radius, 12px);
+    box-shadow: var(--message-shadow, none);
+    position: relative;
+    z-index: 1;
+    background: var(--messages-background, transparent);
+}
+
+.message {
+    max-width: 70%;
+    padding: 10px 15px;
+    border-radius: 18px;
+    position: relative;
+    word-wrap: break-word;
+}
+
+.message.bubbles {
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    max-width: 80%;
+}
+
+.message.minimal {
+    padding: 8px 12px;
+    margin-bottom: 4px;
+    background: transparent !important;
+    border: 1px solid var(--border-color, rgba(255, 176, 255, 0.2));
+    max-width: 90%;
+}
+
+.message.compact {
+    padding: 6px 10px;
+    margin-bottom: 2px;
+    max-width: 95%;
+}
+
+.incoming {
+    align-self: flex-start;
+    background: var(--incoming-background, #3a1c71);
+    color: var(--text-color, #e0e0ff);
+    border-bottom-left-radius: 5px;
+}
+
+.outgoing {
+    align-self: flex-end;
+    color: var(--outgoing-text-color, white);
+    border-bottom-right-radius: 5px;
+}
+
+.inputArea {
+    padding: 12px;
+    background: var(--input-background, linear-gradient(to top, rgba(26, 21, 71, 0.9), rgba(15, 12, 41, 0.95)));
+    border-top: 1px solid var(--border-color, rgba(138, 43, 226, 0.3));
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.inputArea:focus-within {
+    border-top-color: var(--accent-color, #8a2be2);
+    box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.2);
+}
+
+.input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--text-color, #e0e0ff);
+    font-size: var(--font-size, 13px);
+    font-family: var(--font-family, system-ui);
+    outline: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: var(--input-field-background, rgba(30, 30, 70, 0.7));
+    border: 1px solid var(--border-color, rgba(138, 43, 226, 0.3));
+    transition: all 0.3s ease;
+}
+
+.input::placeholder {
+    color: var(--placeholder-color, #b0b0ff);
+}
+
+.input:focus {
+    border-color: var(--accent-color, #8a2be2);
+    box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.2);
+}
+
+.sendButton {
+    background: transparent;
+    border: none;
+    color: var(--accent-color, #8a2be2);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.sendButton:hover {
+    color: var(--hover-color, #00d4ff);
+    background: var(--hover-background, rgba(138, 43, 226, 0.2));
+}
+
+/* Theme-specific styles */
+.previewWindow[data-theme="dark"] {
+    --theme-background: #1e1e2d;
+    --header-background: linear-gradient(to right, #0f0c29, #1a1547);
+    --messages-background: transparent;
+    --incoming-background: #3a1c71;
+    --text-color: #e0e0ff;
+    --outgoing-text-color: white;
+    --border-color: rgba(255, 176, 255, 0.2);
+    --input-background: linear-gradient(to top, rgba(26, 21, 71, 0.9), rgba(15, 12, 41, 0.95));
+    --input-field-background: rgba(30, 30, 70, 0.7);
+    --placeholder-color: #b0b0ff;
+    --hover-background: rgba(138, 43, 226, 0.2);
+    --hover-color: #00d4ff;
+}
+
+.previewWindow[data-theme="light"] {
+    --theme-background: #ffffff;
+    --header-background: linear-gradient(to right, #f5f5f5, #e0e0e0);
+    --messages-background: transparent;
+    --incoming-background: #e0e0e0;
+    --text-color: #333;
+    --outgoing-text-color: white;
+    --border-color: rgba(0, 0, 0, 0.1);
+    --input-background: linear-gradient(to top, #f5f5f5, #e0e0e0);
+    --input-field-background: rgba(200, 200, 200, 0.7);
+    --placeholder-color: #666;
+    --hover-background: rgba(0, 0, 0, 0.1);
+    --hover-color: #005bea;
+}
+
+.previewWindow[data-theme="cosmic"] {
+    --theme-background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    --header-background: linear-gradient(to right, #0f0c29, #302b63);
+    --messages-background: transparent;
+    --incoming-background: rgba(58, 28, 113, 0.7);
+    --text-color: #e0e0ff;
+    --outgoing-text-color: white;
+    --border-color: rgba(106, 90, 205, 0.5);
+    --input-background: linear-gradient(to top, rgba(58, 28, 113, 0.9), rgba(15, 12, 41, 0.95));
+    --input-field-background: rgba(30, 30, 70, 0.7);
+    --placeholder-color: #b0b0ff;
+    --hover-background: rgba(106, 90, 205, 0.2);
+    --hover-color: #00d4ff;
+}
+
+.previewWindow[data-theme="sunset"] {
+    --theme-background: linear-gradient(135deg, #ff7e5f, #feb47b);
+    --header-background: linear-gradient(to right, #ff7e5f, #feb47b);
+    --messages-background: transparent;
+    --incoming-background: rgba(255, 126, 95, 0.7);
+    --text-color: #3c2f2f;
+    --outgoing-text-color: white;
+    --border-color: rgba(255, 126, 95, 0.3);
+    --input-background: linear-gradient(to top, rgba(255, 126, 95, 0.9), rgba(254, 180, 123, 0.9));
+    --input-field-background: rgba(255, 126, 95, 0.5);
+    --placeholder-color: #7b4e2f;
+    --hover-background: rgba(255, 126, 95, 0.2);
+    --hover-color: #d9480f;
+}
+
+.previewWindow[data-theme="ocean"] {
+    --theme-background: linear-gradient(135deg, #00c6fb, #005bea);
+    --header-background: linear-gradient(to right, #00c6fb, #005bea);
+    --messages-background: transparent;
+    --incoming-background: rgba(0, 198, 251, 0.7);
+    --text-color: #1a2e5f;
+    --outgoing-text-color: white;
+    --border-color: rgba(0, 91, 234, 0.3);
+    --input-background: linear-gradient(to top, rgba(0, 198, 251, 0.9), rgba(0, 91, 234, 0.9));
+    --input-field-background: rgba(0, 198, 251, 0.5);
+    --placeholder-color: #4a6a9f;
+    --hover-background: rgba(0, 91, 234, 0.2);
+    --hover-color: #003087;
+}
+
+.previewWindow[data-theme="forest"] {
+    --theme-background: linear-gradient(135deg, #11998e, #38ef7d);
+    --header-background: linear-gradient(to right, #11998e, #38ef7d);
+    --messages-background: transparent;
+    --incoming-background: rgba(17, 153, 142, 0.7);
+    --text-color: #1f3a2e;
+    --outgoing-text-color: white;
+    --border-color: rgba(17, 153, 142, 0.3);
+    --input-background: linear-gradient(to top, rgba(17, 153, 142, 0.9), rgba(56, 239, 125, 0.9));
+    --input-field-background: rgba(17, 153, 142, 0.5);
+    --placeholder-color: #4a7a6a;
+    --hover-background: rgba(17, 153, 142, 0.2);
+    --hover-color: #0a6c5e;
+}

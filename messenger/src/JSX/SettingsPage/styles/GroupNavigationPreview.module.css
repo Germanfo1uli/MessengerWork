@@ -1,0 +1,170 @@
+.groupNavPreview {
+    width: 80px;
+    height: 100%;
+    background: linear-gradient(180deg, #1a1a2e, #16213e);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.groupNavPreview.light {
+    background: linear-gradient(180deg, #f5f5f5, #e0e0e0);
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.groupNavPreview.cosmic {
+    background: linear-gradient(180deg, #0f0c29, #302b63);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.navPanel {
+    width: 80px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 10px;
+}
+
+.homeButton {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 24px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.homeButton:hover {
+    transform: scale(1.1);
+}
+
+.separator {
+    width: 40px;
+    height: 2px;
+    background: currentColor;
+    margin-bottom: 15px;
+    opacity: 0.3;
+}
+
+.groupList {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.groupItem {
+    position: relative;
+}
+
+.avatarWrapper {
+    width: 50px;
+    height: 50px;
+    overflow: hidden;
+    border-radius: 10px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.avatar {
+    width: 100%;
+    height: 100%;
+    background: rgba(106, 90, 205, 0.3);
+    border-radius: 10px;
+}
+
+.addGroupButton {
+    position: relative;
+    margin-top: 10px;
+}
+
+.addGroupButton .avatarWrapper {
+    background: rgba(30, 30, 70, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed currentColor;
+    opacity: 0.5;
+}
+
+.addGroupButton:hover .avatarWrapper {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+.plusIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+/* Добавьте эти стили */
+.avatar.round {
+    border-radius: 50%;
+}
+
+.avatar.square {
+    border-radius: 0;
+}
+
+.avatar.roundedSquare {
+    border-radius: 4px;
+}
+
+.plusIcon.round {
+    border-radius: 50%;
+}
+
+.plusIcon.square {
+    border-radius: 0;
+}
+
+.plusIcon.roundedSquare {
+    border-radius: 4px;
+}
+
+.groupNavPreview.dark {
+    background-color: #1e1e2d;
+    color: #ffffff;
+}
+
+.groupNavPreview.light {
+    background-color: #f5f5f5;
+    color: #333333;
+}
+
+.groupNavPreview.cosmic {
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    color: #ffffff;
+}
+
+.groupNavPreview.sunset {
+    background: linear-gradient(135deg, #ff7e5f, #feb47b);
+    color: #333333;
+}
+
+.groupNavPreview.ocean {
+    background: linear-gradient(135deg, #00c6fb, #005bea);
+    color: #ffffff;
+}
+
+.groupNavPreview.forest {
+    background: linear-gradient(135deg, #11998e, #38ef7d);
+    color: #333333;
+}
+
+/* Avatar shapes */
+.avatar.round,
+.plusIcon.round {
+    border-radius: 50%;
+}
+
+.avatar.square,
+.plusIcon.square {
+    border-radius: 0;
+}
+
+.avatar.rounded-square,
+.plusIcon.rounded-square {
+    border-radius: 4px;
+}

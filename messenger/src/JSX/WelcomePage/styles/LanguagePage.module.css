@@ -1,0 +1,181 @@
+/* Reused styles from SettingsPage.module.css */
+.container,
+.mainContent,
+.contentWrapper,
+.pageHeader,
+.pageHeader h1,
+.pageHeader p,
+.saveButton,
+.cancelButton {
+    composes: container from '../styles/SettingsPage.module.css';
+    composes: mainContent from '../styles/SettingsPage.module.css';
+    composes: contentWrapper from '../styles/SettingsPage.module.css';
+    composes: pageHeader from '../styles/SettingsPage.module.css';
+    composes: h1 from '../styles/SettingsPage.module.css' into pageHeader;
+    composes: p from '../styles/SettingsPage.module.css' into pageHeader;
+    composes: saveButton from '../styles/SettingsPage.module.css';
+    composes: cancelButton from '../styles/SettingsPage.module.css';
+}
+
+/* Language Page Specific Styles */
+.backButton {
+    background: transparent;
+    border: none;
+    color: #6a7a9a;
+    margin-bottom: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.backButton:hover {
+    color: #a0a0c0;
+}
+
+.languageHeaderContent {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.languageHeaderIcon {
+    font-size: 28px;
+    color: #4d79f6;
+    background: rgba(77, 121, 246, 0.1);
+    padding: 12px;
+    border-radius: 50%;
+}
+
+.languageContent {
+    background: rgba(15, 26, 46, 0.5);
+    border-radius: 12px;
+    padding: 25px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.currentLanguage {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: rgba(77, 121, 246, 0.1);
+    border-radius: 8px;
+    margin-bottom: 30px;
+    border: 1px solid rgba(77, 121, 246, 0.2);
+}
+
+.currentLanguageInfo {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.languageFlag {
+    font-size: 28px;
+}
+
+.currentLanguage h3 {
+    margin: 0 0 4px 0;
+    color: #ffffff;
+}
+
+.currentLanguage p {
+    margin: 0;
+    color: #6a7a9a;
+    font-size: 13px;
+}
+
+.languageStatus {
+    display: flex;
+    align-items: center;
+}
+
+.activeBadge {
+    background: rgba(46, 204, 113, 0.2);
+    color: #2ecc71;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.languageListTitle {
+    color: #a0a0c0;
+    font-size: 16px;
+    margin-bottom: 15px;
+    font-weight: 500;
+}
+
+.languageItems {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.languageItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: rgba(10, 14, 23, 0.7);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.languageItem:hover {
+    background: rgba(77, 121, 246, 0.1);
+    border-color: rgba(77, 121, 246, 0.3);
+}
+
+.languageItem.selectedLanguage {
+    background: rgba(77, 121, 246, 0.2);
+    border-color: rgba(77, 121, 246, 0.5);
+}
+
+.languageInfo {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.languageInfo h4 {
+    margin: 0 0 4px 0;
+    color: #ffffff;
+    font-size: 15px;
+}
+
+.languageInfo p {
+    margin: 0;
+    color: #6a7a9a;
+    font-size: 13px;
+}
+
+.languageSelected {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.activeDot {
+    width: 12px;
+    height: 12px;
+    background: #4d79f6;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #4d79f6;
+}
+
+.languageArrow {
+    color: #6a7a9a;
+    font-size: 18px;
+}
+
+.languageActions {
+    display: flex;
+    gap: 12px;
+    margin-top: 30px;
+}

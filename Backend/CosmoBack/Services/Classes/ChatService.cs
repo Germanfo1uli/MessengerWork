@@ -51,34 +51,23 @@ namespace CosmoBack.Services.Classes
             {
                 var currentUserId = Guid.Parse(_httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
                     ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
-                var chat = await _chatRepository.GetChatByIdWithMessagesAsync(id);
-                if (chat == null)
+
+                // Получаем чаты с деталями для текущего пользователя
+                var chats = await _chatRepository.GetChatsWithDetailsAsync(currentUserId);
+                var chatData = chats.FirstOrDefault(c => (c.GetType().GetProperty("Chat").GetValue(c) as Chat)?.Id == id);
+
+                if (chatData == null)
                 {
-                    _logger.LogWarning("Chat with ID {ChatId} not found", id);
+                    _logger.LogWarning("Chat with ID {ChatId} not found for user {UserId}", id, currentUserId);
                     throw new KeyNotFoundException($"Чат с ID {id} не найден");
                 }
 
-                var chatMember = await _chatMembersRepository.GetByChatAndUserIdAsync(id, currentUserId);
+                var chat = chatData.GetType().GetProperty("Chat").GetValue(chatData) as Chat;
+                var chatMember = await _chatMembersRepository.GetByChatAndUserIdAsync(chat.Id, currentUserId);
+                var lastMessageData = chatData.GetType().GetProperty("LastMessageData").GetValue(chatData);
+                var secondUser = chatData.GetType().GetProperty("SecondUser").GetValue(chatData);
 
-                var lastMessage = await _context.Messages
-                    .Where(m => m.ChatId == id)
-                    .Join(_context.Users,
-                        m => m.SenderId,
-                        u => u.Id,
-                        (m, u) => new ChatMessageDto
-                        {
-                            Id = m.Id,
-                            ChatId = m.ChatId,
-                            SenderId = m.SenderId,
-                            Comment = m.Comment,
-                            CreatedAt = m.CreatedAt,
-                            Username = u.Username,
-                            AvatarImageId = u.AvatarImageId
-                        })
-                    .OrderByDescending(m => m.CreatedAt)
-                    .FirstOrDefaultAsync();
-
-                return new ChatDto
+                var chatDto = new ChatDto
                 {
                     Id = chat.Id,
                     PublicId = chat.PublicId,
@@ -86,9 +75,29 @@ namespace CosmoBack.Services.Classes
                     FirstUserId = chat.FirstUserId,
                     SecondUserId = chat.SecondUserId,
                     CreatedAt = chat.CreatedAt,
-                    LastMessageAt = lastMessage?.CreatedAt,
-                    LastMessage = lastMessage
+                    LastMessageAt = lastMessageData != null
+                        ? (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message)?.CreatedAt
+                        : null,
+                    LastMessage = lastMessageData != null ? new ChatMessageDto
+                    {
+                        Id = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).Id,
+                        ChatId = (Guid)(lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).ChatId,
+                        SenderId = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).SenderId,
+                        Comment = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).Comment,
+                        CreatedAt = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).CreatedAt,
+                        Username = lastMessageData.GetType().GetProperty("Username").GetValue(lastMessageData)?.ToString() ?? string.Empty,
+                        AvatarImageId = lastMessageData.GetType().GetProperty("AvatarImageId").GetValue(lastMessageData) as Guid?
+                    } : null,
+                    SecondUser = secondUser != null ? new SecondUserDto
+                    {
+                        Username = secondUser.GetType().GetProperty("Username").GetValue(secondUser)?.ToString() ?? string.Empty,
+                        OnlineStatus = (OnlineStatus)secondUser.GetType().GetProperty("OnlineStatus").GetValue(secondUser),
+                        ContactTag = secondUser.GetType().GetProperty("ContactTag").GetValue(secondUser)?.ToString()
+                    } : null
                 };
+
+                _logger.LogInformation("Retrieved chat with ID {ChatId} for user {UserId}", id, currentUserId);
+                return chatDto;
             }
             catch (Exception ex)
             {
@@ -133,7 +142,7 @@ namespace CosmoBack.Services.Classes
                         LastMessage = lastMessageData != null ? new ChatMessageDto
                         {
                             Id = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).Id,
-                            ChatId = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).ChatId,
+                            ChatId = (Guid)(lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).ChatId,
                             SenderId = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).SenderId,
                             Comment = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).Comment,
                             CreatedAt = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).CreatedAt,
@@ -415,7 +424,7 @@ namespace CosmoBack.Services.Classes
                 var messageDto = new ChatMessageDto
                 {
                     Id = message.Id,
-                    ChatId = message.ChatId,
+                    ChatId = (Guid)message.ChatId,
                     SenderId = message.SenderId,
                     Comment = message.Comment,
                     CreatedAt = message.CreatedAt,
@@ -423,7 +432,7 @@ namespace CosmoBack.Services.Classes
                     AvatarImageId = sender.AvatarImageId
                 };
 
-                await _hubContext.Clients.Group(chat.Id.ToString()).SendAsync("ReceiveMessage", messageDto);
+                // await _hubContext.Clients.Group(chat.Id.ToString()).SendAsync("ReceiveMessage", messageDto);
 
                 return messageDto;
             }
@@ -467,7 +476,7 @@ namespace CosmoBack.Services.Classes
                         (m, u) => new ChatMessageDto
                         {
                             Id = m.Id,
-                            ChatId = m.ChatId,
+                            ChatId = (Guid)m.ChatId,
                             SenderId = m.SenderId,
                             Comment = m.Comment,
                             CreatedAt = m.CreatedAt,
@@ -494,6 +503,100 @@ namespace CosmoBack.Services.Classes
             {
                 _logger.LogError(ex, "Error toggling favorite for chat {ChatId}", chatId);
                 throw new Exception($"Ошибка при переключении статуса избранного: {ex.Message}", ex);
+            }
+        }
+
+        public async Task<IEnumerable<ChatDto>> SearchUsersAsync(Guid userId, string searchQuery)
+        {
+            _logger.LogInformation("Searching chats for user {UserId} with query {SearchQuery}", userId, searchQuery);
+            try
+            {
+                var searchResults = await _chatRepository.GetChatsWithDetailsByQueryAsync(userId, searchQuery);
+                var chatDtos = new List<ChatDto>();
+
+                foreach (var result in searchResults)
+                {
+                    var user = result.GetType().GetProperty("User").GetValue(result);
+                    var chatData = result.GetType().GetProperty("Chat").GetValue(result);
+                    var secondUserId = user.GetType().GetProperty("Id").GetValue(user) as Guid?;
+
+                    if (secondUserId == null)
+                    {
+                        _logger.LogWarning("User ID is null for search result with username {Username}", user.GetType().GetProperty("Username").GetValue(user));
+                        continue;
+                    }
+
+                    ChatDto chatDto;
+
+                    if (chatData == null)
+                    {
+                        // Если чата нет, создаем ChatDto с минимальными данными
+                        chatDto = new ChatDto
+                        {
+                            Id = Guid.Empty, // Или другой индикатор отсутствия чата
+                            PublicId = 0,
+                            IsFavorite = false,
+                            FirstUserId = userId,
+                            SecondUserId = secondUserId.Value,
+                            CreatedAt = DateTime.UtcNow,
+                            LastMessageAt = null,
+                            LastMessage = null,
+                            SecondUser = new SecondUserDto
+                            {
+                                Username = user.GetType().GetProperty("Username").GetValue(user)?.ToString() ?? string.Empty,
+                                OnlineStatus = (OnlineStatus)user.GetType().GetProperty("OnlineStatus").GetValue(user),
+                                ContactTag = user.GetType().GetProperty("ContactTag").GetValue(user)?.ToString()
+                            }
+                        };
+                    }
+                    else
+                    {
+                        // Если чат существует, извлекаем данные
+                        var chat = chatData.GetType().GetProperty("Chat").GetValue(chatData) as Chat;
+                        var lastMessageData = chatData.GetType().GetProperty("LastMessageData").GetValue(chatData);
+
+                        var chatMember = await _chatMembersRepository.GetByChatAndUserIdAsync(chat.Id, userId);
+
+                        chatDto = new ChatDto
+                        {
+                            Id = chat.Id,
+                            PublicId = chat.PublicId,
+                            IsFavorite = chatMember?.IsFavorite ?? false,
+                            FirstUserId = chat.FirstUserId,
+                            SecondUserId = chat.SecondUserId,
+                            CreatedAt = chat.CreatedAt,
+                            LastMessageAt = lastMessageData != null
+                                ? (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message)?.CreatedAt
+                                : null,
+                            LastMessage = lastMessageData != null ? new ChatMessageDto
+                            {
+                                Id = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).Id,
+                                ChatId = (Guid)(lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).ChatId,
+                                SenderId = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).SenderId,
+                                Comment = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).Comment,
+                                CreatedAt = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).CreatedAt,
+                                Username = lastMessageData.GetType().GetProperty("Username").GetValue(lastMessageData)?.ToString() ?? string.Empty,
+                                AvatarImageId = lastMessageData.GetType().GetProperty("AvatarImageId").GetValue(lastMessageData) as Guid?
+                            } : null,
+                            SecondUser = new SecondUserDto
+                            {
+                                Username = user.GetType().GetProperty("Username").GetValue(user)?.ToString() ?? string.Empty,
+                                OnlineStatus = (OnlineStatus)user.GetType().GetProperty("OnlineStatus").GetValue(user),
+                                ContactTag = user.GetType().GetProperty("ContactTag").GetValue(user)?.ToString()
+                            }
+                        };
+                    }
+
+                    chatDtos.Add(chatDto);
+                }
+
+                _logger.LogInformation("Retrieved {ChatCount} chats for user {UserId} with query {SearchQuery}", chatDtos.Count, userId, searchQuery);
+                return chatDtos;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error searching chats for user {UserId} with query {SearchQuery}", userId, searchQuery);
+                throw new Exception($"Ошибка при поиске чатов: {ex.Message}", ex);
             }
         }
     }

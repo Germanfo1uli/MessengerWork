@@ -1,0 +1,75 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.appContainer {
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #0f172a, #2d1b4e, #1e1b4e);
+  position: relative;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+}
+
+.spaceOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.planet {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(24px);
+  pointer-events: none;
+  z-index: 2;
+  animation: pulse 4s infinite ease-in-out;
+}
+
+.planetPurple {
+  top: 20%;
+  right: 20%;
+  width: 8rem;
+  height: 8rem;
+  background: linear-gradient(to bottom right, rgba(168, 85, 247, 0.3), rgba(236, 72, 153, 0.3));
+}
+
+.planetBlue {
+  bottom: 40%;
+  left: 20%;
+  width: 6rem;
+  height: 6rem;
+  background: linear-gradient(to bottom right, rgba(59, 130, 246, 0.3), rgba(6, 182, 212, 0.3));
+  animation-delay: 1s;
+}
+
+.planetYellow {
+  top: 50%;
+  left: 33%;
+  width: 4rem;
+  height: 4rem;
+  background: linear-gradient(to bottom right, rgba(234, 179, 8, 0.2), rgba(249, 115, 22, 0.2));
+  animation-delay: 2s;
+}
+
+.contentContainer {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  flex: 1;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}

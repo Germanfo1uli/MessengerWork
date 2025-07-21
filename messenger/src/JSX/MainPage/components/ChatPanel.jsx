@@ -1,0 +1,473 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import cl from '../styles/ChatPanel.module.css';
+import ChatBox from './ChatBox';
+import { IoSettingsOutline } from 'react-icons/io5';
+import { IoIosMore } from 'react-icons/io';
+import { IoSearchOutline } from 'react-icons/io5';
+import { IoStarOutline } from 'react-icons/io5';
+import { FaEnvelope } from 'react-icons/fa';
+import { FaGift } from 'react-icons/fa';
+import { IoAddCircleOutline } from 'react-icons/io5';
+import Modal from './Modal';
+import AddContactModal from './AddContactModal';
+import { apiRequest } from '../../../hooks/ApiRequest';
+import { useAuth } from '../../../hooks/UseAuth';
+import { useNavigate } from 'react-router-dom';
+import useMainHooks from '../../../hooks/UseMainHooks';
+import debounce from 'lodash.debounce';
+
+const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
+    const { isLoading, userId, username, isAuthenticated, logout } = useAuth();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isAddContactModalOpen, setIsAddContactModalOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState('favorites');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [user, setUser] = useState({});
+    const [data, setData] = useState([]);
+    const [searchResults, setSearchResults] = useState([]);
+    const [isSearching, setIsSearching] = useState(false);
+    const [avatarError, setAvatarError] = useState(false);
+    const { getStatusString, formatTimeFromISO } = useMainHooks();
+    const navigate = useNavigate();
+
+    const debouncedServerSearch = useMemo(
+        () =>
+            debounce(async (query) => {
+                if (query.length <= 1) {
+                    setSearchResults([]);
+                    setIsSearching(false);
+                    return;
+                }
+
+                setIsSearching(true);
+                try {
+                    const response = await apiRequest(`/api/chat/search?userId=${userId}&query=${encodeURIComponent(query.substring(1))}`, {
+                        method: 'GET',
+                        authenticated: isAuthenticated
+                    });
+
+                    const enhancedChats = Array.isArray(response)
+                        ? response.map(chat => ({
+                            id: chat.id,
+                            publicId: chat.publicId,
+                            isFavorite: chat.isFavorite,
+                            firstUserId: chat.firstUserId,
+                            secondUserId: chat.secondUserId,
+                            createdAt: chat.createdAt,
+                            lastMessageAt: chat.lastMessageAt,
+                            lastMessage: chat.lastMessage
+                                ? {
+                                    id: chat.lastMessage.id,
+                                    chatId: chat.lastMessage.chatId,
+                                    senderId: chat.lastMessage.senderId,
+                                    comment: chat.lastMessage.comment,
+                                    createdAt: chat.lastMessage.createdAt,
+                                    username: chat.lastMessage.username,
+                                    avatarImageId: chat.lastMessage.avatarImageId,
+                                    isSentByUser: userId === chat.lastMessage.senderId
+                                }
+                                : null,
+                            secondUser: {
+                                username: chat.secondUser?.username ?? '',
+                                onlineStatus: chat.secondUser?.onlineStatus ?? 0,
+                                contactTag: chat.secondUser?.contactTag
+                            },
+                            joined: false
+                        }))
+                        : [];
+                    setSearchResults(enhancedChats);
+                } catch (error) {
+                    console.error('Failed to search chats:', error);
+                    setSearchResults([]);
+                } finally {
+                    setIsSearching(false);
+                }
+            }, 500),
+        [isAuthenticated, userId]
+    );
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [profileResponse, chatsResponse] = await Promise.all([
+                    apiRequest(`/api/user/${userId}`, {
+                        method: 'GET',
+                        authenticated: isAuthenticated
+                    }),
+                    apiRequest(`/api/chat/user/${userId}`, {
+                        method: 'GET',
+                        authenticated: isAuthenticated
+                    })
+                ]);
+
+                const enhancedChats = Array.isArray(chatsResponse)
+                    ? chatsResponse.map(chat => ({
+                        ...chat,
+                        lastMessage: chat.lastMessage
+                            ? {
+                                ...chat.lastMessage,
+                                isSentByUser: userId === chat.lastMessage.senderId
+                            }
+                            : null,
+                        joined: false
+                    }))
+                    : [];
+
+                console.log(chatsResponse)
+                console.log(enhancedChats)
+
+                setUser({
+                    username: profileResponse.username || username,
+                    status: getStatusString(profileResponse.onlineStatus),
+                    avatarUrl: profileResponse.avatarUrl || '/default-avatar.png'
+                });
+                setData(enhancedChats);
+            } catch (error) {
+                console.error('Failed to fetch user data:', error);
+            }
+        };
+
+        if (isLoading || !userId) {
+            return;
+        }
+
+        if (!isAuthenticated) {
+            logout();
+            navigate('/');
+        }
+
+        fetchData();
+    }, [isLoading, userId, username, isAuthenticated, logout, navigate]);
+
+    useEffect(() => {
+        if (connection && isConnected && data.length > 0) {
+            const unjoinedChats = data.filter((chat) => !chat.joined);
+
+            unjoinedChats.forEach((chat) => {
+                connection
+                    .invoke('JoinChat', chat.id)
+                    .then(() => {
+                        setData((prev) =>
+                            prev.map((c) => (c.id === chat.id ? { ...c, joined: true } : c))
+                        );
+                    })
+                    .catch((error) => {
+                        console.error(`Failed to join chat ${chat.id}:`, error);
+                    });
+            });
+        }
+    }, [connection, isConnected, data]);
+
+    useEffect(() => {
+        if (connection && isConnected) {
+            connection.on('UpdateChatList', async (updatedChat) => {
+                // Проверяем, что updatedChat корректен
+                if (!updatedChat || !updatedChat.id) {
+                    console.warn('Получен некорректный updatedChat:', updatedChat);
+                    return;
+                }
+    
+                setData((prev) => {
+                    const existingChatIndex = prev.findIndex((chat) => chat.id === updatedChat.id);
+                    if (existingChatIndex !== -1) {
+                        // Обновляем существующий чат
+                        const existingChat = prev[existingChatIndex];
+                        const secondUser = existingChat.secondUser || updatedChat.secondUser;
+                        const mergedChat = {
+                            ...existingChat,
+                            ...updatedChat,
+                            secondUser,
+                            lastMessage: updatedChat.lastMessage
+                                ? {
+                                      ...updatedChat.lastMessage,
+                                      isSentByUser: userId === updatedChat.lastMessage.senderId
+                                  }
+                                : existingChat.lastMessage
+                        };
+                        const newData = [...prev];
+                        newData[existingChatIndex] = mergedChat;
+                        return newData;
+                    } else {
+                        // Новый чат: добавляем временный чат и запрашиваем полные данные
+                        const tempChat = {
+                            ...updatedChat,
+                            secondUser: updatedChat.secondUser ?? {
+                                username: 'Загрузка...',
+                                onlineStatus: 0,
+                                contactTag: null
+                            },
+                            joined: false
+                        };
+    
+                        // Выполняем запрос для получения полной информации о чате
+                        const fetchChatDetails = async () => {
+                            try {
+                                const response = await apiRequest(`/api/chat/${updatedChat.id}`, {
+                                    method: 'GET',
+                                    authenticated: isAuthenticated
+                                });
+    
+                                // Формируем чат с полной информацией
+                                const newChat = {
+                                    id: response.id,
+                                    publicId: response.publicId,
+                                    isFavorite: response.isFavorite,
+                                    firstUserId: response.firstUserId,
+                                    secondUserId: response.secondUserId,
+                                    createdAt: response.createdAt,
+                                    lastMessageAt: response.lastMessageAt,
+                                    lastMessage: response.lastMessage
+                                        ? {
+                                              id: response.lastMessage.id,
+                                              chatId: response.lastMessage.chatId,
+                                              senderId: response.lastMessage.senderId,
+                                              comment: response.lastMessage.comment,
+                                              createdAt: response.lastMessage.createdAt,
+                                              username: response.lastMessage.username,
+                                              avatarImageId: response.lastMessage.avatarImageId,
+                                              isSentByUser: userId === response.lastMessage.senderId
+                                          }
+                                        : null,
+                                    secondUser: {
+                                        username: response.secondUser?.username ?? 'Неизвестный пользователь',
+                                        onlineStatus: response.secondUser?.onlineStatus ?? 0,
+                                        contactTag: response.secondUser?.contactTag ?? null
+                                    },
+                                    joined: false
+                                };
+    
+                                // Подключаемся к чату через SignalR
+                                await connection.invoke('JoinChat', newChat.id).catch((error) => {
+                                    console.error(`Failed to join chat ${newChat.id}:`, error);
+                                });
+    
+                                // Обновляем data, заменяя временный чат
+                                setData((prevData) => {
+                                    const tempChatIndex = prevData.findIndex((c) => c.id === newChat.id);
+                                    if (tempChatIndex !== -1) {
+                                        const newData = [...prevData];
+                                        newData[tempChatIndex] = { ...newChat, joined: true };
+                                        return newData;
+                                    }
+                                    return [...prevData, { ...newChat, joined: true }];
+                                });
+                            } catch (error) {
+                                console.error(`Failed to fetch chat details for ${updatedChat.id}:`, error);
+                                // Удаляем временный чат при ошибке
+                                setData((prevData) => prevData.filter((c) => c.id !== updatedChat.id));
+                            }
+                        };
+    
+                        fetchChatDetails();
+                        return [...prev, tempChat];
+                    }
+                });
+            });
+    
+            return () => {
+                connection.off('UpdateChatList');
+            };
+        }
+    }, [connection, isConnected, userId, isAuthenticated, apiRequest]);
+
+    useEffect(() => {
+        return () => {
+            debouncedServerSearch.cancel();
+        };
+    }, [debouncedServerSearch]);
+
+    const toggleModal = () => {
+        setIsModalOpen(!isModalOpen);
+    };
+
+    const toggleAddContactModal = () => {
+        setIsAddContactModalOpen(!isAddContactModalOpen);
+    };
+
+    const handleChatClick = (chat) => {
+        if (chat.id === null) {
+            setData((prev) => {
+                if (!prev.some(c => c.secondUserId === chat.secondUserId)) {
+                    return [...prev, { ...chat, joined: false }];
+                }
+                return prev;
+            });
+        }
+        onChatSelect(chat);
+    };
+
+    const handleAddContact = (contactData) => {
+        const newChat = {
+            id: null,
+            publicId: 0,
+            isFavorite: false,
+            firstUserId: userId,
+            secondUserId: contactData.userId || '00000000-0000-0000-0000-000000000000',
+            createdAt: new Date().toISOString(),
+            lastMessageAt: null,
+            lastMessage: null,
+            secondUser: {
+                username: contactData.username || `Новый контакт (${contactData.phone})`,
+                onlineStatus: 1,
+                contactTag: null
+            },
+            joined: false
+        };
+        setData([...data, newChat]);
+    };
+
+    const handleAvatarError = () => {
+        setAvatarError(true);
+    };
+
+    const handleSearchChange = (e) => {
+        const query = e.target.value;
+        setSearchQuery(query);
+
+        if (query.startsWith('@')) {
+            debouncedServerSearch(query);
+        } else {
+            setSearchResults([]);
+            setIsSearching(false);
+        }
+    };
+
+    const filteredChats = useMemo(() => {
+        const source = searchQuery.startsWith('@') ? searchResults : data;
+        return (activeTab === 'favorites' ? source.filter((chat) => chat.isFavorite) : source)
+            .filter((chat) =>
+                chat.secondUser.username.toLowerCase().includes(
+                    searchQuery.startsWith('@') ? searchQuery.substring(1).toLowerCase() : searchQuery.toLowerCase()
+                )
+            )
+            .sort((a, b) => {
+                if (!a.lastMessage || !a.lastMessage.createdAt) return 1;
+                if (!b.lastMessage || !b.lastMessage.createdAt) return -1;
+                return new Date(b.lastMessage.createdAt) - new Date(a.lastMessage.createdAt);
+            });
+    }, [data, searchResults, activeTab, searchQuery]);
+
+    return (
+        <div className={cl.container}>
+            <div className={cl.profileHeader}>
+                <div className={cl.avatarContainer} onClick={toggleModal} style={{ cursor: 'pointer' }}>
+                    {avatarError || !user.avatarUrl ? (
+                        <div className={cl.avatarPlaceholder}>
+                            {user.username?.charAt(0).toUpperCase() || 'U'}
+                        </div>
+                    ) : (
+                        <img
+                            src={user.avatarUrl}
+                            alt="Аватар"
+                            className={cl.avatarImage}
+                            onError={handleAvatarError}
+                        />
+                    )}
+                    <div className={`${cl.statusBadge} ${cl[user.status]}`}></div>
+                </div>
+                <div className={cl.profileInfo}>
+                    <h3 className={cl.profileName}>{user.username}</h3>
+                    <p className={cl.profileStatus}>{user.status}</p>
+                </div>
+                <div className={cl.profileActions}>
+                    <button
+                        className={cl.iconButton}
+                        onClick={() => navigate('/settings')}
+                    >
+                        <IoSettingsOutline />
+                    </button>
+                    <button className={cl.iconButton}>
+                        <IoIosMore />
+                    </button>
+                </div>
+            </div>
+
+            <Modal
+                isOpen={isModalOpen}
+                onClose={toggleModal}
+                user={user}
+            />
+
+            <AddContactModal
+                isOpen={isAddContactModalOpen}
+                onClose={toggleAddContactModal}
+                onAddContact={handleAddContact}
+            />
+
+            <div className={cl.actionButtons}>
+                <button className={cl.actionButton}>
+                    <FaGift className={cl.actionIcon} />
+                    <span>Подарки</span>
+                </button>
+                <button className={cl.actionButton} onClick={toggleAddContactModal}>
+                    <IoAddCircleOutline className={cl.actionIcon} />
+                    <span>Добавить чат</span>
+                </button>
+            </div>
+
+            <div className={cl.searchPanel}>
+                <div className={cl.searchInputContainer}>
+                    <IoSearchOutline className={cl.searchIcon} />
+                    <input
+                        type="text"
+                        placeholder="Поиск по каналам..."
+                        className={cl.searchInput}
+                        value={searchQuery}
+                        onChange={handleSearchChange}
+                    />
+                    {isSearching && <span className={cl.searchLoading}>Поиск...</span>}
+                </div>
+            </div>
+
+            <div className={cl.tabsContainer}>
+                <button
+                    className={`${cl.tabButton} ${activeTab === 'favorites' ? cl.active : ''}`}
+                    onClick={() => setActiveTab('favorites')}
+                >
+                    <IoStarOutline className={cl.tabIcon} />
+                    <span>Избранное</span>
+                </button>
+                <button
+                    className={`${cl.tabButton} ${activeTab === 'all' ? cl.active : ''}`}
+                    onClick={() => setActiveTab('all')}
+                >
+                    <FaEnvelope className={cl.tabIcon} />
+                    <span>Все каналы</span>
+                </button>
+            </div>
+
+            <div className={cl.chatsList}>
+                {filteredChats.length > 0 ? (
+                    filteredChats.map((chat, index) => (
+                        <div key={index} onClick={() => handleChatClick(chat)} style={{ cursor: 'pointer' }}>
+                            <ChatBox
+                                name={chat.secondUser.username}
+                                unread={10}
+                                lastMessage={chat.lastMessage?.comment ?? ''}
+                                time={formatTimeFromISO(chat.lastMessage?.createdAt)}
+                                status={getStatusString(chat.secondUser.onlineStatus)}
+                                isFavorite={false}
+                                messageStatus={"sent"}
+                                isSentByUser={chat.lastMessage?.isSentByUser ?? false}
+                            />
+                        </div>
+                    ))
+                ) : searchQuery ? (
+                    <div className={cl.noResultsContainer}>
+                        <div className={cl.noResultsIcon}>
+                            <IoSearchOutline />
+                        </div>
+                        <h4 className={cl.noResultsTitle}>Ничего не найдено</h4>
+                        <p className={cl.noResultsText}>
+                            {searchQuery.startsWith('@')
+                                ? `Пользователь "${searchQuery.substring(1)}" не найден`
+                                : `Чаты по запросу "${searchQuery}" не найдены`}
+                        </p>
+                    </div>
+                ) : null}
+            </div>
+        </div>
+    );
+};
+
+export default ChatPanel;
