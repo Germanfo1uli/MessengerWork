@@ -40,7 +40,6 @@ namespace CosmoBack.Hubs
         public async Task JoinChat(Guid chatId)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, chatId.ToString());
-            await Clients.Group(chatId.ToString()).SendAsync("UserJoined", Context.User?.Identity?.Name);
         }
 
         // Отключение пользователя от чата
@@ -50,7 +49,7 @@ namespace CosmoBack.Hubs
         }
 
         // Отправка сообщения в чат
-        public async Task SendMessage(Guid? chatId, Guid secondUserId, string message, int tempId)
+        public async Task<Guid> SendMessage(Guid? chatId, Guid secondUserId, string message, int tempId)
         {
             var senderId = Guid.Parse(Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
                 ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
@@ -82,6 +81,7 @@ namespace CosmoBack.Hubs
 
             // Уведомляем всех участников чата об обновлении списка чатов
             await Clients.Group(chatMessage.ChatId.ToString()).SendAsync("UpdateChatList", chat);
+            return chat.Id;
         }
     }
 }

@@ -76,12 +76,6 @@ const ChatWindow = ({ connection, activeChat, setActiveChat, onToggleFavorite, i
                         msg.tempId === newMessage.tempId && 
                         msg.senderId === newMessage.senderId
                     );
-
-                    if(activeChat.id === '00000000-0000-0000-0000-000000000000')
-                        setActiveChat((prev) => ({
-                            ...prev,
-                            id: newMessage.chatId
-                          }));
                     
                     return isDuplicate ? prevMessages : [...prevMessages, {
                         ...newMessage,
@@ -118,9 +112,17 @@ const ChatWindow = ({ connection, activeChat, setActiveChat, onToggleFavorite, i
     
         try {
             // Отправка на сервер
-            await connection.invoke("SendMessage",
+            var response = await connection.invoke("SendMessage",
                 activeChat.id === '00000000-0000-0000-0000-000000000000' ? null : activeChat.id,
                 secondUserId, message, tempId);
+                
+            console.log(response)
+
+            if(activeChat.id === '00000000-0000-0000-0000-000000000000')
+                setActiveChat((prev) => ({
+                    ...prev,
+                    id: response
+                    }));
 
             // После успешной отправки помечаем сообщение как постоянное
             setMessages(prev => prev.map(msg => 
