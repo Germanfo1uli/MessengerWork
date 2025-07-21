@@ -423,7 +423,7 @@ namespace CosmoBack.Services.Classes
                     AvatarImageId = sender.AvatarImageId
                 };
 
-                await _hubContext.Clients.Group(chat.Id.ToString()).SendAsync("ReceiveMessage", messageDto);
+                // await _hubContext.Clients.Group(chat.Id.ToString()).SendAsync("ReceiveMessage", messageDto);
 
                 return messageDto;
             }

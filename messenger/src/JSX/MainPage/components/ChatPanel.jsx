@@ -113,6 +113,9 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                     }))
                     : [];
 
+                console.log(chatsResponse)
+                console.log(enhancedChats)
+
                 setUser({
                     username: profileResponse.username || username,
                     status: getStatusString(profileResponse.onlineStatus),
@@ -158,6 +161,7 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
     useEffect(() => {
         if (connection && isConnected) {
             connection.on('UpdateChatList', (updatedChat) => {
+                console.log(updatedChat)
                 setData((prev) => {
                     const existingChatIndex = prev.findIndex((chat) => chat.id === updatedChat.id);
                     if (existingChatIndex !== -1) {
@@ -203,7 +207,7 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
     };
 
     const handleChatClick = (chat) => {
-        if (chat.id === '00000000-0000-0000-0000-000000000000') {
+        if (chat.id === null) {
             setData((prev) => {
                 if (!prev.some(c => c.secondUserId === chat.secondUserId)) {
                     return [...prev, { ...chat, joined: false }];
@@ -216,7 +220,7 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
 
     const handleAddContact = (contactData) => {
         const newChat = {
-            id: '00000000-0000-0000-0000-000000000000',
+            id: null,
             publicId: 0,
             isFavorite: false,
             firstUserId: userId,

@@ -30,6 +30,7 @@ function useSignalR() {
                 })
                 .build();
 
+            console.log(localStorage.getItem('authToken'))
             setConnection(newConnection);
 
             newConnection.onclose(async () => {

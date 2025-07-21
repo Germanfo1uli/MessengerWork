@@ -14,19 +14,23 @@ import { useAuth } from '../../../hooks/UseAuth';
 import useMainHooks from '../../../hooks/UseMainHooks';
 import { useNavigate } from 'react-router-dom';
 
-const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) => {
+const ChatWindow = ({ connection, activeChat, setActiveChat, onToggleFavorite, isConnected }) => {
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const {isLoading, userId, username, isAuthenticated, logout} = useAuth();
     const {getStatusString, formatTimeFromISO} = useMainHooks();
+    const [secondUserId, setSecondUserId] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
         const fetchData = async () => {
             if (!activeChat?.id) return; // Добавляем проверку на наличие activeChat и его id
-            
+
+            setSecondUserId(activeChat.secondUserId)
+            console.log(activeChat.id)
+
             try {
                 const response = await apiRequest(`/api/messages/chat/${activeChat.id}`, {
                     method: 'GET',
@@ -72,6 +76,12 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                         msg.tempId === newMessage.tempId && 
                         msg.senderId === newMessage.senderId
                     );
+
+                    if(activeChat.id === '00000000-0000-0000-0000-000000000000')
+                        setActiveChat((prev) => ({
+                            ...prev,
+                            id: newMessage.chatId
+                          }));
                     
                     return isDuplicate ? prevMessages : [...prevMessages, {
                         ...newMessage,
@@ -108,8 +118,10 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
     
         try {
             // Отправка на сервер
-            await connection.invoke("SendMessage", activeChat.id, userId, message, tempId);
-            
+            await connection.invoke("SendMessage",
+                activeChat.id === '00000000-0000-0000-0000-000000000000' ? null : activeChat.id,
+                secondUserId, message, tempId);
+
             // После успешной отправки помечаем сообщение как постоянное
             setMessages(prev => prev.map(msg => 
                 msg.id === tempId ? { ...msg, isTemporary: false } : msg
