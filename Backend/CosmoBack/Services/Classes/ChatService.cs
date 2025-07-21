@@ -51,34 +51,23 @@ namespace CosmoBack.Services.Classes
             {
                 var currentUserId = Guid.Parse(_httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
                     ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
-                var chat = await _chatRepository.GetChatByIdWithMessagesAsync(id);
-                if (chat == null)
+
+                // Получаем чаты с деталями для текущего пользователя
+                var chats = await _chatRepository.GetChatsWithDetailsAsync(currentUserId);
+                var chatData = chats.FirstOrDefault(c => (c.GetType().GetProperty("Chat").GetValue(c) as Chat)?.Id == id);
+
+                if (chatData == null)
                 {
-                    _logger.LogWarning("Chat with ID {ChatId} not found", id);
+                    _logger.LogWarning("Chat with ID {ChatId} not found for user {UserId}", id, currentUserId);
                     throw new KeyNotFoundException($"Чат с ID {id} не найден");
                 }
 
-                var chatMember = await _chatMembersRepository.GetByChatAndUserIdAsync(id, currentUserId);
+                var chat = chatData.GetType().GetProperty("Chat").GetValue(chatData) as Chat;
+                var chatMember = await _chatMembersRepository.GetByChatAndUserIdAsync(chat.Id, currentUserId);
+                var lastMessageData = chatData.GetType().GetProperty("LastMessageData").GetValue(chatData);
+                var secondUser = chatData.GetType().GetProperty("SecondUser").GetValue(chatData);
 
-                var lastMessage = await _context.Messages
-                    .Where(m => m.ChatId == id)
-                    .Join(_context.Users,
-                        m => m.SenderId,
-                        u => u.Id,
-                        (m, u) => new ChatMessageDto
-                        {
-                            Id = m.Id,
-                            ChatId = (Guid)m.ChatId,
-                            SenderId = m.SenderId,
-                            Comment = m.Comment,
-                            CreatedAt = m.CreatedAt,
-                            Username = u.Username,
-                            AvatarImageId = u.AvatarImageId
-                        })
-                    .OrderByDescending(m => m.CreatedAt)
-                    .FirstOrDefaultAsync();
-
-                return new ChatDto
+                var chatDto = new ChatDto
                 {
                     Id = chat.Id,
                     PublicId = chat.PublicId,
@@ -86,9 +75,29 @@ namespace CosmoBack.Services.Classes
                     FirstUserId = chat.FirstUserId,
                     SecondUserId = chat.SecondUserId,
                     CreatedAt = chat.CreatedAt,
-                    LastMessageAt = lastMessage?.CreatedAt,
-                    LastMessage = lastMessage
+                    LastMessageAt = lastMessageData != null
+                        ? (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message)?.CreatedAt
+                        : null,
+                    LastMessage = lastMessageData != null ? new ChatMessageDto
+                    {
+                        Id = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).Id,
+                        ChatId = (Guid)(lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).ChatId,
+                        SenderId = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).SenderId,
+                        Comment = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).Comment,
+                        CreatedAt = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).CreatedAt,
+                        Username = lastMessageData.GetType().GetProperty("Username").GetValue(lastMessageData)?.ToString() ?? string.Empty,
+                        AvatarImageId = lastMessageData.GetType().GetProperty("AvatarImageId").GetValue(lastMessageData) as Guid?
+                    } : null,
+                    SecondUser = secondUser != null ? new SecondUserDto
+                    {
+                        Username = secondUser.GetType().GetProperty("Username").GetValue(secondUser)?.ToString() ?? string.Empty,
+                        OnlineStatus = (OnlineStatus)secondUser.GetType().GetProperty("OnlineStatus").GetValue(secondUser),
+                        ContactTag = secondUser.GetType().GetProperty("ContactTag").GetValue(secondUser)?.ToString()
+                    } : null
                 };
+
+                _logger.LogInformation("Retrieved chat with ID {ChatId} for user {UserId}", id, currentUserId);
+                return chatDto;
             }
             catch (Exception ex)
             {

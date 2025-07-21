@@ -160,11 +160,17 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
 
     useEffect(() => {
         if (connection && isConnected) {
-            connection.on('UpdateChatList', (updatedChat) => {
-                console.log(updatedChat)
+            connection.on('UpdateChatList', async (updatedChat) => {
+                // Проверяем, что updatedChat корректен
+                if (!updatedChat || !updatedChat.id) {
+                    console.warn('Получен некорректный updatedChat:', updatedChat);
+                    return;
+                }
+    
                 setData((prev) => {
                     const existingChatIndex = prev.findIndex((chat) => chat.id === updatedChat.id);
                     if (existingChatIndex !== -1) {
+                        // Обновляем существующий чат
                         const existingChat = prev[existingChatIndex];
                         const secondUser = existingChat.secondUser || updatedChat.secondUser;
                         const mergedChat = {
@@ -173,24 +179,96 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                             secondUser,
                             lastMessage: updatedChat.lastMessage
                                 ? {
-                                    ...updatedChat.lastMessage,
-                                    isSentByUser: userId === updatedChat.lastMessage.senderId
-                                }
+                                      ...updatedChat.lastMessage,
+                                      isSentByUser: userId === updatedChat.lastMessage.senderId
+                                  }
                                 : existingChat.lastMessage
                         };
                         const newData = [...prev];
                         newData[existingChatIndex] = mergedChat;
                         return newData;
+                    } else {
+                        // Новый чат: добавляем временный чат и запрашиваем полные данные
+                        const tempChat = {
+                            ...updatedChat,
+                            secondUser: updatedChat.secondUser ?? {
+                                username: 'Загрузка...',
+                                onlineStatus: 0,
+                                contactTag: null
+                            },
+                            joined: false
+                        };
+    
+                        // Выполняем запрос для получения полной информации о чате
+                        const fetchChatDetails = async () => {
+                            try {
+                                const response = await apiRequest(`/api/chat/${updatedChat.id}`, {
+                                    method: 'GET',
+                                    authenticated: isAuthenticated
+                                });
+    
+                                // Формируем чат с полной информацией
+                                const newChat = {
+                                    id: response.id,
+                                    publicId: response.publicId,
+                                    isFavorite: response.isFavorite,
+                                    firstUserId: response.firstUserId,
+                                    secondUserId: response.secondUserId,
+                                    createdAt: response.createdAt,
+                                    lastMessageAt: response.lastMessageAt,
+                                    lastMessage: response.lastMessage
+                                        ? {
+                                              id: response.lastMessage.id,
+                                              chatId: response.lastMessage.chatId,
+                                              senderId: response.lastMessage.senderId,
+                                              comment: response.lastMessage.comment,
+                                              createdAt: response.lastMessage.createdAt,
+                                              username: response.lastMessage.username,
+                                              avatarImageId: response.lastMessage.avatarImageId,
+                                              isSentByUser: userId === response.lastMessage.senderId
+                                          }
+                                        : null,
+                                    secondUser: {
+                                        username: response.secondUser?.username ?? 'Неизвестный пользователь',
+                                        onlineStatus: response.secondUser?.onlineStatus ?? 0,
+                                        contactTag: response.secondUser?.contactTag ?? null
+                                    },
+                                    joined: false
+                                };
+    
+                                // Подключаемся к чату через SignalR
+                                await connection.invoke('JoinChat', newChat.id).catch((error) => {
+                                    console.error(`Failed to join chat ${newChat.id}:`, error);
+                                });
+    
+                                // Обновляем data, заменяя временный чат
+                                setData((prevData) => {
+                                    const tempChatIndex = prevData.findIndex((c) => c.id === newChat.id);
+                                    if (tempChatIndex !== -1) {
+                                        const newData = [...prevData];
+                                        newData[tempChatIndex] = { ...newChat, joined: true };
+                                        return newData;
+                                    }
+                                    return [...prevData, { ...newChat, joined: true }];
+                                });
+                            } catch (error) {
+                                console.error(`Failed to fetch chat details for ${updatedChat.id}:`, error);
+                                // Удаляем временный чат при ошибке
+                                setData((prevData) => prevData.filter((c) => c.id !== updatedChat.id));
+                            }
+                        };
+    
+                        fetchChatDetails();
+                        return [...prev, tempChat];
                     }
-                    return [...prev, { ...updatedChat, joined: false }];
                 });
             });
-
+    
             return () => {
                 connection.off('UpdateChatList');
             };
         }
-    }, [connection, isConnected, userId]);
+    }, [connection, isConnected, userId, isAuthenticated, apiRequest]);
 
     useEffect(() => {
         return () => {
@@ -365,7 +443,7 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                             <ChatBox
                                 name={chat.secondUser.username}
                                 unread={10}
-                                lastMessage={chat.lastMessage?.comment ?? "Нет сообщений"}
+                                lastMessage={chat.lastMessage?.comment ?? ''}
                                 time={formatTimeFromISO(chat.lastMessage?.createdAt)}
                                 status={getStatusString(chat.secondUser.onlineStatus)}
                                 isFavorite={false}
