@@ -10,7 +10,7 @@ class Program
         var hubConnection = new HubConnectionBuilder()
             .WithUrl("https://localhost:7001/chatHub", options =>
             {
-                options.AccessTokenProvider = () => Task.FromResult("Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YWZmMTZhMi00M2I2LTQzNTEtYjgxOS1hOThlM2E0NzJkYzQiLCJ1c2VybmFtZSI6Ik5pa2l0YSIsIm5iZiI6MTc1Mjc0NTM5NCwiZXhwIjoxNzU0ODE4OTk0LCJpYXQiOjE3NTI3NDUzOTR9.xVwpfqStrSD4P2slmA0kStciQ0WgX9mS8tPZBjFmvOI"); // Замените на реальный токен
+                options.AccessTokenProvider = () => Task.FromResult("Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0MTA0N2MxNy0wNzQ1LTRkZjEtYmM0ZC05NjIzY2ViOTIyY2QiLCJ1c2VybmFtZSI6Ik5lU3dhZ2EiLCJuYmYiOjE3NTMwODk5MzksImV4cCI6MTc1NTE2MzUzOSwiaWF0IjoxNzUzMDg5OTM5fQ.ldQvTaROSDbl4vTXjO2QI02vtA1aG20avWidFem4p1s"); // Замените на реальный токен
             })
             .Build();
 
@@ -37,8 +37,8 @@ class Program
             Console.WriteLine("Подключение к ChatHub успешно");
 
             // Тестирование методов хаба
-            var chatId = "9ac34cf3-5863-47ef-aa1d-ce3be7c9712e"; // Замените на реальный chatId
-            var senderId = "ee403031-a58c-4873-86f8-8baf9b5241ea"; // Замените на реальный senderId
+            var chatId = "0d7e9d08-6e5f-4d36-ab1c-df83c56dc565"; // Замените на реальный chatId
+            var senderId = "41047c17-0745-4df1-bc4d-9623ceb922cd"; // Замените на реальный senderId
             int tempId = 12345678;
             string message = "Герман долбаеб";
 
