@@ -3,22 +3,18 @@ using CosmoBack.Models.Dtos;
 using CosmoBack.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace CosmoBack.Services.Classes
 {
     public class TagSearchService : ITagSearchService
     {
         private readonly CosmoDbContext _context;
-        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<TagSearchService> _logger;
 
         public TagSearchService(
             CosmoDbContext context,
-            IHttpContextAccessor httpContextAccessor,
             ILogger<TagSearchService> logger)
         {
             _context = context;
-            _httpContextAccessor = httpContextAccessor;
             _logger = logger;
         }
 
@@ -31,7 +27,28 @@ namespace CosmoBack.Services.Classes
                 var normalizedTag = tag.StartsWith('@') ? tag[1..] : tag;
                 var results = new List<TagSearchDto>();
 
-                // 1. Поиск каналов по ChannelTag
+                if (!tag.StartsWith('@'))
+                {
+                    var users = await _context.Users
+                        .Where(u => (u.PublicName != null && u.PublicName.Contains(normalizedTag)) ||
+                                   (u.Username.Contains(normalizedTag)))
+                        .Select(u => new TagSearchDto
+                        {
+                            Id = u.Id,
+                            Tag = u.PublicName ?? u.Username, 
+                            Type = EntityType.User,
+                            CreatedAt = u.CreatedAt,
+                            AvatarImageId = u.AvatarImageId,
+                            Username = u.Username,
+                            OnlineStatus = u.OnlineStatus,
+                            Phone = u.Phone,
+                            Bio = u.Bio
+                        })
+                        .ToListAsync();
+
+                    results.AddRange(users);
+                }
+
                 var channels = await _context.Channels
                     .Where(c => c.ChannelTag != null && c.ChannelTag.Contains(normalizedTag))
                     .Select(c => new TagSearchDto
@@ -50,7 +67,6 @@ namespace CosmoBack.Services.Classes
 
                 results.AddRange(channels);
 
-                
                 var groups = await _context.Groups
                     .Where(g => g.GroupTag != null && g.GroupTag.Contains(normalizedTag))
                     .Select(g => new TagSearchDto
@@ -169,7 +185,12 @@ namespace CosmoBack.Services.Classes
                     }
                 }
 
-                return results.OrderByDescending(r => r.LastMessageAt ?? r.CreatedAt);
+                // Сортировка по релевантности
+                return results
+                    .OrderByDescending(r => r.Tag?.StartsWith(normalizedTag) ?? false)
+                    .ThenByDescending(r => r.Tag?.Contains(normalizedTag) ?? false)
+                    .ThenByDescending(r => r.LastMessageAt ?? r.CreatedAt)
+                    .Take(10);
             }
             catch (Exception ex)
             {

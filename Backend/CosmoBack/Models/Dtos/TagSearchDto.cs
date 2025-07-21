@@ -17,6 +17,8 @@ namespace CosmoBack.Models.Dtos
         public string? Username { get; set; }
         public OnlineStatus? OnlineStatus { get; set; }
         public string? ContactTag { get; set; }
+        public string? Phone { get; set; }
+        public string? Bio { get; set; }
     }
 
     public enum EntityType
@@ -24,6 +26,8 @@ namespace CosmoBack.Models.Dtos
         Chat,
         Group,
         Channel,
-        Contact
+        Contact,
+        User 
     }
+
 }
