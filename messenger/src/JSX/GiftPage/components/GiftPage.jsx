@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FiArrowLeft, FiStar, FiGift, FiPlus } from 'react-icons/fi';
+import { FiArrowLeft, FiStar, FiGift, FiPlus, FiShoppingBag } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/GiftPage.module.css';
 
@@ -106,12 +106,22 @@ const GiftPage = () => {
                         <FiArrowLeft size={24} />
                         Назад
                     </button>
-                    <div className={styles.currency} onClick={() => setShowStarModal(true)}>
-                        <FiStar className={styles.currencyIcon} />
-                        <span className={styles.currencyAmount}>10,500</span>
-                        <button className={styles.addStarsButton}>
-                            <FiPlus size={18} />
+                    <div className={styles.currency}>
+                        <button
+                            className={styles.marketplaceButton}
+                            onClick={() => navigate('/marketplace')}
+                        >
+                            <FiShoppingBag size={18} />
+                            Торговая площадка
                         </button>
+                        <div className={styles.currencyDisplay} onClick={() => setShowStarModal(true)}>
+                            <FiStar className={styles.currencyIcon} />
+                            <span className={styles.currencyAmount}>10,500</span>
+                            <button className={styles.addStarsButton}>
+                                <FiPlus size={18} />
+                            </button>
+                        </div>
+
                     </div>
                 </div>
 
@@ -190,9 +200,6 @@ const GiftPage = () => {
                         <h2 className={styles.modalTitle}>Пополнить баланс</h2>
                         <p className={styles.modalSubtitle}>
                             <span className={styles.starHighlight}>Звёзды</span> — ваша космическая валюта для покупки уникального контента и эксклюзивных подарков в мессенджере! Дарите радость друзьям или украшайте свои чаты!
-                        </p>
-                        <p className={styles.starLearnMore}>
-                            Подробнее о звёздах
                         </p>
                         <div className={styles.starPackages}>
                             {starPackages.map(pkg => (

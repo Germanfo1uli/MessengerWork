@@ -11,6 +11,7 @@ import LanguageSettingsPage from "./JSX/SettingsPage/components/LanguageSettings
 import AppearanceSettings from "./JSX/SettingsPage/components/AppearanceSettings";
 import SecurityPage from "./JSX/SettingsPage/components/SecurityPage";
 import GiftPage from "./JSX/GiftPage/components/GiftPage";
+import TradingPlatformPage from "./JSX/GiftPage/components/TradingPlatformPage";
 
 const AppContent = () => {
     const [currentScreen, setCurrentScreen] = useState('welcome');
@@ -18,7 +19,7 @@ const AppContent = () => {
 
     return (
         <div className={styles.appContainer}>
-            {location.pathname !== ('/home' || '/settings'  || '/language' || '/appearance' || '/security' || '/gift') && <StarField />}
+            {location.pathname !== ('/home' || '/settings'  || '/language' || '/appearance' || '/security' || '/gift' || '/marketplace') && <StarField />}
             <div className={styles.spaceOverlay} />
             <div className={styles.contentContainer}>
                 {location.pathname === '/' ? (
@@ -35,6 +36,7 @@ const AppContent = () => {
                         <Route path="/appearance" element={<AppearanceSettings />} />
                         <Route path="/security" element={<SecurityPage />} />
                         <Route path="/gift" element={<GiftPage />} />
+                        <Route path="/marketplace" element={<TradingPlatformPage />} />
                     </Routes>
                 )}
             </div>
