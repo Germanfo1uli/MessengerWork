@@ -68,7 +68,7 @@ namespace CosmoBack.Services.Classes
                         (m, u) => new ChatMessageDto
                         {
                             Id = m.Id,
-                            ChatId = m.ChatId,
+                            ChatId = (Guid)m.ChatId,
                             SenderId = m.SenderId,
                             Comment = m.Comment,
                             CreatedAt = m.CreatedAt,
@@ -133,7 +133,7 @@ namespace CosmoBack.Services.Classes
                         LastMessage = lastMessageData != null ? new ChatMessageDto
                         {
                             Id = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).Id,
-                            ChatId = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).ChatId,
+                            ChatId = (Guid)(lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).ChatId,
                             SenderId = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).SenderId,
                             Comment = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).Comment,
                             CreatedAt = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).CreatedAt,
@@ -415,7 +415,7 @@ namespace CosmoBack.Services.Classes
                 var messageDto = new ChatMessageDto
                 {
                     Id = message.Id,
-                    ChatId = message.ChatId,
+                    ChatId = (Guid)message.ChatId,
                     SenderId = message.SenderId,
                     Comment = message.Comment,
                     CreatedAt = message.CreatedAt,
@@ -467,7 +467,7 @@ namespace CosmoBack.Services.Classes
                         (m, u) => new ChatMessageDto
                         {
                             Id = m.Id,
-                            ChatId = m.ChatId,
+                            ChatId = (Guid)m.ChatId,
                             SenderId = m.SenderId,
                             Comment = m.Comment,
                             CreatedAt = m.CreatedAt,
@@ -562,7 +562,7 @@ namespace CosmoBack.Services.Classes
                             LastMessage = lastMessageData != null ? new ChatMessageDto
                             {
                                 Id = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).Id,
-                                ChatId = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).ChatId,
+                                ChatId = (Guid)(lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).ChatId,
                                 SenderId = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).SenderId,
                                 Comment = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).Comment,
                                 CreatedAt = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).CreatedAt,

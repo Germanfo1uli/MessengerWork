@@ -41,9 +41,9 @@ namespace CosmoBack.Hubs
                 tempId
             };
 
-            await Clients.Group(chatId.ToString()).SendAsync("ReceiveMessage", response);
+            await Clients.Group(response.ChatId.ToString()).SendAsync("ReceiveMessage", response);
 
-            var chat = await _chatService.GetChatByIdAsync(chatId);
+            var chat = await _chatService.GetChatByIdAsync(response.ChatId);
 
             // Уведомляем всех участников чата, что список чатов нужно обновить
             await Clients.Group(chatMessage.ChatId.ToString()).SendAsync("UpdateChatList");
