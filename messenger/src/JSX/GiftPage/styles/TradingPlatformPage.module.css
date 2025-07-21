@@ -615,13 +615,14 @@
     position: relative;
     background: linear-gradient(135deg, #0f1a2e, #1c2347);
     border-radius: 20px;
-    padding: 2rem;
+    padding: 2.5rem;
     width: 90%;
-    max-width: 700px;
+    max-width: 600px;
     box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(77, 121, 246, 0.4);
     animation: modalAppear 0.3s ease-out;
 }
+
 
 .closeModal {
     position: absolute;
