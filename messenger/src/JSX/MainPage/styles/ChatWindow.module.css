@@ -4,7 +4,7 @@
     flex-direction: column;
     height: 100%;
     min-width: 0;
-    max-width: calc(100% - 0px - 30px);
+    max-width: calc(100% - 0px - 40px);
     margin-left: auto;
     background-color: #0f0c29;
     background-image: radial-gradient(circle at top center, #1a1547 0%, #0f0c29 70%);
