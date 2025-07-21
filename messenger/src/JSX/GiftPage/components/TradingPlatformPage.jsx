@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { FiArrowLeft, FiStar, FiPlus, FiShoppingBag } from 'react-icons/fi';
+import React, { useEffect, useState } from 'react';
+import { FiArrowLeft, FiStar, FiPlus, FiShoppingBag, FiSearch, FiFilter } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/TradingPlatformPage.module.css';
 
@@ -8,6 +8,10 @@ const TradingPlatformPage = () => {
     const [walletBalance, setWalletBalance] = useState(1250);
     const [showStarModal, setShowStarModal] = useState(false);
     const [selectedStarPackage, setSelectedStarPackage] = useState(null);
+    const [sortOption, setSortOption] = useState('price-asc');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filterTheme, setFilterTheme] = useState('all');
+    const [filteredMarketplaceItems, setFilteredMarketplaceItems] = useState([]);
     const navigate = useNavigate();
 
     const starPackages = [
@@ -17,6 +21,54 @@ const TradingPlatformPage = () => {
         { id: 4, stars: 6500, price: 799, discount: 30, popular: true },
         { id: 5, stars: 15000, price: 1499, discount: 40, popular: false },
     ];
+
+    const themes = [
+        { id: 'all', name: 'Все темы' },
+        { id: 'space', name: 'Космос' },
+        { id: 'technology', name: 'Технологии' },
+        { id: 'nature', name: 'Природа' },
+        { id: 'art', name: 'Искусство' }
+    ];
+
+    useEffect(() => {
+        let items = [...marketplaceItems];
+
+        // Фильтрация по поисковому запросу
+        if (searchQuery) {
+            items = items.filter(item =>
+                item.name.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        }
+
+        // Фильтрация по теме
+        if (filterTheme !== 'all') {
+            // В реальном приложении у items должно быть поле theme
+            // items = items.filter(item => item.theme === filterTheme);
+            // Для демонстрации просто оставляем как есть
+        }
+
+        // Сортировка
+        items.sort((a, b) => {
+            switch (sortOption) {
+                case 'price-asc':
+                    return a.minPrice - b.minPrice;
+                case 'price-desc':
+                    return b.minPrice - a.minPrice;
+                case 'quantity-asc':
+                    return a.quantity - b.quantity;
+                case 'quantity-desc':
+                    return b.quantity - a.quantity;
+                case 'name-asc':
+                    return a.name.localeCompare(b.name);
+                case 'name-desc':
+                    return b.name.localeCompare(a.name);
+                default:
+                    return 0;
+            }
+        });
+
+        setFilteredMarketplaceItems(items);
+    }, [searchQuery, sortOption, filterTheme]);
 
     const handleBuyStars = (packageId) => {
         const packageToBuy = starPackages.find(pkg => pkg.id === packageId);
@@ -331,28 +383,82 @@ const TradingPlatformPage = () => {
                     {renderTabContent()}
 
                     <div className={styles.marketplaceSection}>
-                        <h2 className={styles.sectionTitle}>Подарки на продажу</h2>
-                        <div className={styles.marketplaceGrid}>
-                            {marketplaceItems.map(item => (
-                                <div key={item.id} className={styles.marketplaceCard} data-rarity={item.rarity}>
-                                    <div className={styles.marketplaceImageWrapper}>
-                                        <div className={styles.marketplaceGlow} style={{ '--rarity-color': getRarityColor(item.rarity) }} />
-                                        <img src={item.image} alt={item.name} className={styles.marketplaceImage} />
+                        <div className={styles.marketplaceHeader}>
+                            <h2 className={styles.sectionTitle}>Подарки на продажу</h2>
+
+                            <div className={styles.marketplaceControls}>
+                                <div className={styles.searchContainer}>
+                                    <FiSearch className={styles.searchIcon} />
+                                    <input
+                                        type="text"
+                                        placeholder="Поиск подарков..."
+                                        className={styles.searchInput}
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                    />
+                                </div>
+
+                                <div className={styles.filterGroup}>
+                                    <div className={styles.filterContainer}>
+                                        <FiFilter className={styles.filterIcon} />
+                                        <select
+                                            className={styles.filterSelect}
+                                            value={filterTheme}
+                                            onChange={(e) => setFilterTheme(e.target.value)}
+                                        >
+                                            {themes.map(theme => (
+                                                <option key={theme.id} value={theme.id}>
+                                                    {theme.name}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </div>
-                                    <div className={styles.marketplaceInfo}>
-                                        <h3 className={styles.marketplaceName}>{item.name}</h3>
-                                        <div className={styles.marketplaceDetails}>
-                                            <span>Доступно: {item.quantity}</span>
-                                            <div className={styles.marketplacePrice}>
-                                                <span>Цена от: </span>
-                                                <FiStar className={styles.priceIcon} />
-                                                <span>{item.minPrice.toLocaleString()}</span>
-                                            </div>
-                                        </div>
-                                        <button className={styles.marketplaceButton}>Предложить цену</button>
+
+                                    <div className={styles.sortContainer}>
+                                        <select
+                                            className={styles.sortSelect}
+                                            value={sortOption}
+                                            onChange={(e) => setSortOption(e.target.value)}
+                                        >
+                                            <option value="price-asc">Цена (по возрастанию)</option>
+                                            <option value="price-desc">Цена (по убыванию)</option>
+                                            <option value="quantity-asc">Количество (по возрастанию)</option>
+                                            <option value="quantity-desc">Количество (по убыванию)</option>
+                                            <option value="name-asc">Название (А-Я)</option>
+                                            <option value="name-desc">Название (Я-А)</option>
+                                        </select>
                                     </div>
                                 </div>
-                            ))}
+                            </div>
+                        </div>
+
+                        <div className={styles.marketplaceGrid}>
+                            {filteredMarketplaceItems.length > 0 ? (
+                                filteredMarketplaceItems.map(item => (
+                                    <div key={item.id} className={styles.marketplaceCard} data-rarity={item.rarity}>
+                                        <div className={styles.marketplaceImageWrapper}>
+                                            <div className={styles.marketplaceGlow} style={{ '--rarity-color': getRarityColor(item.rarity) }} />
+                                            <img src={item.image} alt={item.name} className={styles.marketplaceImage} />
+                                        </div>
+                                        <div className={styles.marketplaceInfo}>
+                                            <h3 className={styles.marketplaceName}>{item.name}</h3>
+                                            <div className={styles.marketplaceDetails}>
+                                                <span>Доступно: {item.quantity}</span>
+                                                <div className={styles.marketplacePrice}>
+                                                    <span>Цена от: </span>
+                                                    <FiStar className={styles.priceIcon} />
+                                                    <span>{item.minPrice.toLocaleString()}</span>
+                                                </div>
+                                            </div>
+                                            <button className={styles.marketplaceButton}>Предложить цену</button>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className={styles.emptyState}>
+                                    <p>Ничего не найдено. Попробуйте изменить параметры поиска.</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
