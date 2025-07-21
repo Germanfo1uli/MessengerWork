@@ -191,12 +191,21 @@ namespace CosmoBack.CosmoDBContext
 
             modelBuilder.Entity<Reply>()
                 .HasOne(r => r.OriginalMessage)
-                .WithMany()
+                .WithMany(m => m.Replies)
                 .HasForeignKey(r => r.OriginalMessageId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade); // Changed to Cascade for consistency
+
+            modelBuilder.Entity<Reply>()
+                .HasOne(r => r.ReplyMessage)
+                .WithMany()
+                .HasForeignKey(r => r.ReplyMessageId)
+                .OnDelete(DeleteBehavior.Cascade); // Changed to Cascade for consistency
 
             modelBuilder.Entity<Reply>()
                 .HasIndex(r => r.OriginalMessageId);
+
+            modelBuilder.Entity<Reply>()
+                .HasIndex(r => r.ReplyMessageId); // Added index for ReplyMessageId
 
             modelBuilder.Entity<Reaction>()
                 .HasKey(r => new { r.MessageId, r.UserId });

@@ -48,7 +48,7 @@ namespace CosmoBack.Controllers
         {
             try
             {
-                var messages = await _messageService.GetMessagesByGroupWithDetailsAsync(groupId);
+                var messages = await _messageService.GetMessagesByGroupAsync(groupId);
                 return Ok(messages);
             }
             catch (Exception ex)
@@ -58,11 +58,11 @@ namespace CosmoBack.Controllers
         }
 
         [HttpGet("channel/{channelId}")]
-        public async Task<IActionResult> GetMessagesByChannel(Guid ChannelId)
+        public async Task<IActionResult> GetMessagesByChannel(Guid channelId)
         {
             try
             {
-                var messages = await _messageService.GetMessagesByChannelAsync(ChannelId);
+                var messages = await _messageService.GetMessagesByChannelAsync(channelId);
                 return Ok(messages);
             }
             catch (Exception ex)

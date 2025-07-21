@@ -52,6 +52,7 @@ builder.Services.AddScoped<IGroupRepository, GroupRepository>();
 builder.Services.AddScoped<IGroupMembersRepository, GroupMembersRepository>();
 builder.Services.AddScoped<IChannelRepository, ChannelRepository>();
 builder.Services.AddScoped<IChannelMembersRepository, ChannelMembersRepository>();
+builder.Services.AddScoped<IReplyRepository, ReplyRepository>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IChatService, ChatService>();
@@ -65,6 +66,7 @@ builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddScoped<IGroupMembersService, GroupMembersService>();
 builder.Services.AddScoped<IChannelService, ChannelService>();
 builder.Services.AddScoped<ITagSearchService, TagSearchService>();
+builder.Services.AddScoped<IReplyService, ReplyService>();
 
 builder.Services.AddDbContext<CosmoDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQL")));

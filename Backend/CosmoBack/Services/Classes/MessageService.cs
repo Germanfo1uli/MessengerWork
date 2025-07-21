@@ -4,6 +4,7 @@ using CosmoBack.Models.Dtos;
 using CosmoBack.Repositories.Interfaces;
 using CosmoBack.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+
 namespace CosmoBack.Services
 {
     public class MessageService(IMessageRepository messageRepository, CosmoDbContext context) : IMessageService
@@ -28,11 +29,47 @@ namespace CosmoBack.Services
             }
         }
 
-        public async Task<IEnumerable<Message>> GetMessagesByChatAsync(Guid chatId)
+        public async Task<IEnumerable<ChatMessageDto>> GetMessagesByChatAsync(Guid chatId)
         {
             try
             {
-                return await _messageRepository.GetMessagesByChatIdAsync(chatId);
+                var messages = await _context.Messages
+                    .Where(m => m.ChatId == chatId)
+                    .Join(_context.Users,
+                        m => m.SenderId,
+                        u => u.Id,
+                        (m, u) => new { Message = m, User = u })
+                    .GroupJoin(_context.Replies,
+                        mu => mu.Message.Id,
+                        r => r.ReplyMessageId, // Изменено: присоединяем по ReplyMessageId
+                        (mu, replies) => new { mu.Message, mu.User, Replies = replies })
+                    .SelectMany(
+                        mur => mur.Replies.DefaultIfEmpty(),
+                        (mur, r) => new { mur.Message, mur.User, Reply = r })
+                    .GroupBy(x => x.Message.Id)
+                    .Select(g => new ChatMessageDto
+                    {
+                        Id = g.First().Message.Id,
+                        ChatId = (Guid)g.First().Message.ChatId,
+                        SenderId = g.First().Message.SenderId,
+                        Comment = g.First().Message.Comment,
+                        CreatedAt = g.First().Message.CreatedAt,
+                        Username = g.First().User.Username,
+                        AvatarImageId = g.First().User.AvatarImageId,
+                        ReplyTo = g.Where(x => x.Reply != null)
+                            .Select(x => new MessageReplyDto
+                            {
+                                MessageId = x.Reply.OriginalMessageId,
+                                SenderId = x.Reply.OriginalMessage.SenderId,
+                                Username = x.Reply.OriginalMessage.Sender.Username,
+                                Comment = x.Reply.OriginalMessage.Comment
+                            })
+                            .FirstOrDefault()
+                    })
+                    .OrderBy(m => m.CreatedAt)
+                    .ToListAsync();
+
+                return messages;
             }
             catch (Exception ex)
             {
@@ -40,19 +77,7 @@ namespace CosmoBack.Services
             }
         }
 
-        public async Task<IEnumerable<Message>> GetMessagesByGroupAsync(Guid groupId)
-        {
-            try
-            {
-                return await _messageRepository.GetMessagesByGroupIdAsync(groupId);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Ошибка при получении сообщений группы: {ex.Message}", ex);
-            }
-        }
-
-        public async Task<IEnumerable<GroupMessageDto>> GetMessagesByGroupWithDetailsAsync(Guid groupId)
+        public async Task<IEnumerable<GroupMessageDto>> GetMessagesByGroupAsync(Guid groupId)
         {
             try
             {
@@ -61,16 +86,34 @@ namespace CosmoBack.Services
                     .Join(_context.Users,
                         m => m.SenderId,
                         u => u.Id,
-                        (m, u) => new GroupMessageDto
-                        {
-                            Id = m.Id,
-                            GroupId = m.GroupId,
-                            SenderId = m.SenderId,
-                            Comment = m.Comment,
-                            CreatedAt = m.CreatedAt,
-                            Username = u.Username,
-                            AvatarImageId = u.AvatarImageId
-                        })
+                        (m, u) => new { Message = m, User = u })
+                    .GroupJoin(_context.Replies,
+                        mu => mu.Message.Id,
+                        r => r.ReplyMessageId, // Изменено: присоединяем по ReplyMessageId
+                        (mu, replies) => new { mu.Message, mu.User, Replies = replies })
+                    .SelectMany(
+                        mur => mur.Replies.DefaultIfEmpty(),
+                        (mur, r) => new { mur.Message, mur.User, Reply = r })
+                    .GroupBy(x => x.Message.Id)
+                    .Select(g => new GroupMessageDto
+                    {
+                        Id = g.First().Message.Id,
+                        GroupId = g.First().Message.GroupId,
+                        SenderId = g.First().Message.SenderId,
+                        Comment = g.First().Message.Comment,
+                        CreatedAt = g.First().Message.CreatedAt,
+                        Username = g.First().User.Username,
+                        AvatarImageId = g.First().User.AvatarImageId,
+                        ReplyTo = g.Where(x => x.Reply != null)
+                            .Select(x => new MessageReplyDto
+                            {
+                                MessageId = x.Reply.OriginalMessageId,
+                                SenderId = x.Reply.OriginalMessage.SenderId,
+                                Username = x.Reply.OriginalMessage.Sender.Username,
+                                Comment = x.Reply.OriginalMessage.Comment
+                            })
+                            .FirstOrDefault()
+                    })
                     .OrderBy(m => m.CreatedAt)
                     .ToListAsync();
 
@@ -78,15 +121,51 @@ namespace CosmoBack.Services
             }
             catch (Exception ex)
             {
-                throw new Exception($"Ошибка при получении сообщений группы с деталями: {ex.Message}", ex);
+                throw new Exception($"Ошибка при получении сообщений группы: {ex.Message}", ex);
             }
         }
 
-        public async Task<IEnumerable<Message>> GetMessagesByChannelAsync(Guid channelId)
+        public async Task<IEnumerable<ChannelMessageDto>> GetMessagesByChannelAsync(Guid channelId)
         {
             try
             {
-                return await _messageRepository.GetMessagesByChannelIdAsync(channelId);
+                var messages = await _context.Messages
+                    .Where(m => m.ChannelId == channelId)
+                    .Join(_context.Users,
+                        m => m.SenderId,
+                        u => u.Id,
+                        (m, u) => new { Message = m, User = u })
+                    .GroupJoin(_context.Replies,
+                        mu => mu.Message.Id,
+                        r => r.ReplyMessageId, // Изменено: присоединяем по ReplyMessageId
+                        (mu, replies) => new { mu.Message, mu.User, Replies = replies })
+                    .SelectMany(
+                        mur => mur.Replies.DefaultIfEmpty(),
+                        (mur, r) => new { mur.Message, mur.User, Reply = r })
+                    .GroupBy(x => x.Message.Id)
+                    .Select(g => new ChannelMessageDto
+                    {
+                        Id = g.First().Message.Id,
+                        ChannelId = g.First().Message.ChannelId,
+                        SenderId = g.First().Message.SenderId,
+                        Comment = g.First().Message.Comment,
+                        CreatedAt = g.First().Message.CreatedAt,
+                        Username = g.First().User.Username,
+                        AvatarImageId = g.First().User.AvatarImageId,
+                        ReplyTo = g.Where(x => x.Reply != null)
+                            .Select(x => new MessageReplyDto
+                            {
+                                MessageId = x.Reply.OriginalMessageId,
+                                SenderId = x.Reply.OriginalMessage.SenderId,
+                                Username = x.Reply.OriginalMessage.Sender.Username,
+                                Comment = x.Reply.OriginalMessage.Comment
+                            })
+                            .FirstOrDefault()
+                    })
+                    .OrderBy(m => m.CreatedAt)
+                    .ToListAsync();
+
+                return messages;
             }
             catch (Exception ex)
             {

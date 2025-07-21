@@ -6,10 +6,9 @@ namespace CosmoBack.Services.Interfaces
     public interface IMessageService
     {
         Task<Message> GetMessageByIdAsync(Guid id);
-        Task<IEnumerable<Message>> GetMessagesByChatAsync(Guid chatId);
-        Task<IEnumerable<Message>> GetMessagesByGroupAsync(Guid groupId);
-        Task<IEnumerable<GroupMessageDto>> GetMessagesByGroupWithDetailsAsync(Guid groupId);
-        Task<IEnumerable<Message>> GetMessagesByChannelAsync(Guid channelId);
+        Task<IEnumerable<ChatMessageDto>> GetMessagesByChatAsync(Guid chatId); 
+        Task<IEnumerable<GroupMessageDto>> GetMessagesByGroupAsync(Guid groupId);
+        Task<IEnumerable<ChannelMessageDto>> GetMessagesByChannelAsync(Guid channelId); 
         Task<IEnumerable<Message>> GetMessagesBySenderAsync(Guid senderId);
         Task<Message> CreateMessageAsync(Message message);
         Task DeleteMessageAsync(Guid messageId);
