@@ -64,6 +64,8 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                                 onlineStatus: item.onlineStatus
                             };
 
+                            console.log(baseItem)
+
                             // Обработка для чатов (как было в оригинале)
                             if (item.type === 'Chat') {
                                 return {
@@ -79,6 +81,8 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                                     joined: true
                                 };
                             }
+
+                            console.log(baseItem)
 
                             // Обработка для пользователей/контактов
                             if (item.type === 'User' || item.type === 'Contact') {
@@ -107,7 +111,7 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                             return baseItem;
                         })
                         : [];
-
+                    console.log(enhancedResults)
                     setSearchResults(enhancedResults);
                 } catch (error) {
                     console.error('Search error:', error);
@@ -289,11 +293,11 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                         };
     
                         fetchChatDetails();
+                        
                         return [...prev, tempChat];
                     }
                 });
             });
-    
             return () => {
                 connection.off('UpdateChatList');
             };

@@ -52,6 +52,7 @@ const ChatWindow = ({ connection, activeChat, setActiveChat, onToggleFavorite, i
             if (!activeChat?.id) return; // Добавляем проверку на наличие activeChat и его id
 
             setSecondUserId(activeChat.secondUserId)
+            console.log(activeChat.id)
 
             try {
                 const response = await apiRequest(`/api/messages/chat/${activeChat.id}`, {
@@ -149,16 +150,18 @@ const ChatWindow = ({ connection, activeChat, setActiveChat, onToggleFavorite, i
                 id: replyingTo.id,
                 comment: replyingTo.comment,
                 senderId: replyingTo.senderId,
-                sender: replyingTo.isUser ? "You" : activeChat.secondUser.username
+                sender: replyingTo.isUser ? username : activeChat.secondUser.username
             } : null
         };
+
+        console.log(newMessage)
 
         setMessages(prev => [...prev, newMessage]);
         setMessage('');
         setReplyingTo(null);
 
         try {
-            await connection.invoke("SendMessage", activeChat.id, userId, message, tempId, replyingTo?.id);
+            await connection.invoke("SendMessage", activeChat?.id || null, secondUserId, message, tempId, replyingTo?.id || null);
             setMessages(prev => prev.map(msg =>
                 msg.id === tempId ? { ...msg, isTemporary: false } : msg
             ));

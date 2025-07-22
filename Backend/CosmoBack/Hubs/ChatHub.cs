@@ -2,12 +2,14 @@
 using CosmoBack.Services.Interfaces;
 using System.Security.Claims;
 using System.Collections.Concurrent;
+using CosmoBack.Models.Dtos;
 
 namespace CosmoBack.Hubs
 {
-    public class ChatHub(IChatService chatService, IHttpContextAccessor httpContextAccessor) : Hub
+    public class ChatHub(IChatService chatService,IReplyService replyService, IHttpContextAccessor httpContextAccessor) : Hub
     {
         private readonly IChatService _chatService = chatService;
+        private readonly IReplyService _replyService = replyService;
         private static readonly ConcurrentDictionary<string, string> UserConnections = new();
 
         // При подключении клиента сохраняем его ConnectionId
@@ -45,12 +47,22 @@ namespace CosmoBack.Hubs
         }
 
         // Отправка сообщения в чат
-        public async Task<Guid> SendMessage(Guid? chatId, Guid secondUserId, string message, int tempId)
+        public async Task<Guid> SendMessage(Guid? chatId, Guid secondUserId, string message, int tempId, Guid? replyMessageId)
         {
             var senderId = Guid.Parse(Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
                 ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
 
-            var chatMessage = await _chatService.SendMessageAsync(chatId, senderId, secondUserId, message);
+            ChatMessageDto chatMessage;
+
+            if (replyMessageId == null)
+            {
+                chatMessage = await _chatService.SendMessageAsync(chatId, senderId, secondUserId, message);
+            }
+            else
+            {
+                chatMessage = await _replyService.CreateReplyAsync((Guid)replyMessageId, message, senderId);
+            }
+
             var chat = await _chatService.GetChatByIdAsync(chatMessage.ChatId);
 
             // Добавляем отправителя в группу чата
@@ -69,6 +81,7 @@ namespace CosmoBack.Hubs
                 chatMessage.SenderId,
                 chatMessage.Comment,
                 chatMessage.CreatedAt,
+                chatMessage.ReplyTo,
                 tempId
             };
 
