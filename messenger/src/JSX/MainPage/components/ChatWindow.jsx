@@ -1,11 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     FiSearch,
     FiPhone,
     FiMoreVertical,
     FiPaperclip,
     FiSmile,
-    FiSend
+    FiSend,
+    FiCornerUpLeft,
+    FiMapPin,
+    FiCopy,
+    FiShare2,
+    FiFlag,
+    FiCheckSquare
 } from 'react-icons/fi';
 import UserProfileModal from './UserProfileModal';
 import cl from '../styles/ChatWindow.module.css';
@@ -19,14 +25,19 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
     const [messages, setMessages] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [isProfileOpen, setIsProfileOpen] = useState(false);
-    const {isLoading, userId, username, isAuthenticated, logout} = useAuth();
-    const {getStatusString, formatTimeFromISO} = useMainHooks();
+    const [contextMenu, setContextMenu] = useState(null);
+    const { isLoading, userId, username, isAuthenticated, logout } = useAuth();
+    const { getStatusString, formatTimeFromISO } = useMainHooks();
     const navigate = useNavigate();
+    const contextMenuRef = useRef(null);
+
+    // List of available emoji reactions
+    const availableReactions = ['😊', '👍', '❤️', '😂', '😢'];
 
     useEffect(() => {
         const fetchData = async () => {
-            if (!activeChat?.id) return; // Добавляем проверку на наличие activeChat и его id
-            
+            if (!activeChat?.id) return;
+
             try {
                 const response = await apiRequest(`/api/messages/chat/${activeChat.id}`, {
                     method: 'GET',
@@ -34,20 +45,21 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                 });
 
                 const messages = Array.isArray(response)
-                ? response.map(message => ({
-                      ...message,
-                      isUser: userId === message.senderId,
-                  }))
-                : response;
+                    ? response.map(message => ({
+                        ...message,
+                        isUser: userId === message.senderId,
+                        reactions: message.reactions || [] // Initialize reactions array
+                    }))
+                    : response;
 
                 setMessages(messages);
             } catch (error) {
                 console.error('Failed to fetch messages:', error);
             }
         };
-    
+
         if (isLoading || !userId) {
-            return; 
+            return;
         }
 
         if (!isAuthenticated) {
@@ -60,38 +72,46 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
 
     useEffect(() => {
         if (!activeChat?.id || !connection || !isConnected) return;
-    
+
         const handleNewMessage = (newMessage) => {
             if (activeChat.id === newMessage.chatId) {
                 setMessages(prevMessages => {
-                    // Пропускаем временные сообщения (они уже отображены)
                     if (newMessage.isTemporary) return prevMessages;
-                    
-                    // Проверяем дубликаты по ID или времени+отправителю
-                    const isDuplicate = prevMessages.some(msg => 
-                        msg.tempId === newMessage.tempId && 
+
+                    const isDuplicate = prevMessages.some(msg =>
+                        msg.tempId === newMessage.tempId &&
                         msg.senderId === newMessage.senderId
                     );
-                    
+
                     return isDuplicate ? prevMessages : [...prevMessages, {
                         ...newMessage,
-                        isUser: userId === newMessage.senderId
+                        isUser: userId === newMessage.senderId,
+                        reactions: newMessage.reactions || []
                     }];
                 });
             }
         };
-    
+
         connection.on('ReceiveMessage', handleNewMessage);
         return () => connection.off('ReceiveMessage', handleNewMessage);
     }, [connection, isConnected, activeChat?.id, userId]);
 
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (contextMenuRef.current && !contextMenuRef.current.contains(event.target)) {
+                setContextMenu(null);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
     const handleSendMessage = async () => {
         if (!message.trim() || !activeChat?.id || !userId) return;
-    
-        // Генерируем временный ID для сообщения
+
         const tempId = Math.floor(10000000 + Math.random() * 90000000);
-        
-        // Оптимистичное обновление UI
+
         const newMessage = {
             id: tempId.toString(),
             tempId: tempId,
@@ -100,23 +120,20 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
             createdAt: new Date().toISOString(),
             senderId: userId,
             chatId: activeChat.id,
-            isTemporary: true // Флаг для временных сообщений
+            isTemporary: true,
+            reactions: []
         };
-    
+
         setMessages(prev => [...prev, newMessage]);
         setMessage('');
-    
+
         try {
-            // Отправка на сервер
             await connection.invoke("SendMessage", activeChat.id, userId, message, tempId);
-            
-            // После успешной отправки помечаем сообщение как постоянное
-            setMessages(prev => prev.map(msg => 
+            setMessages(prev => prev.map(msg =>
                 msg.id === tempId ? { ...msg, isTemporary: false } : msg
             ));
         } catch (error) {
             console.error("Ошибка отправки:", error);
-            // Удаляем временное сообщение при ошибке
             setMessages(prev => prev.filter(msg => msg.id !== tempId));
         }
     };
@@ -137,23 +154,74 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
 
     const handleStartChat = () => {
         closeProfile();
-        // Логика начала чата
     };
 
     const handleBlockUser = () => {
         closeProfile();
-        // Логика блокировки пользователя
     };
 
     const handleReportUser = () => {
         closeProfile();
-        // Логика жалобы на пользователя
     };
 
     const handleToggleFavorite = () => {
         if (onToggleFavorite) {
             onToggleFavorite();
         }
+    };
+
+    const handleContextMenu = (e, message) => {
+        e.preventDefault();
+        const messageElement = e.currentTarget;
+        const rect = messageElement.getBoundingClientRect();
+        setContextMenu({
+            messageId: message.id,
+            x: rect.left,
+            y: rect.bottom + window.scrollY + 5 // Position just below the message
+        });
+    };
+
+    const handleContextMenuAction = (action, messageId, emoji = null) => {
+        const message = messages.find(msg => msg.id === messageId);
+        switch (action) {
+            case 'reply':
+                setMessage(`Replying to: ${message.comment}`);
+                break;
+            case 'pin':
+                console.log(`Pinning message ${messageId}`);
+                break;
+            case 'copy':
+                navigator.clipboard.writeText(message.comment);
+                break;
+            case 'forward':
+                console.log(`Forwarding message ${messageId}`);
+                break;
+            case 'report':
+                console.log(`Reporting message ${messageId}`);
+                break;
+            case 'select':
+                console.log(`Selecting message ${messageId}`);
+                break;
+            case 'react':
+                setMessages(prev => prev.map(msg =>
+                    msg.id === messageId
+                        ? {
+                            ...msg,
+                            reactions: msg.reactions.some(r => r.emoji === emoji)
+                                ? msg.reactions.map(r =>
+                                    r.emoji === emoji ? { ...r, count: r.count + 1 } : r
+                                )
+                                : [...msg.reactions, { emoji, count: 1 }]
+                        }
+                        : msg
+                ));
+                // Optionally, send reaction to server
+                // await connection.invoke("AddReaction", activeChat.id, messageId, userId, emoji);
+                break;
+            default:
+                break;
+        }
+        setContextMenu(null);
     };
 
     if (!activeChat) {
@@ -185,7 +253,6 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
 
     return (
         <div className={cl.chatWindow}>
-            {/* Chat header */}
             <div className={cl.chatHeader}>
                 <div className={cl.userInfo}>
                     <button className={cl.avatarButton} onClick={handleAvatarClick}>
@@ -214,7 +281,6 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                 <div className={cl.headerDecoration}></div>
             </div>
 
-            {/* Search bar (visible when searching) */}
             {searchQuery && (
                 <div className={cl.searchBar}>
                     <input
@@ -226,23 +292,68 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                 </div>
             )}
 
-            {/* Messages area */}
             <div className={cl.messagesArea}>
                 {messages.map((msg) => (
                     <div
                         key={msg.id}
                         className={`${cl.message} ${msg.isUser ? cl.userMessage : cl.contactMessage}`}
+                        onContextMenu={(e) => handleContextMenu(e, msg)}
                     >
                         <div className={cl.messageContent}>
                             <p>{msg.comment}</p>
                             <span className={cl.messageTime}>{formatTimeFromISO(msg.createdAt)}</span>
                         </div>
+                        {msg.reactions.length > 0 && (
+                            <div className={cl.reactions}>
+                                {msg.reactions.map((reaction, index) => (
+                                    <span key={index} className={cl.reaction}>
+                                        {reaction.emoji} {reaction.count > 1 ? reaction.count : ''}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 ))}
+                {contextMenu && (
+                    <div
+                        ref={contextMenuRef}
+                        className={cl.contextMenu}
+                        style={{ top: contextMenu.y, left: contextMenu.x }}
+                    >
+                        <button onClick={() => handleContextMenuAction('reply', contextMenu.messageId)}>
+                            <FiCornerUpLeft /> Ответить
+                        </button>
+                        <button onClick={() => handleContextMenuAction('pin', contextMenu.messageId)}>
+                            <FiMapPin /> Закрепить
+                        </button>
+                        <button onClick={() => handleContextMenuAction('copy', contextMenu.messageId)}>
+                            <FiCopy /> Копировать текст
+                        </button>
+                        <button onClick={() => handleContextMenuAction('forward', contextMenu.messageId)}>
+                            <FiShare2 /> Переслать
+                        </button>
+                        <button onClick={() => handleContextMenuAction('report', contextMenu.messageId)}>
+                            <FiFlag /> Пожаловаться
+                        </button>
+                        <button onClick={() => handleContextMenuAction('select', contextMenu.messageId)}>
+                            <FiCheckSquare /> Выделить
+                        </button>
+                        <div className={cl.reactionPicker}>
+                            {availableReactions.map((emoji) => (
+                                <button
+                                    key={emoji}
+                                    onClick={() => handleContextMenuAction('react', contextMenu.messageId, emoji)}
+                                    className={cl.reactionButton}
+                                >
+                                    {emoji}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
                 <div className={cl.messageDecoration}></div>
             </div>
 
-            {/* Message input */}
             <div className={cl.messageInputContainer}>
                 <div className={cl.inputWrapper}>
                     <button className={cl.attachmentButton}>
@@ -265,7 +376,6 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                 </button>
             </div>
 
-            {/* User Profile Modal */}
             {isProfileOpen && (
                 <UserProfileModal
                     user={{

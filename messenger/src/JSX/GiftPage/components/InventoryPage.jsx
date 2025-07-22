@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FiArrowLeft, FiStar, FiGift, FiSearch, FiFilter } from 'react-icons/fi';
+import { FiArrowLeft, FiStar, FiGift, FiSearch, FiFilter, FiDollarSign } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/InventoryPage.module.css';
 
@@ -37,7 +37,8 @@ const InventoryPage = () => {
             quantity: 2,
             rarity: 'epic',
             dateAcquired: '2023-05-15',
-            description: 'Исследуйте галактику на этом мощном корабле'
+            description: 'Исследуйте галактику на этом мощном корабле',
+            price: 500
         },
         {
             id: 2,
@@ -46,7 +47,8 @@ const InventoryPage = () => {
             quantity: 5,
             rarity: 'rare',
             dateAcquired: '2023-05-10',
-            description: 'Кристалл, наполненный энергией звёзд'
+            description: 'Кристалл, наполненный энергией звёзд',
+            price: 200
         },
         {
             id: 3,
@@ -55,7 +57,8 @@ const InventoryPage = () => {
             quantity: 1,
             rarity: 'legendary',
             dateAcquired: '2023-04-28',
-            description: 'Древний артефакт невероятной силы'
+            description: 'Древний артефакт невероятной силы',
+            price: 1000
         },
         {
             id: 4,
@@ -64,7 +67,8 @@ const InventoryPage = () => {
             quantity: 3,
             rarity: 'rare',
             dateAcquired: '2023-05-18',
-            description: 'Никогда не теряйтесь в космосе'
+            description: 'Никогда не теряйтесь в космосе',
+            price: 250
         },
         {
             id: 5,
@@ -73,7 +77,8 @@ const InventoryPage = () => {
             quantity: 1,
             rarity: 'mythic',
             dateAcquired: '2023-05-20',
-            description: 'Используйте с осторожностью!'
+            description: 'Используйте с осторожностью!',
+            price: 1500
         },
         {
             id: 6,
@@ -82,7 +87,8 @@ const InventoryPage = () => {
             quantity: 4,
             rarity: 'common',
             dateAcquired: '2023-05-05',
-            description: 'Ловите солнечный ветер для движения'
+            description: 'Ловите солнечный ветер для движения',
+            price: 100
         },
         {
             id: 7,
@@ -91,7 +97,8 @@ const InventoryPage = () => {
             quantity: 2,
             rarity: 'rare',
             dateAcquired: '2023-05-12',
-            description: 'Передвигайтесь быстрее скорости света'
+            description: 'Передвигайтесь быстрее скорости света',
+            price: 300
         },
         {
             id: 8,
@@ -100,7 +107,8 @@ const InventoryPage = () => {
             quantity: 1,
             rarity: 'legendary',
             dateAcquired: '2023-05-01',
-            description: 'Ваш собственный голубой шарик'
+            description: 'Ваш собственный голубой шарик',
+            price: 2000
         }
     ];
 
@@ -124,6 +132,12 @@ const InventoryPage = () => {
             case 'mythic': return 'Мифический';
             default: return 'Обычный';
         }
+    };
+
+    const handleSellItem = (itemId) => {
+        // Здесь будет логика продажи предмета
+        alert(`Предмет с ID ${itemId} продан!`);
+        // В реальном приложении здесь был бы вызов API или обновление состояния
     };
 
     const filterItems = () => {
@@ -284,6 +298,13 @@ const InventoryPage = () => {
                                             </span>
                                             <div className={styles.giftActions}>
                                                 <button className={styles.giftButton}>Подарить</button>
+                                                <button
+                                                    className={styles.sellButton}
+                                                    onClick={() => handleSellItem(item.id)}
+                                                    title={`Продать за ${item.price} монет`}
+                                                >
+                                                    <FiDollarSign className={styles.sellIcon} />
+                                                </button>
                                                 <button className={styles.favoriteButton}>
                                                     <FiStar className={styles.favoriteIcon} />
                                                 </button>
