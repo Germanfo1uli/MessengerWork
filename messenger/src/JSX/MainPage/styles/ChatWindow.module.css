@@ -605,3 +605,55 @@
 .sendIcon {
     font-size: 18px;
 }
+
+.messagesArea {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background: transparent;
+    position: relative;
+    align-items: flex-start;
+    /* Кастомный скроллбар */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(138, 43, 226, 0.5) transparent;
+}
+
+.messagesArea::-webkit-scrollbar {
+    width: 8px;
+}
+
+.messagesArea::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 4px;
+}
+
+.messagesArea::-webkit-scrollbar-thumb {
+    background-color: rgba(138, 43, 226, 0.5);
+    border-radius: 4px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+.messagesArea::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(138, 43, 226, 0.7);
+}
+
+/* Анимация для плавного скролла */
+.messagesArea {
+    scroll-behavior: smooth;
+}
+
+/* Дополнительные стили для сообщений */
+.message {
+    max-width: 70%;
+    padding: 10px 15px;
+    border-radius: 18px;
+    position: relative;
+    word-wrap: break-word;
+    align-self: flex-start;
+    margin-right: auto;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}

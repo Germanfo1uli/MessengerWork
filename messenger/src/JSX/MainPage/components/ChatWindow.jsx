@@ -30,9 +30,20 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
     const { getStatusString, formatTimeFromISO } = useMainHooks();
     const navigate = useNavigate();
     const contextMenuRef = useRef(null);
+    const messagesEndRef = useRef(null);
+    const messagesAreaRef = useRef(null);
 
     // List of available emoji reactions
     const availableReactions = ['😊', '👍', '❤️', '😂', '😢'];
+
+    // Auto-scroll to bottom when messages change
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -292,7 +303,7 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                 </div>
             )}
 
-            <div className={cl.messagesArea}>
+            <div className={cl.messagesArea} ref={messagesAreaRef}>
                 {messages.map((msg) => (
                     <div
                         key={msg.id}
@@ -314,6 +325,7 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                         )}
                     </div>
                 ))}
+                <div ref={messagesEndRef} />
                 {contextMenu && (
                     <div
                         ref={contextMenuRef}
