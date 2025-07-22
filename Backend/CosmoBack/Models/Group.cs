@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using CosmoBack.Models.Dtos;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CosmoBack.Models
@@ -28,8 +29,11 @@ namespace CosmoBack.Models
 
         public string? Description { get; set; }
 
-        [ForeignKey("AvatarImage")]
+        [ForeignKey("Avatar")]
         public Guid? AvatarImageId { get; set; }
+
+        [NotMapped]
+        public ImageDto? AvatarImage { get; set; } 
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
@@ -41,8 +45,7 @@ namespace CosmoBack.Models
         [NotMapped]
         public DateTime? LastMessageAt => LastMessage?.CreatedAt;
 
-        // Навигационные свойства
-        public Image? AvatarImage { get; set; }
+        public Image? Avatar { get; set; } 
         public User Owner { get; set; }
         public ICollection<GroupMember> Members { get; set; } = new List<GroupMember>();
         public ICollection<Message>? Messages { get; set; }

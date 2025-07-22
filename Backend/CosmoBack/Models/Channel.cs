@@ -1,5 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using CosmoBack.Models.Dtos;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CosmoBack.Models
 {
@@ -11,19 +12,22 @@ namespace CosmoBack.Models
 
         [Required]
         [ForeignKey("Owner")]
-        public Guid OwnerId { get; set; } 
+        public Guid OwnerId { get; set; }
 
         [Required]
         [MaxLength(255)]
-        public string Name { get; set; }
+        public string Name { get; set; } = default!;
 
         [Required]
         public long PublicId { get; set; }
 
         public string? Description { get; set; }
 
-        [ForeignKey("AvatarImage")]
+        [ForeignKey("Avatar")]
         public Guid? AvatarImageId { get; set; }
+
+        [NotMapped]
+        public ImageDto? AvatarImage { get; set; } 
 
         [MaxLength(50)]
         public string? ChannelTag { get; set; }
@@ -46,10 +50,9 @@ namespace CosmoBack.Models
         [NotMapped]
         public DateTime? LastMessageAt => LastMessage?.CreatedAt;
 
-        // Навигационные свойства
-        public Image? AvatarImage { get; set; }
+        public Image? Avatar { get; set; }
         public User Owner { get; set; }
-        public ICollection<ChannelMember> Members { get; set; }
+        public ICollection<ChannelMember> Members { get; set; } = new List<ChannelMember>();
         public ICollection<Message>? Messages { get; set; }
     }
 }

@@ -37,10 +37,17 @@ namespace CosmoBack.CosmoDBContext
             ConfigureContent(modelBuilder);
             ConfigurePayments(modelBuilder);
             ConfigureNotifications(modelBuilder);
+            ConfigureImages(modelBuilder);
         }
 
         private void ConfigureAuthAndUsers(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<User>()
+            .HasOne(u => u.AvatarImage) 
+            .WithMany()
+            .HasForeignKey(u => u.AvatarImageId)
+            .OnDelete(DeleteBehavior.SetNull);
+
             modelBuilder.Entity<Token>()
                 .HasOne(t => t.User)
                 .WithMany(u => u.Tokens)
@@ -65,6 +72,12 @@ namespace CosmoBack.CosmoDBContext
             modelBuilder.Entity<Channel>()
                 .HasIndex(c => c.PublicId)
                 .IsUnique();
+
+            modelBuilder.Entity<Channel>()
+                .HasOne(c => c.Avatar)
+                .WithMany()
+                .HasForeignKey(c => c.AvatarImageId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<ChannelMember>()
                 .HasKey(cm => cm.Id);
@@ -91,6 +104,16 @@ namespace CosmoBack.CosmoDBContext
             modelBuilder.Entity<ChannelMember>()
                 .Property(cm => cm.Notifications)
                 .HasDefaultValue(true);
+
+            modelBuilder.Entity<Group>()
+                .HasIndex(g => g.PublicId)
+                .IsUnique();
+
+            modelBuilder.Entity<Group>()
+                .HasOne(g => g.Avatar)
+                .WithMany()
+                .HasForeignKey(g => g.AvatarImageId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<GroupMember>()
                 .HasKey(gm => new { gm.GroupId, gm.UserId });
@@ -127,10 +150,6 @@ namespace CosmoBack.CosmoDBContext
             modelBuilder.Entity<ChatMember>()
                 .Property(cm => cm.IsFavorite)
                 .HasDefaultValue(false);
-
-            modelBuilder.Entity<Group>()
-                .HasIndex(g => g.PublicId)
-                .IsUnique();
 
             modelBuilder.Entity<Contact>()
                 .HasOne(c => c.Owner)
@@ -193,19 +212,19 @@ namespace CosmoBack.CosmoDBContext
                 .HasOne(r => r.OriginalMessage)
                 .WithMany(m => m.Replies)
                 .HasForeignKey(r => r.OriginalMessageId)
-                .OnDelete(DeleteBehavior.Cascade); // Changed to Cascade for consistency
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Reply>()
                 .HasOne(r => r.ReplyMessage)
                 .WithMany()
                 .HasForeignKey(r => r.ReplyMessageId)
-                .OnDelete(DeleteBehavior.Cascade); // Changed to Cascade for consistency
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Reply>()
                 .HasIndex(r => r.OriginalMessageId);
 
             modelBuilder.Entity<Reply>()
-                .HasIndex(r => r.ReplyMessageId); // Added index for ReplyMessageId
+                .HasIndex(r => r.ReplyMessageId);
 
             modelBuilder.Entity<Reaction>()
                 .HasKey(r => new { r.MessageId, r.UserId });
@@ -260,6 +279,13 @@ namespace CosmoBack.CosmoDBContext
 
             modelBuilder.Entity<Notification>()
                 .HasIndex(n => new { n.UserId, n.ChatId, n.GroupId, n.ChannelId });
+        }
+
+        private void ConfigureImages(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Image>()
+                .HasIndex(i => new { i.EntityType, i.EntityId })
+                .IsUnique();
         }
     }
 }

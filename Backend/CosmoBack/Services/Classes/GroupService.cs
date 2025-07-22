@@ -86,6 +86,8 @@ namespace CosmoBack.Services.Classes
                     .OrderByDescending(m => m.CreatedAt)
                     .FirstOrDefaultAsync();
 
+               
+
                 return new GroupDto
                 {
                     Id = group.Id,
@@ -96,6 +98,7 @@ namespace CosmoBack.Services.Classes
                     GroupTag = group.GroupTag,
                     Description = group.Description,
                     AvatarImageId = group.AvatarImageId,
+                    AvatarImage = group.AvatarImage,
                     CreatedAt = group.CreatedAt,
                     IsActive = group.IsActive,
                     IsFavorite = groupMember.IsFavorite,
@@ -151,6 +154,7 @@ namespace CosmoBack.Services.Classes
                     var membersCount = await _context.GroupMembers
                         .CountAsync(gm => gm.GroupId == group.Id);
 
+
                     groupDtos.Add(new GroupDto
                     {
                         Id = group.Id,
@@ -161,12 +165,13 @@ namespace CosmoBack.Services.Classes
                         GroupTag = group.GroupTag,
                         Description = group.Description,
                         AvatarImageId = group.AvatarImageId,
+                        AvatarImage = group.AvatarImage,
                         CreatedAt = group.CreatedAt,
                         IsActive = group.IsActive,
                         IsFavorite = groupMember?.IsFavorite ?? false,
                         LastMessageAt = lastMessage?.CreatedAt,
                         LastMessage = lastMessage,
-                        MembersCount = membersCount 
+                        MembersCount = membersCount
                     });
                 }
 
@@ -257,6 +262,7 @@ namespace CosmoBack.Services.Classes
                     GroupTag = group.GroupTag,
                     Description = group.Description,
                     AvatarImageId = group.AvatarImageId,
+                    AvatarImage = group.AvatarImage,
                     CreatedAt = group.CreatedAt,
                     IsActive = group.IsActive,
                     IsFavorite = false,
@@ -445,6 +451,7 @@ namespace CosmoBack.Services.Classes
                     GroupTag = group.GroupTag,
                     Description = group.Description,
                     AvatarImageId = group.AvatarImageId,
+                    AvatarImage = group.AvatarImage,
                     CreatedAt = group.CreatedAt,
                     IsActive = group.IsActive,
                     IsFavorite = groupMember.IsFavorite,

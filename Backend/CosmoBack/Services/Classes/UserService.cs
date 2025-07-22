@@ -1,5 +1,6 @@
 ﻿using CosmoBack.CosmoDBContext;
 using CosmoBack.Models;
+using CosmoBack.Models.Dtos;
 using CosmoBack.Repositories.Interfaces;
 using CosmoBack.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -10,8 +11,8 @@ namespace CosmoBack.Services.Classes
 {
     public class UserService(IUserRepository userRepository, CosmoDbContext context) : IUserService
     {
-        private readonly IUserRepository _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-        private readonly CosmoDbContext _context = context ?? throw new ArgumentNullException(nameof(context));
+        private readonly IUserRepository _userRepository = userRepository;
+        private readonly CosmoDbContext _context = context;
 
         public async Task<User> GetUserByIdAsync(Guid id)
         {
@@ -22,6 +23,7 @@ namespace CosmoBack.Services.Classes
                 {
                     throw new KeyNotFoundException($"Пользователь с ID {id} не найден");
                 }
+
                 return user;
             }
             catch (Exception ex)
@@ -39,6 +41,7 @@ namespace CosmoBack.Services.Classes
                 {
                     throw new KeyNotFoundException($"Пользователь с именем {username} не найден");
                 }
+
                 return user;
             }
             catch (Exception ex)
@@ -56,6 +59,7 @@ namespace CosmoBack.Services.Classes
                 {
                     throw new KeyNotFoundException($"Пользователь с публичным именем {publicname} не найден");
                 }
+
                 return user;
             }
             catch (Exception ex)
@@ -98,10 +102,11 @@ namespace CosmoBack.Services.Classes
                     throw new KeyNotFoundException($"Пользователь с ID {user.Id} не найден");
                 }
 
-                if (await _context.Users.AnyAsync(u => u.Id != user.Id && (u.Phone == user.Phone)))
+                if (await _context.Users.AnyAsync(u => u.Id != user.Id && u.Phone == user.Phone))
                 {
                     throw new InvalidOperationException("Пользователь с таким номером телефона уже существует");
                 }
+
                 existingUser.Username = user.Username;
                 existingUser.Phone = user.Phone;
                 existingUser.Bio = user.Bio;

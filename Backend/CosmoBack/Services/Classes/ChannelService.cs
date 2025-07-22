@@ -94,6 +94,7 @@ namespace CosmoBack.Services.Classes
                     ChannelTag = channel.ChannelTag,
                     Description = channel.Description,
                     AvatarImageId = channel.AvatarImageId,
+                    AvatarImage = channel.AvatarImage,
                     CreatedAt = channel.CreatedAt,
                     IsActive = channel.IsActive,
                     MembersNumber = channel.MembersNumber,
@@ -146,6 +147,8 @@ namespace CosmoBack.Services.Classes
                         .OrderByDescending(m => m.CreatedAt)
                         .FirstOrDefaultAsync();
 
+        
+
                     channelDtos.Add(new ChannelDto
                     {
                         Id = channel.Id,
@@ -156,6 +159,7 @@ namespace CosmoBack.Services.Classes
                         ChannelTag = channel.ChannelTag,
                         Description = channel.Description,
                         AvatarImageId = channel.AvatarImageId,
+                        AvatarImage = channel.AvatarImage,
                         CreatedAt = channel.CreatedAt,
                         IsActive = channel.IsActive,
                         MembersNumber = channel.MembersNumber,
@@ -213,7 +217,8 @@ namespace CosmoBack.Services.Classes
                     AvatarImageId = avatarImageId,
                     CreatedAt = DateTime.UtcNow,
                     IsActive = true,
-                    MembersNumber = 1
+                    MembersNumber = 1,
+                    PublicId = await GenerateUniquePublicIdAsync()
                 };
 
                 await _context.Channels.AddAsync(channel);
@@ -248,6 +253,8 @@ namespace CosmoBack.Services.Classes
                 await transaction.CommitAsync();
                 _logger.LogInformation("Transaction committed for channel {ChannelId}", channel.Id);
 
+                
+
                 return new ChannelDto
                 {
                     Id = channel.Id,
@@ -258,6 +265,7 @@ namespace CosmoBack.Services.Classes
                     ChannelTag = channel.ChannelTag,
                     Description = channel.Description,
                     AvatarImageId = channel.AvatarImageId,
+                    AvatarImage = channel.AvatarImage,
                     CreatedAt = channel.CreatedAt,
                     IsActive = channel.IsActive,
                     MembersNumber = channel.MembersNumber,
@@ -387,6 +395,7 @@ namespace CosmoBack.Services.Classes
                     .OrderByDescending(m => m.CreatedAt)
                     .FirstOrDefaultAsync();
 
+
                 _logger.LogInformation("Favorite status for channel {ChannelId} updated to {Favorite} for user {UserId}", channelId, favorite, userId);
 
                 return new ChannelDto
@@ -399,6 +408,7 @@ namespace CosmoBack.Services.Classes
                     ChannelTag = channel.ChannelTag,
                     Description = channel.Description,
                     AvatarImageId = channel.AvatarImageId,
+                    AvatarImage = channel.AvatarImage,
                     CreatedAt = channel.CreatedAt,
                     IsActive = channel.IsActive,
                     MembersNumber = channel.MembersNumber,

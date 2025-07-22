@@ -8,7 +8,8 @@ namespace CosmoBack.Models.Dtos
         public DateTime CreatedAt { get; set; }
         public string Username { get; set; } = default!;
         public Guid? AvatarImageId { get; set; }
-        public MessageReplyDto? ReplyTo { get; set; } 
+        public MessageReplyDto? ReplyTo { get; set; }
+        public ImageDto? AvatarImage { get; set; }
     }
 
     public class MessageReplyDto

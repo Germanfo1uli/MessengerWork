@@ -53,6 +53,7 @@ builder.Services.AddScoped<IGroupMembersRepository, GroupMembersRepository>();
 builder.Services.AddScoped<IChannelRepository, ChannelRepository>();
 builder.Services.AddScoped<IChannelMembersRepository, ChannelMembersRepository>();
 builder.Services.AddScoped<IReplyRepository, ReplyRepository>();
+builder.Services.AddScoped<IImageRepository, ImageRepository>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IChatService, ChatService>();
@@ -67,6 +68,7 @@ builder.Services.AddScoped<IGroupMembersService, GroupMembersService>();
 builder.Services.AddScoped<IChannelService, ChannelService>();
 builder.Services.AddScoped<ITagSearchService, TagSearchService>();
 builder.Services.AddScoped<IReplyService, ReplyService>();
+builder.Services.AddScoped<IImageService, ImageService>();
 
 builder.Services.AddDbContext<CosmoDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQL")));
@@ -136,6 +138,7 @@ builder.Services.AddSwaggerGen(c =>
             new string[] { }
         }
     });
+    c.OperationFilter<FileUploader>();
 });
 
 builder.Services.AddHttpContextAccessor();
