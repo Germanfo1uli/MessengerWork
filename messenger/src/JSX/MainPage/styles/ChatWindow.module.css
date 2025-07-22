@@ -4,7 +4,7 @@
     flex-direction: column;
     height: 100%;
     min-width: 0;
-    max-width: calc(100% - 0px - 30px);
+    max-width: calc(100% - 0px - 40px);
     margin-left: auto;
     background-color: #0f0c29;
     background-image: radial-gradient(circle at top center, #1a1547 0%, #0f0c29 70%);
@@ -347,6 +347,7 @@
     outline: none;
     box-shadow: 0 0 5px rgba(176, 176, 255, 0.3);
 }
+
 .messagesArea {
     flex: 1;
     padding: 20px;
@@ -357,6 +358,28 @@
     background: transparent;
     position: relative;
     align-items: flex-start;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(138, 43, 226, 0.5) transparent;
+}
+
+.messagesArea::-webkit-scrollbar {
+    width: 8px;
+}
+
+.messagesArea::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 4px;
+}
+
+.messagesArea::-webkit-scrollbar-thumb {
+    background-color: rgba(138, 43, 226, 0.5);
+    border-radius: 4px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+.messagesArea::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(138, 43, 226, 0.7);
 }
 
 .message {
@@ -367,8 +390,8 @@
     word-wrap: break-word;
     align-self: flex-start;
     margin-right: auto;
+    transition: transform 0.2s ease, opacity 0.2s ease;
 }
-
 
 .contactMessage {
     background: linear-gradient(135deg, #3a1c71, #6a3093);
@@ -377,7 +400,6 @@
     box-shadow: 0 0 12px rgba(106, 48, 147, 0.5);
 }
 
-
 .userMessage {
     background: linear-gradient(135deg, #d33682, #ed6a5a);
     border-bottom-left-radius: 5px;
@@ -385,8 +407,6 @@
     box-shadow: 0 0 8px rgba(237, 106, 90, 0.5),
     inset 0 0 10px rgba(211, 54, 130, 0.3);
 }
-
-
 
 .messageContent {
     display: flex;
@@ -405,6 +425,98 @@
     align-self: flex-end;
 }
 
+.reactions {
+    display: flex;
+    gap: 6px;
+    margin-top: 5px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.reaction {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 3px 8px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    line-height: 1;
+    min-height: 28px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.reaction:hover {
+    transform: scale(1.15);
+    background: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.contextMenu {
+    position: fixed;
+    background: linear-gradient(135deg, #1a1547, #0f0c29);
+    border: 1px solid rgba(255, 176, 255, 0.2);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    min-width: 160px;
+    padding: 8px 0;
+}
+
+.contextMenu button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 16px;
+    background: none;
+    border: none;
+    color: #e0e0ff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.contextMenu button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.contextMenu button svg {
+    font-size: 16px;
+}
+
+.reactionPicker {
+    display: flex;
+    gap: 6px;
+    padding: 8px 12px;
+    border-top: 1px solid rgba(255, 176, 255, 0.2);
+    background: rgba(15, 12, 41, 0.9);
+    border-radius: 0 0 8px 8px;
+}
+
+.reactionButton {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    border-radius: 90%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.reactionButton:hover {
+    transform: scale(1.3);
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
 
 .messageInputContainer {
     display: flex;
@@ -507,4 +619,122 @@
 
 .sendIcon {
     font-size: 18px;
+}
+
+.messagesArea {
+    scroll-behavior: smooth;
+}
+
+.replyPreview {
+    display: flex;
+    background: rgba(255, 255, 255, 0.07);
+    border-radius: 12px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    margin-left: -10px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(138, 43, 226, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.replyPreview:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(138, 43, 226, 0.4);
+}
+
+.replyLine {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, #8a2be2, #ff6f91);
+    border-radius: 0 4px 4px 0;
+    animation: replyLineGlow 2s ease-in-out infinite;
+}
+
+.replyContent {
+    padding-left: 12px;
+    width: 100%;
+}
+
+.replyAuthor {
+    font-size: 13px;
+    font-weight: 600;
+    color: #e0e0ff;
+    display: block;
+    margin-bottom: 4px;
+    text-shadow: 0 0 4px rgba(176, 176, 255, 0.4);
+}
+
+.replyText {
+    font-size: 14px;
+    color: #b0b0ff;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.replyIndicator {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    background: linear-gradient(90deg, rgba(26, 21, 71, 0.9), rgba(15, 12, 41, 0.95));
+    border-top: 1px solid rgba(138, 43, 226, 0.4);
+    border-bottom: 1px solid rgba(138, 43, 226, 0.2);
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(8px);
+}
+
+.replyInfo {
+    flex: 1;
+    overflow: hidden;
+}
+
+.replyInfo span {
+    font-size: 13px;
+    font-weight: 600;
+    color: #e0e0ff;
+    display: block;
+    text-shadow: 0 0 4px rgba(176, 176, 255, 0.3);
+}
+
+.replyInfo p {
+    font-size: 14px;
+    color: #b0b0ff;
+    margin: 4px 0 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cancelReply {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #e0e0ff;
+    cursor: pointer;
+    padding: 6px;
+    margin-left: 12px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cancelReply:hover {
+    background: rgba(255, 111, 145, 0.3);
+    color: #fff;
+    transform: scale(1.1);
+}
+
+@keyframes replyLineGlow {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
 }

@@ -230,6 +230,7 @@
     color: #a0a8ff;
     font-size: 16px;
     margin-top: 20px;
+    margin-bottom: 10px;
     display: inline-flex;
     align-items: center;
     gap: 5px;
@@ -438,14 +439,15 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    margin-bottom: -10px;
+    margin-top: 40px;
+    margin-bottom: -8px;
 }
 
 /* Звезда в имени пользователя */
 .usernameStar {
     color: gold;
     font-size: 20px;
-    margin-bottom: -25px;
+    margin-bottom: -6px;
     filter: drop-shadow(0 0 4px gold);
     animation: starAppear 0.3s ease-out;
 }

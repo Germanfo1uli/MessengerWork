@@ -18,9 +18,14 @@ const AuthScreen = ({ onBack }) => {
 
     // Схема валидации для входа
     const loginSchema = Yup.object().shape({
-        phone: Yup.string()
-            .matches(/^\+7\d{10}$/, 'Формат: +7XXXXXXXXXX')
-            .required('Обязательное поле'),
+        identifier: Yup.string()
+            .required('Введите имя пользователя или номер телефона')
+            .test('is-valid-identifier', 'Введите корректное имя пользователя или номер телефона (+7XXXXXXXXXX)',
+                value => {
+                    const phoneRegex = /^\+7\d{10}$/;
+                    const usernameRegex = /^.{3,}$/;
+                    return phoneRegex.test(value) || usernameRegex.test(value);
+                }),
         password: Yup.string()
             .min(6, 'Пароль должен содержать минимум 6 символов')
             .required('Обязательное поле')
@@ -60,9 +65,14 @@ const AuthScreen = ({ onBack }) => {
 
     const handleLogin = async (data) => {
         try {
+            const isPhone = /^\+7\d{10}$/.test(data.identifier);
+            const body = isPhone
+                ? { Phone: data.identifier, Password: data.password }
+                : { Username: data.identifier, Password: data.password };
+
             const response = await apiRequest('/api/auth/login/phone', {
                 method: 'POST',
-                body: { Phone: data.phone, Password: data.password },
+                body,
                 authenticated: false
             });
 
@@ -148,21 +158,21 @@ const AuthScreen = ({ onBack }) => {
                                     {authError && <div className={styles.errorMessage}>{authError}</div>}
                                     <form onSubmit={handleLoginSubmit(handleLogin)} className={styles.authForm}>
                                         <div className={styles.inputGroup}>
-                                            <label htmlFor="phone" className={styles.inputLabel}>
-                                                Номер телефона
+                                            <label htmlFor="identifier" className={styles.inputLabel}>
+                                                Имя пользователя или номер телефона
                                             </label>
                                             <div className={styles.inputWrapper}>
-                                                <Mail className={styles.inputIcon} />
+                                                <User className={styles.inputIcon} />
                                                 <input
-                                                    id="phone"
-                                                    type="tel"
-                                                    placeholder="+..."
+                                                    id="identifier"
+                                                    type="text"
+                                                    placeholder="Имя пользователя или +7..."
                                                     className={styles.authInput}
-                                                    {...loginRegister("phone")}
+                                                    {...loginRegister("identifier")}
                                                 />
                                             </div>
-                                            {loginErrors.phone && (
-                                                <div className={styles.errorMessage}>{loginErrors.phone.message}</div>
+                                            {loginErrors.identifier && (
+                                                <div className={styles.errorMessage}>{loginErrors.identifier.message}</div>
                                             )}
                                         </div>
 
@@ -249,7 +259,7 @@ const AuthScreen = ({ onBack }) => {
                                                     type="tel"
                                                     placeholder="+..."
                                                     className={styles.authInput}
-                                                    {...registerRegister("phone")} // Исправлено на registerRegister
+                                                    {...registerRegister("phone")}
                                                 />
                                             </div>
                                             {registerErrors.phone && (

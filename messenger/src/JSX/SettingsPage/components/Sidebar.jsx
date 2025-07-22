@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { FiUser, FiGlobe, FiBell, FiShield, FiLogOut } from 'react-icons/fi';
+import { FiUser, FiGlobe, FiBell, FiShield, FiLogOut, FiArrowLeft } from 'react-icons/fi';
 import { RiSpaceShipLine } from 'react-icons/ri';
 import styles from '../styles/SettingsPage.module.css';
 
@@ -8,15 +8,13 @@ const Sidebar = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Определяем активную страницу на основе пути
     const getActivePath = () => {
         const path = location.pathname;
         if (path.startsWith('/settings')) return 'settings';
         if (path.startsWith('/language')) return 'language';
         if (path.startsWith('/appearance')) return 'appearance';
         if (path.startsWith('/security')) return 'security';
-        if (path.startsWith('/home')) return 'exit';
-        return 'settings'; // по умолчанию
+        return 'settings';
     };
 
     const activePath = getActivePath();
@@ -27,6 +25,16 @@ const Sidebar = () => {
                 <RiSpaceShipLine className={styles.logoIcon} />
                 <h2>Космические Настройки</h2>
             </div>
+
+            {/* Кнопка "Назад" - теперь ведет на /home */}
+            <button
+                className={`${styles.navButton} ${styles.backButton}`}
+                onClick={() => navigate('/home')}
+            >
+                <FiArrowLeft className={styles.navIcon} />
+                <span>На главную</span>
+            </button>
+
             <nav className={styles.navMenu}>
                 <button
                     className={`${styles.navButton} ${activePath === 'settings' ? styles.active : ''}`}
@@ -56,14 +64,23 @@ const Sidebar = () => {
                     <FiShield className={styles.navIcon} />
                     <span>Безопасность</span>
                 </button>
+            </nav>
+
+
+            <div className={styles.exitSection}>
                 <button
-                    className={`${styles.navButton} ${activePath === 'exit' ? styles.active : ''}`}
-                    onClick={() => navigate('/home')}
+                    className={`${styles.navButton} ${styles.exitButton}`}
+                    onClick={() => {
+
+                        console.log('Выход из аккаунта');
+                        navigate('/');
+                    }}
                 >
                     <FiLogOut className={styles.navIcon} />
-                    <span>Выход</span>
+                    <span>Выйти из аккаунта</span>
                 </button>
-            </nav>
+            </div>
+
             <div className={styles.sidebarFooter}>
                 <div className={styles.statusLight}></div>
                 <span>Связь стабильная</span>

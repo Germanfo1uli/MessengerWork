@@ -1,13 +1,11 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import cl from '../styles/ChatPanel.module.css';
 import ChatBox from './ChatBox';
 import { IoSettingsOutline } from 'react-icons/io5';
 import { IoIosMore } from 'react-icons/io';
 import { IoSearchOutline } from 'react-icons/io5';
 import { IoStarOutline } from 'react-icons/io5';
-import { FaEnvelope } from 'react-icons/fa';
-import { FaGift } from 'react-icons/fa';
-import { IoAddCircleOutline } from 'react-icons/io5';
+import { FaEnvelope, FaGift, FaShoppingCart, FaBox, FaAddressBook, FaQuestionCircle } from 'react-icons/fa';
 import Modal from './Modal';
 import AddContactModal from './AddContactModal';
 import { apiRequest } from '../../../hooks/ApiRequest';
@@ -20,6 +18,7 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
     const { isLoading, userId, username, isAuthenticated, logout } = useAuth();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isAddContactModalOpen, setIsAddContactModalOpen] = useState(false);
+    const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('favorites');
     const [searchQuery, setSearchQuery] = useState('');
     const [user, setUser] = useState({});
@@ -29,6 +28,7 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
     const [avatarError, setAvatarError] = useState(false);
     const { getStatusString, formatTimeFromISO } = useMainHooks();
     const navigate = useNavigate();
+    const moreButtonRef = useRef(null);
 
     const debouncedServerSearch = useMemo(
         () =>
@@ -273,12 +273,29 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
         };
     }, [debouncedServerSearch]);
 
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (moreButtonRef.current && !moreButtonRef.current.contains(event.target)) {
+                setIsMoreMenuOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
     const toggleModal = () => {
         setIsModalOpen(!isModalOpen);
     };
 
     const toggleAddContactModal = () => {
         setIsAddContactModalOpen(!isAddContactModalOpen);
+    };
+
+    const toggleMoreMenu = () => {
+        setIsMoreMenuOpen(!isMoreMenuOpen);
     };
 
     const handleChatClick = (chat) => {
@@ -368,14 +385,59 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                 </div>
                 <div className={cl.profileActions}>
                     <button
+                        className={`${cl.iconButton} ${cl.giftButton}`}
+                        onClick={() => navigate('/gift')}
+                        title="Подарки"
+                    >
+                        <FaGift className={cl.giftIcon} />
+                    </button>
+                    <button
                         className={cl.iconButton}
                         onClick={() => navigate('/settings')}
                     >
                         <IoSettingsOutline />
                     </button>
-                    <button className={cl.iconButton}>
-                        <IoIosMore />
-                    </button>
+                    <div className={cl.moreMenuContainer} ref={moreButtonRef}>
+                        <button
+                            className={cl.iconButton}
+                            onClick={toggleMoreMenu}
+                            title="Ещё"
+                        >
+                            <IoIosMore />
+                        </button>
+                        {isMoreMenuOpen && (
+                            <div className={cl.moreMenu}>
+                                <button
+                                    className={cl.moreMenuItem}
+                                    onClick={() => navigate('/marketplace')}
+                                >
+                                    <FaShoppingCart className={cl.moreMenuIcon} />
+                                    <span>Торговая площадка</span>
+                                </button>
+                                <button
+                                    className={cl.moreMenuItem}
+                                    onClick={() => navigate('/inventory')}
+                                >
+                                    <FaBox className={cl.moreMenuIcon} />
+                                    <span>Инвентарь</span>
+                                </button>
+                                <button
+                                    className={cl.moreMenuItem}
+                                    onClick={() => navigate('/contacts')}
+                                >
+                                    <FaAddressBook className={cl.moreMenuIcon} />
+                                    <span>Контакты</span>
+                                </button>
+                                <button
+                                    className={cl.moreMenuItem}
+                                    onClick={() => navigate('/help')}
+                                >
+                                    <FaQuestionCircle className={cl.moreMenuIcon} />
+                                    <span>Помощь</span>
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -391,17 +453,6 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                 onAddContact={handleAddContact}
             />
 
-            <div className={cl.actionButtons}>
-                <button className={cl.actionButton}>
-                    <FaGift className={cl.actionIcon} />
-                    <span>Подарки</span>
-                </button>
-                <button className={cl.actionButton} onClick={toggleAddContactModal}>
-                    <IoAddCircleOutline className={cl.actionIcon} />
-                    <span>Добавить чат</span>
-                </button>
-            </div>
-
             <div className={cl.searchPanel}>
                 <div className={cl.searchInputContainer}>
                     <IoSearchOutline className={cl.searchIcon} />
@@ -412,7 +463,6 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                         value={searchQuery}
                         onChange={handleSearchChange}
                     />
-                    {isSearching && <span className={cl.searchLoading}>Поиск...</span>}
                 </div>
             </div>
 

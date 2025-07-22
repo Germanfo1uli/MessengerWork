@@ -1,0 +1,598 @@
+.wrapper {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Cosmic background elements */
+.backgroundEffects {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at bottom, #1F2F4A 0%, #050A1A 100%);
+    z-index: -3;
+}
+
+.stars {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="20" cy="20" r="0.5" fill="white"/><circle cx="50" cy="50" r="0.7" fill="white"/><circle cx="80" cy="30" r="0.4" fill="white"/><circle cx="10" cy="70" r="0.3" fill="white"/><circle cx="90" cy="80" r="0.5" fill="white"/><circle cx="30" cy="90" r="0.6" fill="white"/></svg>') repeat;
+    z-index: -2;
+    animation: twinkle 100s linear infinite;
+}
+
+.twinkling {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    z-index: -1;
+    animation: twinkle 50s linear infinite;
+}
+
+.nebula {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(60, 100, 200, 0.25) 0%, transparent 50%);
+    z-index: -1;
+    animation: nebulaPulse 15s infinite alternate;
+}
+
+.pageContent {
+    position: relative;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+    color: #e0e0e0;
+    font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1rem 1.5rem;
+    background: rgba(10, 15, 43, 0.8);
+    backdrop-filter: blur(8px);
+    border-radius: 12px;
+    border: 1px solid rgba(77, 121, 246, 0.2);
+}
+
+.backButton {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: linear-gradient(90deg, rgba(77, 121, 246, 0.2), rgba(106, 90, 205, 0.2));
+    border: 1px solid rgba(77, 121, 246, 0.4);
+    color: #e0e0ff;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.backButton:hover {
+    background: linear-gradient(90deg, rgba(77, 121, 246, 0.3), rgba(106, 90, 205, 0.3));
+    transform: translateX(-3px);
+    box-shadow: 0 2px 8px rgba(77, 121, 246, 0.2);
+}
+
+.title {
+    font-size: 2.5rem;
+    margin: 0;
+    background: linear-gradient(90deg, #e0e0ff, #8a6df7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+}
+
+.currency {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.currencyDisplay {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.2));
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.currencyIcon {
+    color: #8a6df7;
+    font-size: 1.5rem;
+}
+
+.currencyAmount {
+    font-weight: 700;
+    color: #8a6df7;
+    font-size: 1.4rem;
+}
+
+.content {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+}
+
+.tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(77, 121, 246, 0.2);
+    padding-bottom: 0.5rem;
+}
+
+.tab {
+    background: transparent;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #8a9aba;
+    transition: all 0.3s ease;
+}
+
+.tab:hover {
+    background: rgba(77, 121, 246, 0.1);
+    color: #e0e0ff;
+}
+
+.activeTab {
+    background: rgba(77, 121, 246, 0.2);
+    color: #e0e0ff;
+    font-weight: 600;
+}
+
+.inventoryControls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.searchContainer {
+    position: relative;
+    flex-grow: 1;
+    max-width: 400px;
+}
+
+.searchIcon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #8a9aba;
+    font-size: 1.2rem;
+}
+
+.searchInput {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 3rem;
+    background: rgba(10, 15, 43, 0.8);
+    border: 1px solid rgba(77, 121, 246, 0.4);
+    border-radius: 12px;
+    color: #e0e0ff;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.searchInput:focus {
+    outline: none;
+    border-color: rgba(77, 121, 246, 0.8);
+    box-shadow: 0 0 0 2px rgba(77, 121, 246, 0.2);
+}
+
+.filterGroup {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.filterContainer, .sortContainer {
+    position: relative;
+}
+
+.filterIcon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #8a9aba;
+    font-size: 1.2rem;
+    pointer-events: none;
+}
+
+.filterSelect, .sortSelect {
+    padding: 0.75rem 1rem 0.75rem 3rem;
+    background: rgba(10, 15, 43, 0.8);
+    border: 1px solid rgba(77, 121, 246, 0.4);
+    border-radius: 12px;
+    color: #e0e0ff;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    appearance: none;
+    min-width: 200px;
+}
+
+.filterSelect {
+    padding-left: 3.5rem;
+}
+
+.filterSelect:hover, .sortSelect:hover {
+    border-color: rgba(77, 121, 246, 0.6);
+}
+
+.filterSelect:focus, .sortSelect:focus {
+    outline: none;
+    border-color: rgba(77, 121, 246, 0.8);
+    box-shadow: 0 0 0 2px rgba(77, 121, 246, 0.2);
+}
+
+.inventoryGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.giftCard {
+    background: linear-gradient(135deg, rgba(15, 26, 46, 0.9), rgba(10, 15, 43, 0.9));
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(77, 121, 246, 0.4);
+    transition: all 0.3s ease;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.giftCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    border-color: rgba(77, 121, 246, 0.6);
+}
+
+.giftImageWrapper {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+}
+
+.giftImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.giftCard:hover .giftImage {
+    transform: scale(1.05);
+}
+
+.giftGlow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 150%;
+    height: 150%;
+    background: radial-gradient(circle at center, var(--rarity-color, rgba(77, 121, 246, 0.4)) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.giftCard:hover .giftGlow {
+    opacity: 0.6;
+}
+
+.quantityBadge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.giftInfo {
+    padding: 1.5rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.giftName {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.3rem;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.giftRarity {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.giftDescription {
+    margin: 0 0 1.5rem 0;
+    font-size: 0.95rem;
+    color: #8a9aba;
+    line-height: 1.5;
+    flex-grow: 1;
+}
+
+.giftFooter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+}
+
+.giftDate {
+    font-size: 0.85rem;
+    color: #8a9aba;
+}
+
+.giftActions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.giftButton {
+    background: linear-gradient(90deg, #4d79f6, #6a5acd);
+    border: none;
+    padding: 0.5rem 1rem;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.giftButton:hover {
+    background: linear-gradient(90deg, #5a87ff, #7b68ee);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(77, 121, 246, 0.3);
+}
+
+.favoriteButton {
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.favoriteButton:hover {
+    background: rgba(255, 215, 0, 0.2);
+    border-color: rgba(255, 215, 0, 0.5);
+}
+
+.favoriteIcon {
+    color: rgba(255, 215, 0, 0.7);
+    transition: all 0.3s ease;
+}
+
+.favoriteButton:hover .favoriteIcon {
+    color: #FFD700;
+    transform: scale(1.1);
+}
+
+.emptyState {
+    grid-column: 1 / -1;
+    background: rgba(10, 15, 43, 0.5);
+    border-radius: 12px;
+    padding: 3rem;
+    text-align: center;
+    color: #8a9aba;
+    font-size: 1.1rem;
+    border: 1px dashed rgba(77, 121, 246, 0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.emptyIcon {
+    color: rgba(77, 121, 246, 0.5);
+    margin-bottom: 1.5rem;
+}
+
+.emptyState h3 {
+    color: #e0e0ff;
+    font-size: 1.5rem;
+    margin: 0 0 1rem 0;
+}
+
+.emptyState p {
+    margin: 0 0 2rem 0;
+    max-width: 500px;
+}
+
+.exploreButton {
+    background: linear-gradient(90deg, #4d79f6, #6a5acd);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.exploreButton:hover {
+    background: linear-gradient(90deg, #5a87ff, #7b68ee);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(77, 121, 246, 0.3);
+}
+
+/* Rarity colors */
+.giftCard[data-rarity="common"] {
+    border-color: rgba(77, 121, 246, 0.4);
+    --rarity-color: rgba(77, 121, 246, 0.4);
+}
+
+.giftCard[data-rarity="rare"] {
+    border-color: rgba(68, 170, 255, 0.4);
+    --rarity-color: rgba(68, 170, 255, 0.4);
+}
+
+.giftCard[data-rarity="epic"] {
+    border-color: rgba(170, 85, 255, 0.4);
+    --rarity-color: rgba(170, 85, 255, 0.4);
+}
+
+.giftCard[data-rarity="legendary"] {
+    border-color: rgba(255, 170, 85, 0.4);
+    --rarity-color: rgba(255, 170, 85, 0.4);
+}
+
+.giftCard[data-rarity="mythic"] {
+    border-color: rgba(255, 85, 170, 0.4);
+    --rarity-color: rgba(255, 85, 170, 0.4);
+}
+
+/* Animations */
+@keyframes twinkle {
+    0% { opacity: 0.2; }
+    50% { opacity: 1; }
+    100% { opacity: 0.2; }
+}
+
+@keyframes nebulaPulse {
+    0% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.02); }
+    100% { opacity: 0.3; transform: scale(1); }
+}
+
+/* Responsive styles */
+@media (max-width: 1024px) {
+    .inventoryGrid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .pageContent {
+        padding: 1.5rem 1rem;
+    }
+
+    .header {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .title {
+        font-size: 2rem;
+        text-align: center;
+    }
+
+    .tabs {
+        flex-wrap: wrap;
+    }
+
+    .tab {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .inventoryControls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+
+    .searchContainer {
+        max-width: 100%;
+    }
+
+    .filterGroup {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .filterSelect, .sortSelect {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .title {
+        font-size: 1.8rem;
+    }
+
+    .inventoryGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .filterSelect, .sortSelect {
+        min-width: 0;
+    }
+}
+
+.sellButton {
+    background: rgba(0, 200, 83, 0.1);
+    border: 1px solid rgba(0, 200, 83, 0.3);
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sellButton:hover {
+    background: rgba(0, 200, 83, 0.2);
+    border-color: rgba(0, 200, 83, 0.5);
+}
+
+.sellIcon {
+    color: rgba(0, 200, 83, 0.7);
+    transition: all 0.3s ease;
+}
+
+.sellButton:hover .sellIcon {
+    color: #00C853;
+    transform: scale(1.1);
+}
