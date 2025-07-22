@@ -447,7 +447,7 @@
 .usernameStar {
     color: gold;
     font-size: 20px;
-    margin-bottom: -25px;
+    margin-bottom: -6px;
     filter: drop-shadow(0 0 4px gold);
     animation: starAppear 0.3s ease-out;
 }
