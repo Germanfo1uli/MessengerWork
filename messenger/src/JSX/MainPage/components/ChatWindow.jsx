@@ -11,7 +11,8 @@ import {
     FiCopy,
     FiShare2,
     FiFlag,
-    FiCheckSquare
+    FiCheckSquare,
+    FiX
 } from 'react-icons/fi';
 import UserProfileModal from './UserProfileModal';
 import cl from '../styles/ChatWindow.module.css';
@@ -26,17 +27,17 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
     const [searchQuery, setSearchQuery] = useState('');
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [contextMenu, setContextMenu] = useState(null);
+    const [replyingTo, setReplyingTo] = useState(null);
     const { isLoading, userId, username, isAuthenticated, logout } = useAuth();
     const { getStatusString, formatTimeFromISO } = useMainHooks();
     const navigate = useNavigate();
     const contextMenuRef = useRef(null);
     const messagesEndRef = useRef(null);
     const messagesAreaRef = useRef(null);
+    const inputRef = useRef(null);
 
-    // List of available emoji reactions
     const availableReactions = ['😊', '👍', '❤️', '😂', '😢'];
 
-    // Auto-scroll to bottom when messages change
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
@@ -59,7 +60,11 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                     ? response.map(message => ({
                         ...message,
                         isUser: userId === message.senderId,
-                        reactions: message.reactions || [] // Initialize reactions array
+                        reactions: message.reactions || [],
+                        replyTo: message.replyTo ? {
+                            ...message.replyTo,
+                            sender: message.replyTo.senderId === userId ? "You" : activeChat.secondUser.username
+                        } : null
                     }))
                     : response;
 
@@ -97,7 +102,11 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                     return isDuplicate ? prevMessages : [...prevMessages, {
                         ...newMessage,
                         isUser: userId === newMessage.senderId,
-                        reactions: newMessage.reactions || []
+                        reactions: newMessage.reactions || [],
+                        replyTo: newMessage.replyTo ? {
+                            ...newMessage.replyTo,
+                            sender: newMessage.replyTo.senderId === userId ? "You" : activeChat.secondUser.username
+                        } : null
                     }];
                 });
             }
@@ -132,14 +141,21 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
             senderId: userId,
             chatId: activeChat.id,
             isTemporary: true,
-            reactions: []
+            reactions: [],
+            replyTo: replyingTo ? {
+                id: replyingTo.id,
+                comment: replyingTo.comment,
+                senderId: replyingTo.senderId,
+                sender: replyingTo.isUser ? "You" : activeChat.secondUser.username
+            } : null
         };
 
         setMessages(prev => [...prev, newMessage]);
         setMessage('');
+        setReplyingTo(null);
 
         try {
-            await connection.invoke("SendMessage", activeChat.id, userId, message, tempId);
+            await connection.invoke("SendMessage", activeChat.id, userId, message, tempId, replyingTo?.id);
             setMessages(prev => prev.map(msg =>
                 msg.id === tempId ? { ...msg, isTemporary: false } : msg
             ));
@@ -185,18 +201,29 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
         e.preventDefault();
         const messageElement = e.currentTarget;
         const rect = messageElement.getBoundingClientRect();
+        const contextMenuHeight = 200;
         setContextMenu({
             messageId: message.id,
             x: rect.left,
-            y: rect.bottom + window.scrollY + 5 // Position just below the message
+            y: rect.top + window.scrollY - contextMenuHeight - 5
         });
+    };
+
+    const handleReply = (message) => {
+        setReplyingTo(message);
+        setContextMenu(null);
+        inputRef.current.focus();
+    };
+
+    const cancelReply = () => {
+        setReplyingTo(null);
     };
 
     const handleContextMenuAction = (action, messageId, emoji = null) => {
         const message = messages.find(msg => msg.id === messageId);
         switch (action) {
             case 'reply':
-                setMessage(`Replying to: ${message.comment}`);
+                handleReply(message);
                 break;
             case 'pin':
                 console.log(`Pinning message ${messageId}`);
@@ -226,8 +253,6 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                         }
                         : msg
                 ));
-                // Optionally, send reaction to server
-                // await connection.invoke("AddReaction", activeChat.id, messageId, userId, emoji);
                 break;
             default:
                 break;
@@ -310,6 +335,15 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                         className={`${cl.message} ${msg.isUser ? cl.userMessage : cl.contactMessage}`}
                         onContextMenu={(e) => handleContextMenu(e, msg)}
                     >
+                        {msg.replyTo && (
+                            <div className={cl.replyPreview}>
+                                <div className={cl.replyLine}></div>
+                                <div className={cl.replyContent}>
+                                    <span className={cl.replyAuthor}>{msg.replyTo.sender}</span>
+                                    <p className={cl.replyText}>{msg.replyTo.comment}</p>
+                                </div>
+                            </div>
+                        )}
                         <div className={cl.messageContent}>
                             <p>{msg.comment}</p>
                             <span className={cl.messageTime}>{formatTimeFromISO(msg.createdAt)}</span>
@@ -366,12 +400,25 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                 <div className={cl.messageDecoration}></div>
             </div>
 
+            {replyingTo && (
+                <div className={cl.replyIndicator}>
+                    <div className={cl.replyInfo}>
+                        <span>Replying to {replyingTo.isUser ? "yourself" : activeChat.secondUser.username}</span>
+                        <p>{replyingTo.comment}</p>
+                    </div>
+                    <button className={cl.cancelReply} onClick={cancelReply}>
+                        <FiX />
+                    </button>
+                </div>
+            )}
+
             <div className={cl.messageInputContainer}>
                 <div className={cl.inputWrapper}>
                     <button className={cl.attachmentButton}>
                         <FiPaperclip className={cl.icon} />
                     </button>
                     <input
+                        ref={inputRef}
                         type="text"
                         placeholder="Напишите сообщение..."
                         value={message}

@@ -358,6 +358,28 @@
     background: transparent;
     position: relative;
     align-items: flex-start;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(138, 43, 226, 0.5) transparent;
+}
+
+.messagesArea::-webkit-scrollbar {
+    width: 8px;
+}
+
+.messagesArea::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 4px;
+}
+
+.messagesArea::-webkit-scrollbar-thumb {
+    background-color: rgba(138, 43, 226, 0.5);
+    border-radius: 4px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+.messagesArea::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(138, 43, 226, 0.7);
 }
 
 .message {
@@ -368,6 +390,7 @@
     word-wrap: break-word;
     align-self: flex-start;
     margin-right: auto;
+    transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
 .contactMessage {
@@ -402,7 +425,6 @@
     align-self: flex-end;
 }
 
-/* Обновленные стили для реакций */
 .reactions {
     display: flex;
     gap: 6px;
@@ -431,12 +453,6 @@
     transform: scale(1.15);
     background: rgba(255, 255, 255, 0.25);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-}
-
-.reaction-count {
-    font-size: 12px;
-    color: #e0e0ff;
-    margin-left: 2px;
 }
 
 .contextMenu {
@@ -472,7 +488,6 @@
     font-size: 16px;
 }
 
-/* Обновленные стили для выбора реакций */
 .reactionPicker {
     display: flex;
     gap: 6px;
@@ -607,53 +622,119 @@
 }
 
 .messagesArea {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    background: transparent;
-    position: relative;
-    align-items: flex-start;
-    /* Кастомный скроллбар */
-    scrollbar-width: thin;
-    scrollbar-color: rgba(138, 43, 226, 0.5) transparent;
-}
-
-.messagesArea::-webkit-scrollbar {
-    width: 8px;
-}
-
-.messagesArea::-webkit-scrollbar-track {
-    background: transparent;
-    border-radius: 4px;
-}
-
-.messagesArea::-webkit-scrollbar-thumb {
-    background-color: rgba(138, 43, 226, 0.5);
-    border-radius: 4px;
-    border: 2px solid transparent;
-    background-clip: content-box;
-}
-
-.messagesArea::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(138, 43, 226, 0.7);
-}
-
-/* Анимация для плавного скролла */
-.messagesArea {
     scroll-behavior: smooth;
 }
 
-/* Дополнительные стили для сообщений */
-.message {
-    max-width: 70%;
-    padding: 10px 15px;
-    border-radius: 18px;
+.replyPreview {
+    display: flex;
+    background: rgba(255, 255, 255, 0.07);
+    border-radius: 12px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    margin-left: -10px;
     position: relative;
-    word-wrap: break-word;
-    align-self: flex-start;
-    margin-right: auto;
-    transition: transform 0.2s ease, opacity 0.2s ease;
+    overflow: hidden;
+    border: 1px solid rgba(138, 43, 226, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.replyPreview:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(138, 43, 226, 0.4);
+}
+
+.replyLine {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, #8a2be2, #ff6f91);
+    border-radius: 0 4px 4px 0;
+    animation: replyLineGlow 2s ease-in-out infinite;
+}
+
+.replyContent {
+    padding-left: 12px;
+    width: 100%;
+}
+
+.replyAuthor {
+    font-size: 13px;
+    font-weight: 600;
+    color: #e0e0ff;
+    display: block;
+    margin-bottom: 4px;
+    text-shadow: 0 0 4px rgba(176, 176, 255, 0.4);
+}
+
+.replyText {
+    font-size: 14px;
+    color: #b0b0ff;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.replyIndicator {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    background: linear-gradient(90deg, rgba(26, 21, 71, 0.9), rgba(15, 12, 41, 0.95));
+    border-top: 1px solid rgba(138, 43, 226, 0.4);
+    border-bottom: 1px solid rgba(138, 43, 226, 0.2);
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(8px);
+}
+
+.replyInfo {
+    flex: 1;
+    overflow: hidden;
+}
+
+.replyInfo span {
+    font-size: 13px;
+    font-weight: 600;
+    color: #e0e0ff;
+    display: block;
+    text-shadow: 0 0 4px rgba(176, 176, 255, 0.3);
+}
+
+.replyInfo p {
+    font-size: 14px;
+    color: #b0b0ff;
+    margin: 4px 0 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cancelReply {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #e0e0ff;
+    cursor: pointer;
+    padding: 6px;
+    margin-left: 12px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cancelReply:hover {
+    background: rgba(255, 111, 145, 0.3);
+    color: #fff;
+    transform: scale(1.1);
+}
+
+@keyframes replyLineGlow {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
 }
