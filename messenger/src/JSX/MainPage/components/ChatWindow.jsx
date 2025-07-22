@@ -11,7 +11,7 @@ import UserProfileModal from './UserProfileModal';
 import cl from '../styles/ChatWindow.module.css';
 import { apiRequest } from '../../../hooks/ApiRequest';
 import { useAuth } from '../../../hooks/UseAuth';
-import useMainHooks from '../../../hooks/UseMainHooks';
+import useMainHooks from '../hooks/UseMainHooks';
 import { useNavigate } from 'react-router-dom';
 
 const ChatWindow = ({ connection, activeChat, setActiveChat, onToggleFavorite, isConnected }) => {
@@ -29,7 +29,6 @@ const ChatWindow = ({ connection, activeChat, setActiveChat, onToggleFavorite, i
             if (!activeChat?.id) return; // Добавляем проверку на наличие activeChat и его id
 
             setSecondUserId(activeChat.secondUserId)
-            console.log(activeChat.id)
 
             try {
                 const response = await apiRequest(`/api/messages/chat/${activeChat.id}`, {
@@ -115,8 +114,6 @@ const ChatWindow = ({ connection, activeChat, setActiveChat, onToggleFavorite, i
             var response = await connection.invoke("SendMessage",
                 activeChat.id === '00000000-0000-0000-0000-000000000000' ? null : activeChat.id,
                 secondUserId, message, tempId);
-                
-            console.log(response)
 
             if(activeChat.id === '00000000-0000-0000-0000-000000000000')
                 setActiveChat((prev) => ({

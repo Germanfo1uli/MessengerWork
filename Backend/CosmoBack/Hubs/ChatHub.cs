@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using CosmoBack.Models.Dtos;
 using CosmoBack.Services.Interfaces;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Security.Claims;
-using CosmoBack.Models;
 using System.Collections.Concurrent;
 
 namespace CosmoBack.Hubs
@@ -11,7 +8,6 @@ namespace CosmoBack.Hubs
     public class ChatHub(IChatService chatService, IHttpContextAccessor httpContextAccessor) : Hub
     {
         private readonly IChatService _chatService = chatService;
-        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
         private static readonly ConcurrentDictionary<string, string> UserConnections = new();
 
         // При подключении клиента сохраняем его ConnectionId

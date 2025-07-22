@@ -13,7 +13,7 @@ import AddContactModal from './AddContactModal';
 import { apiRequest } from '../../../hooks/ApiRequest';
 import { useAuth } from '../../../hooks/UseAuth';
 import { useNavigate } from 'react-router-dom';
-import useMainHooks from '../../../hooks/UseMainHooks';
+import useMainHooks from '../hooks/UseMainHooks';
 import debounce from 'lodash.debounce';
 
 const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
@@ -112,9 +112,6 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                         joined: false
                     }))
                     : [];
-
-                console.log(chatsResponse)
-                console.log(enhancedChats)
 
                 setUser({
                     username: profileResponse.username || username,
