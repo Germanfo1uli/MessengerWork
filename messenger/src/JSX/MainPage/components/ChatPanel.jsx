@@ -41,43 +41,76 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
 
                 setIsSearching(true);
                 try {
-                    const response = await apiRequest(`/api/chat/search?userId=${userId}&query=${encodeURIComponent(query.substring(1))}`, {
+                    const response = await apiRequest(`/api/search/tag/${encodeURIComponent(query.substring(1))}?userId=${userId}`, {
                         method: 'GET',
                         authenticated: isAuthenticated
                     });
+                    console.log(response)
+                    const enhancedResults = Array.isArray(response)
+                        ? response.map(item => {
+                            // Базовые поля для всех типов
+                            const baseItem = {
+                                id: item.id,
+                                type: item.type,
+                                name: item.name || item.username || item.tag,
+                                avatarImageId: item.avatarImageId,
+                                isFavorite: item.isFavorite ?? false,
+                                lastMessage: item.lastMessage 
+                                    ? { 
+                                        text: item.lastMessage,
+                                        date: item.lastMessageAt 
+                                    } 
+                                    : null,
+                                onlineStatus: item.onlineStatus
+                            };
 
-                    const enhancedChats = Array.isArray(response)
-                        ? response.map(chat => ({
-                            id: chat.id,
-                            publicId: chat.publicId,
-                            isFavorite: chat.isFavorite,
-                            firstUserId: chat.firstUserId,
-                            secondUserId: chat.secondUserId,
-                            createdAt: chat.createdAt,
-                            lastMessageAt: chat.lastMessageAt,
-                            lastMessage: chat.lastMessage
-                                ? {
-                                    id: chat.lastMessage.id,
-                                    chatId: chat.lastMessage.chatId,
-                                    senderId: chat.lastMessage.senderId,
-                                    comment: chat.lastMessage.comment,
-                                    createdAt: chat.lastMessage.createdAt,
-                                    username: chat.lastMessage.username,
-                                    avatarImageId: chat.lastMessage.avatarImageId,
-                                    isSentByUser: userId === chat.lastMessage.senderId
-                                }
-                                : null,
-                            secondUser: {
-                                username: chat.secondUser?.username ?? '',
-                                onlineStatus: chat.secondUser?.onlineStatus ?? 0,
-                                contactTag: chat.secondUser?.contactTag
-                            },
-                            joined: false
-                        }))
+                            // Обработка для чатов (как было в оригинале)
+                            if (item.type === 'Chat') {
+                                return {
+                                    ...baseItem,
+                                    publicId: item.publicId,
+                                    firstUserId: item.firstUserId,
+                                    secondUserId: item.secondUserId,
+                                    secondUser: {
+                                        username: item.username ?? '',
+                                        onlineStatus: item.onlineStatus ?? 0,
+                                        contactTag: item.contactTag
+                                    },
+                                    joined: true
+                                };
+                            }
+
+                            // Обработка для пользователей/контактов
+                            if (item.type === 'User' || item.type === 'Contact') {
+                                return {
+                                    ...baseItem,
+                                    username: item.username,
+                                    onlineStatus: item.onlineStatus,
+                                    contactTag: item.contactTag,
+                                    phone: item.phone,
+                                    bio: item.bio,
+                                    isContact: item.type === 'Contact',
+                                    joined: false // Новый чат
+                                };
+                            }
+
+                            // Обработка групп/каналов
+                            if (item.type === 'Group' || item.type === 'Channel') {
+                                return {
+                                    ...baseItem,
+                                    description: item.description,
+                                    membersCount: item.membersCount,
+                                    joined: item.isFavorite !== null // Упрощенная проверка
+                                };
+                            }
+
+                            return baseItem;
+                        })
                         : [];
-                    setSearchResults(enhancedChats);
+
+                    setSearchResults(enhancedResults);
                 } catch (error) {
-                    console.error('Failed to search chats:', error);
+                    console.error('Search error:', error);
                     setSearchResults([]);
                 } finally {
                     setIsSearching(false);
@@ -299,15 +332,18 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
     };
 
     const handleChatClick = (chat) => {
-        if (chat.id === null) {
-            setData((prev) => {
-                if (!prev.some(c => c.secondUserId === chat.secondUserId)) {
-                    return [...prev, { ...chat, joined: false }];
-                }
-                return prev;
-            });
-        }
-        onChatSelect(chat);
+        if (!chat) return;
+        
+        const targetChat = {
+            ...chat,
+            secondUser: chat.secondUser || {
+                username: chat.name || 'Новый чат',
+                onlineStatus: 0,
+                contactTag: null
+            }
+        };
+        
+        onChatSelect(targetChat);
     };
 
     const handleAddContact = (contactData) => {
@@ -348,17 +384,30 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
 
     const filteredChats = useMemo(() => {
         const source = searchQuery.startsWith('@') ? searchResults : data;
-        return (activeTab === 'favorites' ? source.filter((chat) => chat.isFavorite) : source)
-            .filter((chat) =>
-                chat.secondUser.username.toLowerCase().includes(
-                    searchQuery.startsWith('@') ? searchQuery.substring(1).toLowerCase() : searchQuery.toLowerCase()
-                )
-            )
-            .sort((a, b) => {
-                if (!a.lastMessage || !a.lastMessage.createdAt) return 1;
-                if (!b.lastMessage || !b.lastMessage.createdAt) return -1;
-                return new Date(b.lastMessage.createdAt) - new Date(a.lastMessage.createdAt);
-            });
+        
+        return (activeTab === 'favorites' 
+            ? source.filter((item) => item.isFavorite) 
+            : source)
+        .filter((item) => {
+            // Универсальная проверка для всех типов
+            const searchTerm = searchQuery.startsWith('@') 
+                ? searchQuery.substring(1).toLowerCase() 
+                : searchQuery.toLowerCase();
+            
+            // Для чатов и контактов
+            if (item.secondUser) {
+                return item.secondUser.username?.toLowerCase().includes(searchTerm);
+            }
+            // Для пользователей/групп из поиска
+            return item.name?.toLowerCase().includes(searchTerm) || 
+                item.username?.toLowerCase().includes(searchTerm) ||
+                item.tag?.toLowerCase().includes(searchTerm);
+        })
+        .sort((a, b) => {
+            const dateA = a.lastMessage?.date || a.lastMessage?.createdAt || a.createdAt;
+            const dateB = b.lastMessage?.date || b.lastMessage?.createdAt || b.createdAt;
+            return new Date(dateB || 0) - new Date(dateA || 0);
+        });
     }, [data, searchResults, activeTab, searchQuery]);
 
     return (
@@ -486,14 +535,14 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
             <div className={cl.chatsList}>
                 {filteredChats.length > 0 ? (
                     filteredChats.map((chat, index) => (
-                        <div key={index} onClick={() => handleChatClick(chat)} style={{ cursor: 'pointer' }}>
+                        <div key={`${chat.id || index}`} onClick={() => handleChatClick(chat)} style={{ cursor: 'pointer' }}>
                             <ChatBox
-                                name={chat.secondUser.username}
-                                unread={10}
-                                lastMessage={chat.lastMessage?.comment ?? ''}
-                                time={formatTimeFromISO(chat.lastMessage?.createdAt)}
-                                status={getStatusString(chat.secondUser.onlineStatus)}
-                                isFavorite={false}
+                                name={chat.secondUser?.username || chat.name || 'Без названия'}
+                                unread={0} 
+                                lastMessage={chat.lastMessage?.text || chat.lastMessage?.comment || ''}
+                                time={formatTimeFromISO(chat.lastMessage?.date || chat.lastMessage?.createdAt)}
+                                status={getStatusString(chat.secondUser?.onlineStatus || chat.onlineStatus || 0)}
+                                isFavorite={chat.isFavorite || false}
                                 messageStatus={"sent"}
                                 isSentByUser={chat.lastMessage?.isSentByUser ?? false}
                             />

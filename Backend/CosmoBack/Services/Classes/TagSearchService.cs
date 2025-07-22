@@ -3,22 +3,18 @@ using CosmoBack.Models.Dtos;
 using CosmoBack.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace CosmoBack.Services.Classes
 {
     public class TagSearchService : ITagSearchService
     {
         private readonly CosmoDbContext _context;
-        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<TagSearchService> _logger;
 
         public TagSearchService(
             CosmoDbContext context,
-            IHttpContextAccessor httpContextAccessor,
             ILogger<TagSearchService> logger)
         {
             _context = context;
-            _httpContextAccessor = httpContextAccessor;
             _logger = logger;
         }
 
@@ -31,7 +27,34 @@ namespace CosmoBack.Services.Classes
                 var normalizedTag = tag.StartsWith('@') ? tag[1..] : tag;
                 var results = new List<TagSearchDto>();
 
-                // 1. Поиск каналов по ChannelTag
+                // Always search for users, but include additional fields when tag doesn't start with '@'
+                var users = await _context.Users
+                    .Where(u => (u.PublicName != null && u.PublicName.Contains(normalizedTag)) ||
+                               (u.Username.Contains(normalizedTag)))
+                    .Select(u => new TagSearchDto
+                    {
+                        Id = u.Id,
+                        PublicId = null, // Not available for users in this context
+                        Name = u.PublicName ?? u.Username,
+                        Description = null, // Not available for users
+                        Tag = u.PublicName ?? u.Username,
+                        Type = EntityType.User,
+                        CreatedAt = u.CreatedAt,
+                        LastMessageAt = null, // Will be updated below if needed
+                        LastMessage = null, // Will be updated below if needed
+                        AvatarImageId = u.AvatarImageId,
+                        MembersCount = null, // Not applicable for users
+                        IsFavorite = null, // Will be updated below if needed
+                        Username = u.Username,
+                        OnlineStatus = u.OnlineStatus,
+                        ContactTag = null, // Will be updated for contacts
+                        Phone = u.Phone,
+                        Bio = u.Bio
+                    })
+                    .ToListAsync();
+
+                results.AddRange(users);
+
                 var channels = await _context.Channels
                     .Where(c => c.ChannelTag != null && c.ChannelTag.Contains(normalizedTag))
                     .Select(c => new TagSearchDto
@@ -43,26 +66,42 @@ namespace CosmoBack.Services.Classes
                         Tag = c.ChannelTag,
                         Type = EntityType.Channel,
                         CreatedAt = c.CreatedAt,
+                        LastMessageAt = null, // Will be updated below
+                        LastMessage = null, // Will be updated below
                         AvatarImageId = c.AvatarImageId,
-                        MembersCount = c.MembersNumber
+                        MembersCount = c.MembersNumber,
+                        IsFavorite = null, // Will be updated below
+                        Username = null, // Not applicable for channels
+                        OnlineStatus = null, // Not applicable for channels
+                        ContactTag = null, // Not applicable for channels
+                        Phone = null, // Not applicable for channels
+                        Bio = null // Not applicable for channels
                     })
                     .ToListAsync();
 
                 results.AddRange(channels);
 
-                
                 var groups = await _context.Groups
                     .Where(g => g.GroupTag != null && g.GroupTag.Contains(normalizedTag))
                     .Select(g => new TagSearchDto
                     {
                         Id = g.Id,
+                        PublicId = null, // Not available for groups in this context
                         Name = g.Name,
                         Description = g.Description,
                         Tag = g.GroupTag,
                         Type = EntityType.Group,
                         CreatedAt = g.CreatedAt,
+                        LastMessageAt = null, // Will be updated below
+                        LastMessage = null, // Will be updated below
                         AvatarImageId = g.AvatarImageId,
-                        MembersCount = _context.GroupMembers.Count(gm => gm.GroupId == g.Id)
+                        MembersCount = _context.GroupMembers.Count(gm => gm.GroupId == g.Id),
+                        IsFavorite = null, // Will be updated below
+                        Username = null, // Not applicable for groups
+                        OnlineStatus = null, // Not applicable for groups
+                        ContactTag = null, // Not applicable for groups
+                        Phone = null, // Not applicable for groups
+                        Bio = null // Not applicable for groups
                     })
                     .ToListAsync();
 
@@ -76,48 +115,28 @@ namespace CosmoBack.Services.Classes
                         (c, u) => new TagSearchDto
                         {
                             Id = u.Id,
+                            PublicId = null, // Not available for contacts in this context
                             Name = u.PublicName ?? u.Username,
+                            Description = null, // Not available for contacts
                             Tag = c.ContactTag,
                             Type = EntityType.Contact,
                             CreatedAt = c.CreatedAt,
+                            LastMessageAt = null, // Will be updated below if needed
+                            LastMessage = null, // Will be updated below if needed
                             AvatarImageId = u.AvatarImageId,
+                            MembersCount = null, // Not applicable for contacts
+                            IsFavorite = null, // Will be updated below if needed
                             Username = u.Username,
                             OnlineStatus = u.OnlineStatus,
-                            ContactTag = c.ContactTag
+                            ContactTag = c.ContactTag,
+                            Phone = u.Phone,
+                            Bio = u.Bio
                         })
                     .ToListAsync();
 
                 results.AddRange(contacts);
 
-                var chatMatches = await _context.Chats
-                    .Where(c => c.FirstUserId == userId || c.SecondUserId == userId)
-                    .Join(_context.Contacts,
-                        c => c.FirstUserId == userId ? c.SecondUserId : c.FirstUserId,
-                        contact => contact.ContactId,
-                        (c, contact) => new { Chat = c, Contact = contact })
-                    .Where(x => x.Contact.OwnerId == userId &&
-                               x.Contact.ContactTag != null &&
-                               x.Contact.ContactTag.Contains(normalizedTag))
-                    .Join(_context.Users,
-                        x => x.Contact.ContactId,
-                        u => u.Id,
-                        (x, u) => new TagSearchDto
-                        {
-                            Id = x.Chat.Id,
-                            PublicId = x.Chat.PublicId,
-                            Name = u.PublicName ?? u.Username,
-                            Tag = x.Contact.ContactTag,
-                            Type = EntityType.Chat,
-                            CreatedAt = x.Chat.CreatedAt,
-                            AvatarImageId = u.AvatarImageId,
-                            Username = u.Username,
-                            OnlineStatus = u.OnlineStatus,
-                            ContactTag = x.Contact.ContactTag
-                        })
-                    .ToListAsync();
-
-                results.AddRange(chatMatches);
-
+                // Update last messages and favorite status for all results
                 foreach (var result in results)
                 {
                     switch (result.Type)
@@ -138,18 +157,30 @@ namespace CosmoBack.Services.Classes
                             break;
 
                         case EntityType.Chat:
-                            var chatLastMessage = await _context.Messages
-                                .Where(m => m.ChatId == result.Id)
-                                .OrderByDescending(m => m.CreatedAt)
-                                .FirstOrDefaultAsync();
+                            // Find existing chat between current user and the found user
+                            var chat = await _context.Chats
+                                .FirstOrDefaultAsync(c =>
+                                    (c.FirstUserId == userId && c.SecondUserId == result.Id) ||
+                                    (c.FirstUserId == result.Id && c.SecondUserId == userId));
 
-                            result.LastMessage = chatLastMessage?.Comment;
-                            result.LastMessageAt = chatLastMessage?.CreatedAt;
+                            if (chat != null)
+                            {
+                                result.Id = chat.Id; // Override with chat ID for chat type
+                                result.PublicId = chat.PublicId;
 
-                            var chatMember = await _context.ChatMembers
-                                .FirstOrDefaultAsync(cm => cm.ChatId == result.Id && cm.UserId == userId);
+                                var chatLastMessage = await _context.Messages
+                                    .Where(m => m.ChatId == chat.Id)
+                                    .OrderByDescending(m => m.CreatedAt)
+                                    .FirstOrDefaultAsync();
 
-                            result.IsFavorite = chatMember?.IsFavorite;
+                                result.LastMessage = chatLastMessage?.Comment;
+                                result.LastMessageAt = chatLastMessage?.CreatedAt;
+
+                                var chatMember = await _context.ChatMembers
+                                    .FirstOrDefaultAsync(cm => cm.ChatId == chat.Id && cm.UserId == userId);
+
+                                result.IsFavorite = chatMember?.IsFavorite;
+                            }
                             break;
 
                         case EntityType.Group:
@@ -166,10 +197,44 @@ namespace CosmoBack.Services.Classes
 
                             result.IsFavorite = groupMember?.IsFavorite;
                             break;
+
+                        case EntityType.User:
+                        case EntityType.Contact:
+                            // For users and contacts, check if there's an existing chat
+                            var userChat = await _context.Chats
+                                .FirstOrDefaultAsync(c =>
+                                    (c.FirstUserId == userId && c.SecondUserId == result.Id) ||
+                                    (c.FirstUserId == result.Id && c.SecondUserId == userId));
+
+                            if (userChat != null)
+                            {
+                                result.LastMessageAt = await _context.Messages
+                                    .Where(m => m.ChatId == userChat.Id)
+                                    .OrderByDescending(m => m.CreatedAt)
+                                    .Select(m => m.CreatedAt)
+                                    .FirstOrDefaultAsync();
+
+                                result.LastMessage = await _context.Messages
+                                    .Where(m => m.ChatId == userChat.Id)
+                                    .OrderByDescending(m => m.CreatedAt)
+                                    .Select(m => m.Comment)
+                                    .FirstOrDefaultAsync();
+
+                                var userChatMember = await _context.ChatMembers
+                                    .FirstOrDefaultAsync(cm => cm.ChatId == userChat.Id && cm.UserId == userId);
+
+                                result.IsFavorite = userChatMember?.IsFavorite;
+                            }
+                            break;
                     }
                 }
 
-                return results.OrderByDescending(r => r.LastMessageAt ?? r.CreatedAt);
+                // Сортировка по релевантности
+                return results
+                    .OrderByDescending(r => r.Tag?.StartsWith(normalizedTag) ?? false)
+                    .ThenByDescending(r => r.Tag?.Contains(normalizedTag) ?? false)
+                    .ThenByDescending(r => r.LastMessageAt ?? r.CreatedAt)
+                    .Take(10);
             }
             catch (Exception ex)
             {

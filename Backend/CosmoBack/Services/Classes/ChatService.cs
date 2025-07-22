@@ -506,98 +506,98 @@ namespace CosmoBack.Services.Classes
             }
         }
 
-        public async Task<IEnumerable<ChatDto>> SearchUsersAsync(Guid userId, string searchQuery)
-        {
-            _logger.LogInformation("Searching chats for user {UserId} with query {SearchQuery}", userId, searchQuery);
-            try
-            {
-                var searchResults = await _chatRepository.GetChatsWithDetailsByQueryAsync(userId, searchQuery);
-                var chatDtos = new List<ChatDto>();
+        //public async Task<IEnumerable<ChatDto>> SearchUsersAsync(Guid userId, string searchQuery)
+        //{
+        //    _logger.LogInformation("Searching chats for user {UserId} with query {SearchQuery}", userId, searchQuery);
+        //    try
+        //    {
+        //        var searchResults = await _chatRepository.GetChatsWithDetailsByQueryAsync(userId, searchQuery);
+        //        var chatDtos = new List<ChatDto>();
 
-                foreach (var result in searchResults)
-                {
-                    var user = result.GetType().GetProperty("User").GetValue(result);
-                    var chatData = result.GetType().GetProperty("Chat").GetValue(result);
-                    var secondUserId = user.GetType().GetProperty("Id").GetValue(user) as Guid?;
+        //        foreach (var result in searchResults)
+        //        {
+        //            var user = result.GetType().GetProperty("User").GetValue(result);
+        //            var chatData = result.GetType().GetProperty("Chat").GetValue(result);
+        //            var secondUserId = user.GetType().GetProperty("Id").GetValue(user) as Guid?;
 
-                    if (secondUserId == null)
-                    {
-                        _logger.LogWarning("User ID is null for search result with username {Username}", user.GetType().GetProperty("Username").GetValue(user));
-                        continue;
-                    }
+        //            if (secondUserId == null)
+        //            {
+        //                _logger.LogWarning("User ID is null for search result with username {Username}", user.GetType().GetProperty("Username").GetValue(user));
+        //                continue;
+        //            }
 
-                    ChatDto chatDto;
+        //            ChatDto chatDto;
 
-                    if (chatData == null)
-                    {
-                        // Если чата нет, создаем ChatDto с минимальными данными
-                        chatDto = new ChatDto
-                        {
-                            Id = Guid.Empty, // Или другой индикатор отсутствия чата
-                            PublicId = 0,
-                            IsFavorite = false,
-                            FirstUserId = userId,
-                            SecondUserId = secondUserId.Value,
-                            CreatedAt = DateTime.UtcNow,
-                            LastMessageAt = null,
-                            LastMessage = null,
-                            SecondUser = new SecondUserDto
-                            {
-                                Username = user.GetType().GetProperty("Username").GetValue(user)?.ToString() ?? string.Empty,
-                                OnlineStatus = (OnlineStatus)user.GetType().GetProperty("OnlineStatus").GetValue(user),
-                                ContactTag = user.GetType().GetProperty("ContactTag").GetValue(user)?.ToString()
-                            }
-                        };
-                    }
-                    else
-                    {
-                        // Если чат существует, извлекаем данные
-                        var chat = chatData.GetType().GetProperty("Chat").GetValue(chatData) as Chat;
-                        var lastMessageData = chatData.GetType().GetProperty("LastMessageData").GetValue(chatData);
+        //            if (chatData == null)
+        //            {
+        //                // Если чата нет, создаем ChatDto с минимальными данными
+        //                chatDto = new ChatDto
+        //                {
+        //                    Id = Guid.Empty, // Или другой индикатор отсутствия чата
+        //                    PublicId = 0,
+        //                    IsFavorite = false,
+        //                    FirstUserId = userId,
+        //                    SecondUserId = secondUserId.Value,
+        //                    CreatedAt = DateTime.UtcNow,
+        //                    LastMessageAt = null,
+        //                    LastMessage = null,
+        //                    SecondUser = new SecondUserDto
+        //                    {
+        //                        Username = user.GetType().GetProperty("Username").GetValue(user)?.ToString() ?? string.Empty,
+        //                        OnlineStatus = (OnlineStatus)user.GetType().GetProperty("OnlineStatus").GetValue(user),
+        //                        ContactTag = user.GetType().GetProperty("ContactTag").GetValue(user)?.ToString()
+        //                    }
+        //                };
+        //            }
+        //            else
+        //            {
+        //                // Если чат существует, извлекаем данные
+        //                var chat = chatData.GetType().GetProperty("Chat").GetValue(chatData) as Chat;
+        //                var lastMessageData = chatData.GetType().GetProperty("LastMessageData").GetValue(chatData);
 
-                        var chatMember = await _chatMembersRepository.GetByChatAndUserIdAsync(chat.Id, userId);
+        //                var chatMember = await _chatMembersRepository.GetByChatAndUserIdAsync(chat.Id, userId);
 
-                        chatDto = new ChatDto
-                        {
-                            Id = chat.Id,
-                            PublicId = chat.PublicId,
-                            IsFavorite = chatMember?.IsFavorite ?? false,
-                            FirstUserId = chat.FirstUserId,
-                            SecondUserId = chat.SecondUserId,
-                            CreatedAt = chat.CreatedAt,
-                            LastMessageAt = lastMessageData != null
-                                ? (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message)?.CreatedAt
-                                : null,
-                            LastMessage = lastMessageData != null ? new ChatMessageDto
-                            {
-                                Id = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).Id,
-                                ChatId = (Guid)(lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).ChatId,
-                                SenderId = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).SenderId,
-                                Comment = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).Comment,
-                                CreatedAt = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).CreatedAt,
-                                Username = lastMessageData.GetType().GetProperty("Username").GetValue(lastMessageData)?.ToString() ?? string.Empty,
-                                AvatarImageId = lastMessageData.GetType().GetProperty("AvatarImageId").GetValue(lastMessageData) as Guid?
-                            } : null,
-                            SecondUser = new SecondUserDto
-                            {
-                                Username = user.GetType().GetProperty("Username").GetValue(user)?.ToString() ?? string.Empty,
-                                OnlineStatus = (OnlineStatus)user.GetType().GetProperty("OnlineStatus").GetValue(user),
-                                ContactTag = user.GetType().GetProperty("ContactTag").GetValue(user)?.ToString()
-                            }
-                        };
-                    }
+        //                chatDto = new ChatDto
+        //                {
+        //                    Id = chat.Id,
+        //                    PublicId = chat.PublicId,
+        //                    IsFavorite = chatMember?.IsFavorite ?? false,
+        //                    FirstUserId = chat.FirstUserId,
+        //                    SecondUserId = chat.SecondUserId,
+        //                    CreatedAt = chat.CreatedAt,
+        //                    LastMessageAt = lastMessageData != null
+        //                        ? (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message)?.CreatedAt
+        //                        : null,
+        //                    LastMessage = lastMessageData != null ? new ChatMessageDto
+        //                    {
+        //                        Id = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).Id,
+        //                        ChatId = (Guid)(lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).ChatId,
+        //                        SenderId = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).SenderId,
+        //                        Comment = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).Comment,
+        //                        CreatedAt = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).CreatedAt,
+        //                        Username = lastMessageData.GetType().GetProperty("Username").GetValue(lastMessageData)?.ToString() ?? string.Empty,
+        //                        AvatarImageId = lastMessageData.GetType().GetProperty("AvatarImageId").GetValue(lastMessageData) as Guid?
+        //                    } : null,
+        //                    SecondUser = new SecondUserDto
+        //                    {
+        //                        Username = user.GetType().GetProperty("Username").GetValue(user)?.ToString() ?? string.Empty,
+        //                        OnlineStatus = (OnlineStatus)user.GetType().GetProperty("OnlineStatus").GetValue(user),
+        //                        ContactTag = user.GetType().GetProperty("ContactTag").GetValue(user)?.ToString()
+        //                    }
+        //                };
+        //            }
 
-                    chatDtos.Add(chatDto);
-                }
+        //            chatDtos.Add(chatDto);
+        //        }
 
-                _logger.LogInformation("Retrieved {ChatCount} chats for user {UserId} with query {SearchQuery}", chatDtos.Count, userId, searchQuery);
-                return chatDtos;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error searching chats for user {UserId} with query {SearchQuery}", userId, searchQuery);
-                throw new Exception($"Ошибка при поиске чатов: {ex.Message}", ex);
-            }
-        }
+        //        _logger.LogInformation("Retrieved {ChatCount} chats for user {UserId} with query {SearchQuery}", chatDtos.Count, userId, searchQuery);
+        //        return chatDtos;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Error searching chats for user {UserId} with query {SearchQuery}", userId, searchQuery);
+        //        throw new Exception($"Ошибка при поиске чатов: {ex.Message}", ex);
+        //    }
+        //}
     }
 }

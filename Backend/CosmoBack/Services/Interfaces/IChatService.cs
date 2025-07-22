@@ -10,7 +10,7 @@ namespace CosmoBack.Services.Interfaces
         Task DeleteChatAsync(Guid chatId);
         Task<ChatMessageDto> SendMessageAsync(Guid? chatId, Guid senderId, Guid secondUserId, string content);
         Task<ChatDto> ToggleFavoriteChatAsync(Guid chatId, bool favorite);
-        Task<IEnumerable<ChatDto>> SearchUsersAsync(Guid userId, string searchQuery);
+        //Task<IEnumerable<ChatDto>> SearchUsersAsync(Guid userId, string searchQuery);
     }
 }
 

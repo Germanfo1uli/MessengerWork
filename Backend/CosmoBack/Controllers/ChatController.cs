@@ -43,19 +43,19 @@ namespace CosmoBack.Controllers
             }
         }
 
-        [HttpGet("search")]
-        public async Task<IActionResult> SearchChats(Guid userId, string query)
-        {
-            try
-            {
-                var chats = await _chatService.SearchUsersAsync(userId, query);
-                return Ok(chats);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
+        //[HttpGet("search")]
+        //public async Task<IActionResult> SearchChats(Guid userId, string query)
+        //{
+        //    try
+        //    {
+        //        var chats = await _chatService.SearchUsersAsync(userId, query);
+        //        return Ok(chats);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //}
 
         [HttpPost]
         public async Task<IActionResult> CreateChat([FromBody] CreateChatRequest request)
