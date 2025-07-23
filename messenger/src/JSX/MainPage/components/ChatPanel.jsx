@@ -45,12 +45,11 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                         method: 'GET',
                         authenticated: isAuthenticated
                     });
-                    console.log(response)
                     const enhancedResults = Array.isArray(response)
                         ? response.map(item => {
                             // Базовые поля для всех типов
                             const baseItem = {
-                                id: item.id,
+                                id: item.id, // Для User/Contact это ID чата, если он существует иначе Userid
                                 type: item.type,
                                 name: item.name || item.username || item.tag,
                                 avatarImageId: item.avatarImageId,
@@ -64,33 +63,18 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                                 onlineStatus: item.onlineStatus
                             };
 
-                            // Обработка для чатов (как было в оригинале)
-                            if (item.type === 'Chat') {
-                                return {
-                                    ...baseItem,
-                                    publicId: item.publicId,
-                                    firstUserId: item.firstUserId,
-                                    secondUserId: item.secondUserId,
-                                    secondUser: {
-                                        username: item.username ?? '',
-                                        onlineStatus: item.onlineStatus ?? 0,
-                                        contactTag: item.contactTag
-                                    },
-                                    joined: true
-                                };
-                            }
-
                             // Обработка для пользователей/контактов
                             if (item.type === 'User' || item.type === 'Contact') {
                                 return {
                                     ...baseItem,
+                                    userId: item.id, // Сохраняем ID пользователя
                                     username: item.username,
                                     onlineStatus: item.onlineStatus,
                                     contactTag: item.contactTag,
                                     phone: item.phone,
                                     bio: item.bio,
                                     isContact: item.type === 'Contact',
-                                    joined: false // Новый чат
+                                    joined: !!item.lastMessage // Чат существует, если есть lastMessage
                                 };
                             }
 
@@ -100,7 +84,7 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                                     ...baseItem,
                                     description: item.description,
                                     membersCount: item.membersCount,
-                                    joined: item.isFavorite !== null // Упрощенная проверка
+                                    joined: item.isFavorite !== null
                                 };
                             }
 
