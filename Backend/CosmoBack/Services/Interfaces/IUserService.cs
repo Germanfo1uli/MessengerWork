@@ -1,10 +1,11 @@
 ﻿using CosmoBack.Models;
+using CosmoBack.Models.Dtos;
 
 namespace CosmoBack.Services.Interfaces
 {
     public interface IUserService
     {
-        Task<User> GetUserByIdAsync(Guid id);
+        Task<(UserDto, ImageDto?)> GetUserByIdAsync(Guid id);
         Task<User> GetUserByUsernameAsync(string username);
         Task<User> GetUserByPublicnameAsync(string publicname);
         Task<User> CreateUserAsync(User user);

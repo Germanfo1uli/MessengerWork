@@ -35,7 +35,7 @@ namespace CosmoBack.Controllers
             try
             {
                 var groups = await _groupService.GetUserGroupsAsync(userId);
-                return Ok(groups);
+                return Ok(groups.Select(g => new { Group = g.Item1, AvatarImage = g.Item2 }));
             }
             catch (Exception ex)
             {

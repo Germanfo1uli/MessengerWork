@@ -1,9 +1,9 @@
-﻿using CosmoBack.Models.Dtos;
+﻿using CosmoBack.Models;
+using CosmoBack.Models.Dtos;
 using CosmoBack.Repositories.Interfaces;
 using CosmoBack.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace CosmoBack.Controllers
 {
@@ -12,37 +12,20 @@ namespace CosmoBack.Controllers
     [Route("api/[controller]")]
     public class UserController(IUserService userService, IUserRepository userRepository) : ControllerBase
     {
-        private readonly IUserService _userService = userService ?? throw new ArgumentNullException(nameof(userService));
-        private readonly IUserRepository _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+        private readonly IUserService _userService = userService;
+        private readonly IUserRepository _userRepository = userRepository;
 
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetUser(Guid userId)
         {
             try
             {
-                var user = await _userRepository.GetByIdAsync(userId);
-                if (user == null)
-                {
-                    return NotFound($"Пользователь с ID {userId} не найден");
-                }
-
-                var userDto = new UserDto
-                {
-                    Id = user.Id,
-                    Username = user.Username,
-                    Phone = user.Phone,
-                    PasswordHash = user.PasswordHash,
-                    CreatedAt = user.CreatedAt,
-                    Bio = user.Bio,
-                    AvatarImageId = user.AvatarImageId,
-                    LastSeen = user.LastSeen,
-                    IsActive = user.IsActive,
-                    PublicName = user.PublicName,
-                    OnlineStatus = user.OnlineStatus,
-                    Theme = user.Theme
-                };
-
-                return Ok(userDto);
+                var (userDto, avatarImage) = await _userService.GetUserByIdAsync(userId);
+                return Ok(new { User = userDto, AvatarImage = avatarImage });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
@@ -85,11 +68,27 @@ namespace CosmoBack.Controllers
                     return Forbid("Вы можете обновлять только свой профиль");
                 }
 
-                var user = await _userService.GetUserByIdAsync(updateUserDto.Id);
-                if (user == null)
+                var (userDto, _) = await _userService.GetUserByIdAsync(updateUserDto.Id);
+                if (userDto == null)
                 {
                     return NotFound("Пользователь не найден");
                 }
+
+                var user = new User
+                {
+                    Id = userDto.Id,
+                    Username = userDto.Username,
+                    Phone = userDto.Phone,
+                    PasswordHash = userDto.PasswordHash,
+                    CreatedAt = userDto.CreatedAt,
+                    Bio = userDto.Bio,
+                    AvatarImageId = userDto.AvatarImageId,
+                    LastSeen = userDto.LastSeen,
+                    IsActive = userDto.IsActive,
+                    PublicName = userDto.PublicName,
+                    OnlineStatus = userDto.OnlineStatus,
+                    Theme = userDto.Theme
+                };
 
                 if (!string.IsNullOrEmpty(updateUserDto.Username))
                     user.Username = updateUserDto.Username;

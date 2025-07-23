@@ -114,7 +114,7 @@ namespace CosmoBack.Services.Classes
             }
         }
 
-        public async Task<IEnumerable<GroupDto>> GetUserGroupsAsync(Guid userId)
+        public async Task<IEnumerable<(GroupDto, ImageDto?)>> GetUserGroupsAsync(Guid userId)
         {
             _logger.LogInformation("Getting groups for user {UserId}", userId);
             try
@@ -128,7 +128,7 @@ namespace CosmoBack.Services.Classes
                 }
 
                 var groups = await _groupRepository.GetGroupsByUserIdAsync(userId);
-                var groupDtos = new List<GroupDto>();
+                var groupDtos = new List<(GroupDto, ImageDto?)>();
 
                 foreach (var group in groups)
                 {
@@ -154,8 +154,28 @@ namespace CosmoBack.Services.Classes
                     var membersCount = await _context.GroupMembers
                         .CountAsync(gm => gm.GroupId == group.Id);
 
+                    ImageDto? avatarImage = null;
+                    if (group.AvatarImageId.HasValue)
+                    {
+                        var image = await _context.Images.FirstOrDefaultAsync(i => i.Id == group.AvatarImageId);
+                        if (image != null)
+                        {
+                            avatarImage = new ImageDto
+                            {
+                                Id = image.Id,
+                                FileName = image.FileName,
+                                MimeType = image.MimeType,
+                                FileSize = image.FileSize,
+                                Data = image.Data,
+                                EntityType = image.EntityType,
+                                EntityId = image.EntityId,
+                                UploadDate = image.UploadDate,
+                                Url = image.Url
+                            };
+                        }
+                    }
 
-                    groupDtos.Add(new GroupDto
+                    groupDtos.Add((new GroupDto
                     {
                         Id = group.Id,
                         PublicId = group.PublicId,
@@ -165,14 +185,13 @@ namespace CosmoBack.Services.Classes
                         GroupTag = group.GroupTag,
                         Description = group.Description,
                         AvatarImageId = group.AvatarImageId,
-                        AvatarImage = group.AvatarImage,
                         CreatedAt = group.CreatedAt,
                         IsActive = group.IsActive,
                         IsFavorite = groupMember?.IsFavorite ?? false,
                         LastMessageAt = lastMessage?.CreatedAt,
                         LastMessage = lastMessage,
                         MembersCount = membersCount
-                    });
+                    }, avatarImage));
                 }
 
                 _logger.LogInformation("Retrieved {GroupCount} groups for user {UserId}", groupDtos.Count, userId);

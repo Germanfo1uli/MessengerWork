@@ -39,7 +39,7 @@ namespace CosmoBack.Controllers
             try
             {
                 var channels = await _channelService.GetUserChannelsAsync(userId);
-                return Ok(channels);
+                return Ok(channels.Select(c => new { Channel = c.Item1, AvatarImage = c.Item2 }));
             }
             catch (UnauthorizedAccessException ex)
             {

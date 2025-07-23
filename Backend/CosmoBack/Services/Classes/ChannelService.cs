@@ -110,7 +110,7 @@ namespace CosmoBack.Services.Classes
             }
         }
 
-        public async Task<IEnumerable<ChannelDto>> GetUserChannelsAsync(Guid userId)
+        public async Task<IEnumerable<(ChannelDto, ImageDto?)>> GetUserChannelsAsync(Guid userId)
         {
             _logger.LogInformation("Getting channels for user {UserId}", userId);
             try
@@ -124,7 +124,7 @@ namespace CosmoBack.Services.Classes
                 }
 
                 var channels = await _channelRepository.GetChannelsByUserIdAsync(userId);
-                var channelDtos = new List<ChannelDto>();
+                var channelDtos = new List<(ChannelDto, ImageDto?)>();
 
                 foreach (var channel in channels)
                 {
@@ -147,9 +147,28 @@ namespace CosmoBack.Services.Classes
                         .OrderByDescending(m => m.CreatedAt)
                         .FirstOrDefaultAsync();
 
-        
+                    ImageDto? avatarImage = null;
+                    if (channel.AvatarImageId.HasValue)
+                    {
+                        var image = await _context.Images.FirstOrDefaultAsync(i => i.Id == channel.AvatarImageId);
+                        if (image != null)
+                        {
+                            avatarImage = new ImageDto
+                            {
+                                Id = image.Id,
+                                FileName = image.FileName,
+                                MimeType = image.MimeType,
+                                FileSize = image.FileSize,
+                                Data = image.Data,
+                                EntityType = image.EntityType,
+                                EntityId = image.EntityId,
+                                UploadDate = image.UploadDate,
+                                Url = image.Url
+                            };
+                        }
+                    }
 
-                    channelDtos.Add(new ChannelDto
+                    channelDtos.Add((new ChannelDto
                     {
                         Id = channel.Id,
                         PublicId = channel.PublicId,
@@ -159,14 +178,13 @@ namespace CosmoBack.Services.Classes
                         ChannelTag = channel.ChannelTag,
                         Description = channel.Description,
                         AvatarImageId = channel.AvatarImageId,
-                        AvatarImage = channel.AvatarImage,
                         CreatedAt = channel.CreatedAt,
                         IsActive = channel.IsActive,
                         MembersNumber = channel.MembersNumber,
                         IsFavorite = channelMember?.IsFavorite ?? false,
                         LastMessageAt = lastMessage?.CreatedAt,
                         LastMessage = lastMessage
-                    });
+                    }, avatarImage));
                 }
 
                 _logger.LogInformation("Retrieved {ChannelCount} channels for user {UserId}", channelDtos.Count, userId);
