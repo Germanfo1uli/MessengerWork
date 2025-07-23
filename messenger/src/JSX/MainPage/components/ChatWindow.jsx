@@ -1,19 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-    FiSearch,
-    FiPhone,
-    FiMoreVertical,
-    FiPaperclip,
-    FiSmile,
-    FiSend,
-    FiCornerUpLeft,
-    FiMapPin,
-    FiCopy,
-    FiShare2,
-    FiFlag,
-    FiCheckSquare,
-    FiX
-} from 'react-icons/fi';
+import { FiSearch, FiPhone, FiMoreVertical, FiPaperclip, FiSmile, FiSend, FiCornerUpLeft, FiMapPin, FiCopy, FiShare2, FiFlag, FiCheckSquare, FiX } from 'react-icons/fi';
 import UserProfileModal from './UserProfileModal';
 import cl from '../styles/ChatWindow.module.css';
 import { apiRequest } from '../../../hooks/ApiRequest';
@@ -246,9 +232,7 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                         ? {
                             ...msg,
                             reactions: msg.reactions.some(r => r.emoji === emoji)
-                                ? msg.reactions.map(r =>
-                                    r.emoji === emoji ? { ...r, count: r.count + 1 } : r
-                                )
+                                ? msg.reactions.map(r => r.emoji === emoji ? { ...r, count: r.count + 1 } : r)
                                 : [...msg.reactions, { emoji, count: 1 }]
                         }
                         : msg
@@ -298,20 +282,20 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                     </button>
                     <div className={cl.userDetails}>
                         <h3>{activeChat.secondUser.username}</h3>
-                        <p className={cl.userStatus} data-status={getStatusString(activeChat.secondUser.onlineStatus)}>
+                        <p className={cl.userStatus} data-status={activeChat.secondUser.onlineStatus}>
                             {getStatusString(activeChat.secondUser.onlineStatus)}
                         </p>
                     </div>
                 </div>
                 <div className={cl.chatActions}>
                     <button className={cl.actionButton}>
-                        <FiSearch />
+                        <FiSearch className={cl.actionIcon} />
                     </button>
                     <button className={cl.actionButton}>
-                        <FiPhone />
+                        <FiPhone className={cl.actionIcon} />
                     </button>
                     <button className={cl.actionButton}>
-                        <FiMoreVertical />
+                        <FiMoreVertical className={cl.actionIcon} />
                     </button>
                 </div>
                 <div className={cl.headerDecoration}></div>
@@ -352,8 +336,8 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                             <div className={cl.reactions}>
                                 {msg.reactions.map((reaction, index) => (
                                     <span key={index} className={cl.reaction}>
-                                        {reaction.emoji} {reaction.count > 1 ? reaction.count : ''}
-                                    </span>
+                    {reaction.emoji} {reaction.count > 1 ? reaction.count : ''}
+                  </span>
                                 ))}
                             </div>
                         )}
