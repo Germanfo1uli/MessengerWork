@@ -3,6 +3,7 @@ namespace CosmoBack.Models.Dtos
     public class TagSearchDto
     {
         public Guid Id { get; set; }
+        public Guid? SecondUserId { get; set; }
         public long? PublicId { get; set; }
         public string Name { get; set; } = default!;
         public string? Description { get; set; }

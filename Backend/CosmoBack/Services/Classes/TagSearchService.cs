@@ -2,15 +2,18 @@
 using CosmoBack.Models.Dtos;
 using CosmoBack.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace CosmoBack.Services.Classes
 {
     public class TagSearchService(
         CosmoDbContext context,
-        ILogger<TagSearchService> logger) : ITagSearchService
+        ILogger<TagSearchService> logger,
+        IHttpContextAccessor httpContextAccessor) : ITagSearchService
     {
         private readonly CosmoDbContext _context = context;
         private readonly ILogger<TagSearchService> _logger = logger;
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
         public async Task<IEnumerable<TagSearchDto>> SearchByTagAsync(Guid userId, string tag)
         {
@@ -23,11 +26,11 @@ namespace CosmoBack.Services.Classes
 
                 var users = await _context.Users
                     .Where(u => (u.PublicName != null && u.PublicName.Contains(normalizedTag)) ||
-                               (u.Username.Contains(normalizedTag)))
+                                (u.Username.Contains(normalizedTag)))
                     .Select(u => new TagSearchDto
                     {
-                        Id = u.Id,
-                        PublicId = null, 
+                        Id = u.Id, // Оригинальный userId
+                        PublicId = null,
                         Name = u.PublicName ?? u.Username,
                         Description = null,
                         Tag = u.PublicName ?? u.Username,
@@ -37,10 +40,10 @@ namespace CosmoBack.Services.Classes
                         LastMessage = null,
                         AvatarImageId = u.AvatarImageId,
                         MembersCount = null,
-                        IsFavorite = null, 
+                        IsFavorite = null,
                         Username = u.Username,
                         OnlineStatus = u.OnlineStatus,
-                        ContactTag = null, 
+                        ContactTag = null,
                         Phone = u.Phone,
                         Bio = u.Bio
                     })
@@ -59,13 +62,13 @@ namespace CosmoBack.Services.Classes
                         Tag = c.ChannelTag,
                         Type = EntityType.Channel,
                         CreatedAt = c.CreatedAt,
-                        LastMessageAt = null, 
+                        LastMessageAt = null,
                         LastMessage = null,
                         AvatarImageId = c.AvatarImageId,
                         MembersCount = c.MembersNumber,
-                        IsFavorite = null, 
-                        Username = null, 
-                        OnlineStatus = null, 
+                        IsFavorite = null,
+                        Username = null,
+                        OnlineStatus = null,
                         ContactTag = null,
                         Phone = null,
                         Bio = null
@@ -85,16 +88,16 @@ namespace CosmoBack.Services.Classes
                         Tag = g.GroupTag,
                         Type = EntityType.Group,
                         CreatedAt = g.CreatedAt,
-                        LastMessageAt = null, 
+                        LastMessageAt = null,
                         LastMessage = null,
                         AvatarImageId = g.AvatarImageId,
                         MembersCount = _context.GroupMembers.Count(gm => gm.GroupId == g.Id),
-                        IsFavorite = null, 
-                        Username = null, 
-                        OnlineStatus = null, 
+                        IsFavorite = null,
+                        Username = null,
+                        OnlineStatus = null,
                         ContactTag = null,
-                        Phone = null, 
-                        Bio = null 
+                        Phone = null,
+                        Bio = null
                     })
                     .ToListAsync();
 
@@ -107,18 +110,18 @@ namespace CosmoBack.Services.Classes
                         u => u.Id,
                         (c, u) => new TagSearchDto
                         {
-                            Id = u.Id,
-                            PublicId = null, 
+                            Id = u.Id, // Оригинальный userId
+                            PublicId = null,
                             Name = u.PublicName ?? u.Username,
-                            Description = null, 
+                            Description = null,
                             Tag = c.ContactTag,
                             Type = EntityType.Contact,
                             CreatedAt = c.CreatedAt,
-                            LastMessageAt = null, 
+                            LastMessageAt = null,
                             LastMessage = null,
                             AvatarImageId = u.AvatarImageId,
-                            MembersCount = null, 
-                            IsFavorite = null, 
+                            MembersCount = null,
+                            IsFavorite = null,
                             Username = u.Username,
                             OnlineStatus = u.OnlineStatus,
                             ContactTag = c.ContactTag,
@@ -131,6 +134,10 @@ namespace CosmoBack.Services.Classes
 
                 foreach (var result in results)
                 {
+                    // Сохраняем оригинальный userId для User/Contact
+                    var originalUserId = Guid.Parse(_httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                    ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
+
                     switch (result.Type)
                     {
                         case EntityType.Channel:
@@ -198,6 +205,8 @@ namespace CosmoBack.Services.Classes
 
                             if (userChat != null)
                             {
+                                // Добавляем secondUserId в результат перед заменой Id
+                                result.SecondUserId = originalUserId;
                                 result.Id = userChat.Id;
                                 result.PublicId = userChat.PublicId;
 
@@ -213,6 +222,11 @@ namespace CosmoBack.Services.Classes
                                     .FirstOrDefaultAsync(cm => cm.ChatId == userChat.Id && cm.UserId == userId);
 
                                 result.IsFavorite = userChatMember?.IsFavorite;
+                            }
+                            else
+                            {
+                                // Если чата нет, сохраняем secondUserId как оригинальный ID
+                                result.SecondUserId = originalUserId;
                             }
                             break;
                     }

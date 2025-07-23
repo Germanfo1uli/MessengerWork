@@ -10,39 +10,26 @@ using System.Security.Claims;
 
 namespace CosmoBack.Services.Classes
 {
-    public class GroupService : IGroupService
+    public class GroupService(
+        IGroupRepository groupRepository,
+        IMessageRepository messageRepository,
+        IUserRepository userRepository,
+        IGroupMembersRepository groupMembersRepository,
+        INotificationService notificationService,
+        CosmoDbContext context,
+        ILogger<GroupService> logger,
+        IHubContext<ChatHub> hubContext,
+        IHttpContextAccessor httpContextAccessor) : IGroupService
     {
-        private readonly IGroupRepository _groupRepository;
-        private readonly IMessageRepository _messageRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly IGroupMembersRepository _groupMembersRepository;
-        private readonly INotificationService _notificationService;
-        private readonly CosmoDbContext _context;
-        private readonly ILogger<GroupService> _logger;
-        private readonly IHubContext<ChatHub> _hubContext;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-
-        public GroupService(
-            IGroupRepository groupRepository,
-            IMessageRepository messageRepository,
-            IUserRepository userRepository,
-            IGroupMembersRepository groupMembersRepository,
-            INotificationService notificationService,
-            CosmoDbContext context,
-            ILogger<GroupService> logger,
-            IHubContext<ChatHub> hubContext,
-            IHttpContextAccessor httpContextAccessor)
-        {
-            _groupRepository = groupRepository;
-            _messageRepository = messageRepository;
-            _userRepository = userRepository;
-            _groupMembersRepository = groupMembersRepository;
-            _notificationService = notificationService;
-            _context = context;
-            _logger = logger;
-            _hubContext = hubContext;
-            _httpContextAccessor = httpContextAccessor;
-        }
+        private readonly IGroupRepository _groupRepository = groupRepository;
+        private readonly IMessageRepository _messageRepository = messageRepository;
+        private readonly IUserRepository _userRepository = userRepository;
+        private readonly IGroupMembersRepository _groupMembersRepository = groupMembersRepository;
+        private readonly INotificationService _notificationService = notificationService;
+        private readonly CosmoDbContext _context = context;
+        private readonly ILogger<GroupService> _logger = logger;
+        private readonly IHubContext<ChatHub> _hubContext = hubContext;
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
         public async Task<GroupDto> GetGroupByIdAsync(Guid id)
         {

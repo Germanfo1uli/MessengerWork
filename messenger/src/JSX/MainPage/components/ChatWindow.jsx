@@ -49,13 +49,33 @@ const ChatWindow = ({ connection, activeChat, setActiveChat, onToggleFavorite, i
 
     useEffect(() => {
         const fetchData = async () => {
-            if (!activeChat?.id) return; // Добавляем проверку на наличие activeChat и его id
+            if (!activeChat?.id || !userId) return;
 
-            setSecondUserId(activeChat.secondUserId)
-            console.log(activeChat.id)
+            // Нормализация type
+            const typeMap = {
+                0: 'Chat',
+                1: 'Group',
+                2: 'Channel',
+                3: 'Contact',
+                4: 'User'
+            };
+            const chatType = typeMap[activeChat.type] || activeChat.type || (activeChat.secondUserId && !activeChat.membersCount ? 'User' : 'Group');
+
+            // Устанавливаем secondUserId
+            if (chatType === 'User' || chatType === 'Contact') {
+                if (!activeChat.secondUserId) {
+                    console.error('No secondUserId provided for User/Contact:', activeChat);
+                    return;
+                }
+                setSecondUserId(activeChat.secondUserId);
+            } else {
+                setSecondUserId('00000000-0000-0000-0000-000000000000');
+            }
+
+            let chatId = activeChat.id;
 
             try {
-                const response = await apiRequest(`/api/messages/chat/${activeChat.id}`, {
+                const response = await apiRequest(`/api/messages/chat/${chatId}`, {
                     method: 'GET',
                     authenticated: isAuthenticated
                 });
@@ -67,10 +87,10 @@ const ChatWindow = ({ connection, activeChat, setActiveChat, onToggleFavorite, i
                         reactions: message.reactions || [],
                         replyTo: message.replyTo ? {
                             ...message.replyTo,
-                            sender: message.replyTo.senderId === userId ? "You" : activeChat.secondUser.username
+                            sender: message.replyTo.senderId === userId ? "You" : activeChat.secondUser?.username || activeChat.name
                         } : null
                     }))
-                    : response;
+                    : [];
 
                 setMessages(messages);
             } catch (error) {
@@ -78,17 +98,16 @@ const ChatWindow = ({ connection, activeChat, setActiveChat, onToggleFavorite, i
             }
         };
 
-        if (isLoading || !userId) {
+        if (isLoading || !userId || !isAuthenticated) {
+            if (!isAuthenticated) {
+                logout();
+                navigate('/');
+            }
             return;
         }
 
-        if (!isAuthenticated) {
-            logout();
-            navigate('/');
-        }
-
         fetchData();
-    }, [isLoading, userId, username, isAuthenticated, logout, activeChat?.id, navigate]);
+    }, [isLoading, userId, isAuthenticated, logout, activeChat, navigate]);
 
     useEffect(() => {
         if (!activeChat?.id || !connection || !isConnected) return;
@@ -109,7 +128,7 @@ const ChatWindow = ({ connection, activeChat, setActiveChat, onToggleFavorite, i
                         reactions: newMessage.reactions || [],
                         replyTo: newMessage.replyTo ? {
                             ...newMessage.replyTo,
-                            sender: newMessage.replyTo.senderId === userId ? "You" : activeChat.secondUser.username
+                            sender: newMessage.replyTo.senderId === userId ? "You" : activeChat.secondUser?.username || activeChat.name
                         } : null
                     }];
                 });
@@ -118,7 +137,7 @@ const ChatWindow = ({ connection, activeChat, setActiveChat, onToggleFavorite, i
 
         connection.on('ReceiveMessage', handleNewMessage);
         return () => connection.off('ReceiveMessage', handleNewMessage);
-    }, [connection, isConnected, activeChat?.id, userId]);
+    }, [connection, isConnected, activeChat, userId]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -150,24 +169,69 @@ const ChatWindow = ({ connection, activeChat, setActiveChat, onToggleFavorite, i
                 id: replyingTo.id,
                 comment: replyingTo.comment,
                 senderId: replyingTo.senderId,
-                sender: replyingTo.isUser ? username : activeChat.secondUser.username
+                sender: replyingTo.isUser ? username : activeChat.secondUser?.username || activeChat.name
             } : null
         };
-
-        console.log(newMessage)
 
         setMessages(prev => [...prev, newMessage]);
         setMessage('');
         setReplyingTo(null);
 
         try {
-            await connection.invoke("SendMessage", activeChat?.id || null, secondUserId, message, tempId, replyingTo?.id || null);
+            const typeMap = {
+                0: 'Chat',
+                1: 'Group',
+                2: 'Channel',
+                3: 'Contact',
+                4: 'User'
+            };
+            const chatType = typeMap[activeChat.type] || activeChat.type || (activeChat.secondUserId && !activeChat.membersCount ? 'User' : 'Group');
+
+            const recipientId = (chatType === 'User' || chatType === 'Contact')
+                ? activeChat.secondUserId
+                : '00000000-0000-0000-0000-000000000000';
+
+            if (!recipientId && (chatType === 'User' || chatType === 'Contact')) {
+                throw new Error('recipientId is required for User/Contact chats');
+            }
+
+            let chatId = (chatType === 'User' || chatType === 'Contact') && !activeChat.joined ? null : activeChat.id;
+
+            // Проверяем формат chatId только если он не null
+            if (chatId) {
+                const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+                if (!guidRegex.test(chatId)) {
+                    throw new Error('Invalid chatId format');
+                }
+            }
+
+            console.log('Sending message with params:', {
+                chatId: chatId,
+                recipientId: recipientId,
+                message: message,
+                tempId: tempId,
+                replyToId: replyingTo?.id
+            });
+
+            if (!connection || connection.state !== 'Connected') {
+                throw new Error('SignalR connection is not active');
+            }
+            console.log(chatId, recipientId, message, tempId);
+
+            await connection.invoke(
+                "SendMessage",
+                chatId,
+                recipientId,
+                message,
+                tempId,
+                replyingTo?.id || null
+            );
             setMessages(prev => prev.map(msg =>
-                msg.id === tempId ? { ...msg, isTemporary: false } : msg
+                msg.id === tempId.toString() ? { ...msg, isTemporary: false } : msg
             ));
         } catch (error) {
             console.error("Ошибка отправки:", error);
-            setMessages(prev => prev.filter(msg => msg.id !== tempId));
+            setMessages(prev => prev.filter(msg => msg.id !== tempId.toString()));
         }
     };
 
@@ -298,14 +362,14 @@ const ChatWindow = ({ connection, activeChat, setActiveChat, onToggleFavorite, i
             <div className={cl.chatHeader}>
                 <div className={cl.userInfo}>
                     <button className={cl.avatarButton} onClick={handleAvatarClick}>
-                        <div className={cl.avatar} style={{ backgroundColor: activeChat.avatarColor }}>
-                            {activeChat.avatarText}
+                        <div className={cl.avatar} style={{ backgroundColor: activeChat.avatarColor || '#ccc' }}>
+                            {activeChat.avatarText || activeChat.name?.charAt(0) || 'U'}
                         </div>
                     </button>
                     <div className={cl.userDetails}>
-                        <h3>{activeChat.secondUser.username}</h3>
-                        <p className={cl.userStatus} data-status={getStatusString(activeChat.secondUser.onlineStatus)}>
-                            {getStatusString(activeChat.secondUser.onlineStatus)}
+                        <h3>{activeChat.secondUser?.username || activeChat.name || 'Без названия'}</h3>
+                        <p className={cl.userStatus} data-status={getStatusString(activeChat.secondUser?.onlineStatus || 0)}>
+                            {getStatusString(activeChat.secondUser?.onlineStatus || 0)}
                         </p>
                     </div>
                 </div>
@@ -322,7 +386,6 @@ const ChatWindow = ({ connection, activeChat, setActiveChat, onToggleFavorite, i
                 </div>
                 <div className={cl.headerDecoration}></div>
             </div>
-
             {searchQuery && (
                 <div className={cl.searchBar}>
                     <input
@@ -444,13 +507,13 @@ const ChatWindow = ({ connection, activeChat, setActiveChat, onToggleFavorite, i
             {isProfileOpen && (
                 <UserProfileModal
                     user={{
-                        name: activeChat.name,
-                        avatarText: activeChat.avatarText,
-                        avatarColor: activeChat.avatarColor,
-                        status: activeChat.status,
-                        isFavorite: activeChat.isFavorite,
-                        tag: "#0000",
-                        quote: "Статус пользователя"
+                        name: activeChat.secondUser?.username || activeChat.name,
+                        avatarText: activeChat.avatarText || activeChat.name?.charAt(0) || 'U',
+                        avatarColor: activeChat.avatarColor || '#ccc',
+                        status: getStatusString(activeChat.secondUser?.onlineStatus || 0),
+                        isFavorite: activeChat.isFavorite || false,
+                        tag: activeChat.secondUser?.contactTag || activeChat.tag || '#0000',
+                        quote: activeChat.secondUser?.bio || activeChat.description || 'Статус пользователя'
                     }}
                     onClose={closeProfile}
                     onStartChat={handleStartChat}

@@ -47,10 +47,19 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                     });
                     const enhancedResults = Array.isArray(response)
                         ? response.map(item => {
-                            // Базовые поля для всех типов
+                            // Нормализация type согласно серверному enum EntityType
+                            const typeMap = {
+                                0: 'Chat',
+                                1: 'Group',
+                                2: 'Channel',
+                                3: 'Contact',
+                                4: 'User'
+                            };
+                            const itemType = typeMap[item.type] || 'User'; // Fallback на User
+
                             const baseItem = {
-                                id: item.id, // Для User/Contact это ID чата, если он существует иначе Userid
-                                type: item.type,
+                                id: item.id,
+                                type: itemType,
                                 name: item.name || item.username || item.tag,
                                 avatarImageId: item.avatarImageId,
                                 isFavorite: item.isFavorite ?? false,
@@ -63,23 +72,22 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                                 onlineStatus: item.onlineStatus
                             };
 
-                            // Обработка для пользователей/контактов
-                            if (item.type === 'User' || item.type === 'Contact') {
+                            if (itemType === 'User' || itemType === 'Contact') {
                                 return {
                                     ...baseItem,
-                                    userId: item.id, // Сохраняем ID пользователя
+                                    userId: item.id,
+                                    secondUserId: item.secondUserId || item.userId || item.id, // Пробуем разные поля
                                     username: item.username,
                                     onlineStatus: item.onlineStatus,
                                     contactTag: item.contactTag,
                                     phone: item.phone,
                                     bio: item.bio,
-                                    isContact: item.type === 'Contact',
-                                    joined: !!item.lastMessage // Чат существует, если есть lastMessage
+                                    isContact: itemType === 'Contact',
+                                    joined: !!item.lastMessage
                                 };
                             }
 
-                            // Обработка групп/каналов
-                            if (item.type === 'Group' || item.type === 'Channel') {
+                            if (itemType === 'Group' || itemType === 'Channel') {
                                 return {
                                     ...baseItem,
                                     description: item.description,
@@ -91,7 +99,7 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                             return baseItem;
                         })
                         : [];
-                    console.log(enhancedResults)
+                    console.log('Search results:', enhancedResults);
                     setSearchResults(enhancedResults);
                 } catch (error) {
                     console.error('Search error:', error);
@@ -120,6 +128,7 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                 const enhancedChats = Array.isArray(chatsResponse)
                     ? chatsResponse.map(chat => ({
                         ...chat,
+                        type: (chat.secondUserId && !chat.membersCount) ? 'Contact' : (chat.membersCount ? 'Group' : 'Channel'),
                         lastMessage: chat.lastMessage
                             ? {
                                 ...chat.lastMessage,
@@ -317,16 +326,28 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
 
     const handleChatClick = (chat) => {
         if (!chat) return;
-        
+
+        const typeMap = {
+            0: 'Chat',
+            1: 'Group',
+            2: 'Channel',
+            3: 'Contact',
+            4: 'User'
+        };
+        const chatType = typeMap[chat.type] || chat.type || (chat.secondUserId && !chat.membersCount ? 'User' : (chat.membersCount ? 'Group' : 'Channel'));
+
         const targetChat = {
             ...chat,
+            type: chatType,
+            secondUserId: chat.secondUserId || chat.userId || chat.id,
             secondUser: chat.secondUser || {
                 username: chat.name || 'Новый чат',
-                onlineStatus: 0,
-                contactTag: null
+                onlineStatus: chat.onlineStatus || 0,
+                contactTag: chat.contactTag || null
             }
         };
-        
+
+        console.log('Selected chat:', targetChat);
         onChatSelect(targetChat);
     };
 
