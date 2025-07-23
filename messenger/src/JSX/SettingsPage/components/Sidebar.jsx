@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { FiUser, FiGlobe, FiBell, FiShield, FiLogOut, FiArrowLeft } from 'react-icons/fi';
+import { FiUser, FiGlobe, FiBell, FiShield, FiLogOut, FiArrowLeft, FiUsers } from 'react-icons/fi';
 import { RiSpaceShipLine } from 'react-icons/ri';
 import styles from '../styles/SettingsPage.module.css';
 
@@ -11,6 +11,7 @@ const Sidebar = () => {
     const getActivePath = () => {
         const path = location.pathname;
         if (path.startsWith('/settings')) return 'settings';
+        if (path.startsWith('/groups')) return 'groups';
         if (path.startsWith('/language')) return 'language';
         if (path.startsWith('/appearance')) return 'appearance';
         if (path.startsWith('/security')) return 'security';
@@ -44,6 +45,13 @@ const Sidebar = () => {
                     <span>Профиль</span>
                 </button>
                 <button
+                    className={`${styles.navButton} ${activePath === 'groups' ? styles.active : ''}`}
+                    onClick={() => navigate('/groups')}
+                >
+                    <FiUsers className={styles.navIcon} />
+                    <span>Группы</span>
+                </button>
+                <button
                     className={`${styles.navButton} ${activePath === 'language' ? styles.active : ''}`}
                     onClick={() => navigate('/language')}
                 >
@@ -71,7 +79,6 @@ const Sidebar = () => {
                 <button
                     className={`${styles.navButton} ${styles.exitButton}`}
                     onClick={() => {
-
                         console.log('Выход из аккаунта');
                         navigate('/');
                     }}

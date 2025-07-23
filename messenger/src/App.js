@@ -13,6 +13,7 @@ import SecurityPage from "./JSX/SettingsPage/components/SecurityPage";
 import GiftPage from "./JSX/GiftPage/components/GiftPage";
 import TradingPlatformPage from "./JSX/GiftPage/components/TradingPlatformPage";
 import InventoryPage from "./JSX/GiftPage/components/InventoryPage";
+import GroupSettings from "./JSX/SettingsPage/components/GroupSettings";
 
 const AppContent = () => {
     const [currentScreen, setCurrentScreen] = useState('welcome');
@@ -39,6 +40,7 @@ const AppContent = () => {
                         <Route path="/gift" element={<GiftPage />} />
                         <Route path="/marketplace" element={<TradingPlatformPage />} />
                         <Route path="/inventory" element={<InventoryPage/>} />
+                        <Route path="/groups" element={<GroupSettings/>} />
                     </Routes>
                 )}
             </div>
