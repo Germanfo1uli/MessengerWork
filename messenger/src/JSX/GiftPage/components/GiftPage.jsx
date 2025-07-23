@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { FiArrowLeft, FiStar, FiGift, FiPlus } from 'react-icons/fi';
+import { FiArrowLeft, FiStar, FiGift, FiPlus, FiShoppingBag } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
 import styles from '../styles/GiftPage.module.css';
 
 const GiftPage = () => {
     const [showStarModal, setShowStarModal] = useState(false);
     const [selectedStarPackage, setSelectedStarPackage] = useState(null);
+    const navigate = useNavigate();
 
     const gifts = [
         { id: 1, name: 'Чвк Лабуби', price: 500, image: 'https://s0.rbk.ru/v6_top_pics/media/img/6/41/347473974424416.jpeg', rarity: 'rare' },
@@ -97,16 +99,29 @@ const GiftPage = () => {
 
             <div className={styles.pageContent}>
                 <div className={styles.header}>
-                    <button className={styles.backButton} onClick={() => window.location.href = '/'}>
+                    <button
+                        className={styles.backButton}
+                        onClick={() => navigate('/home')}
+                    >
                         <FiArrowLeft size={24} />
                         Назад
                     </button>
-                    <div className={styles.currency} onClick={() => setShowStarModal(true)}>
-                        <FiStar className={styles.currencyIcon} />
-                        <span className={styles.currencyAmount}>10,500</span>
-                        <button className={styles.addStarsButton}>
-                            <FiPlus size={18} />
+                    <div className={styles.currency}>
+                        <button
+                            className={styles.marketplaceButton}
+                            onClick={() => navigate('/marketplace')}
+                        >
+                            <FiShoppingBag size={18} />
+                            Торговая площадка
                         </button>
+                        <div className={styles.currencyDisplay} onClick={() => setShowStarModal(true)}>
+                            <FiStar className={styles.currencyIcon} />
+                            <span className={styles.currencyAmount}>10,500</span>
+                            <button className={styles.addStarsButton}>
+                                <FiPlus size={18} />
+                            </button>
+                        </div>
+
                     </div>
                 </div>
 
@@ -116,7 +131,7 @@ const GiftPage = () => {
                     <div className={styles.subtitleWrapper}>
                         <p className={styles.subtitle}>
                             Приобретайте уникальные подарки или открывайте кейсы с сюрпризами.
-                            <span className={styles.highlight}> Каждый предмет можно отправить другу</span>,оставить себе или продать на торговой площадке.
+                            <span className={styles.highlight}> Каждый предмет можно отправить другу</span>, оставить себе или продать на торговой площадке.
                         </p>
                         <div className={styles.rarityLegend}>
                             <span style={{ color: '#4d79f6' }}>Обычный</span>
@@ -180,11 +195,12 @@ const GiftPage = () => {
                 <div className={styles.starModalOverlay}>
                     <div className={styles.starModal}>
                         <button className={styles.closeModal} onClick={() => setShowStarModal(false)}>
-                            &times;
+                            ×
                         </button>
                         <h2 className={styles.modalTitle}>Пополнить баланс</h2>
-                        <p className={styles.modalSubtitle}>Выберите пакет звезд для покупки</p>
-
+                        <p className={styles.modalSubtitle}>
+                            <span className={styles.starHighlight}>Звёзды</span> — ваша космическая валюта для покупки уникального контента и эксклюзивных подарков в мессенджере! Дарите радость друзьям или украшайте свои чаты!
+                        </p>
                         <div className={styles.starPackages}>
                             {starPackages.map(pkg => (
                                 <div
@@ -211,6 +227,7 @@ const GiftPage = () => {
                                 </div>
                             ))}
                         </div>
+                        <a href="/terms" className={styles.termsLink}>Условия соглашения</a>
                     </div>
                 </div>
             )}

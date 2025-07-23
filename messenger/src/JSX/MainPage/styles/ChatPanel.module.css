@@ -7,7 +7,7 @@
     border-right: 1px solid rgba(138, 43, 226, 0.3);
     overflow: hidden;
     position: fixed;
-    left: 80px;
+    left: 100px;
     top: 0;
     box-shadow: 4px 0 15px rgba(0, 0, 0, 0.3);
     z-index: 998;
@@ -112,6 +112,60 @@
 .iconButton:hover {
     color: #00d4ff;
     background: rgba(138, 43, 226, 0.2);
+}
+
+/* Стили для меню "Ещё" */
+.moreMenuContainer {
+    position: relative;
+}
+
+.moreMenu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: rgba(20, 20, 50, 0.95);
+    border: 1px solid rgba(138, 43, 226, 0.3);
+    border-radius: 8px;
+    padding: 8px 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    z-index: 999;
+    min-width: 180px;
+    animation: slideIn 0.2s ease-out;
+}
+
+.moreMenuItem {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    background: transparent;
+    border: none;
+    color: #e0e0ff;
+    font-size: 13px;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.moreMenuItem:hover {
+    background: rgba(138, 43, 226, 0.2);
+    color: #00d4ff;
+}
+
+.moreMenuIcon {
+    margin-right: 10px;
+    font-size: 16px;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Кнопки "Подарки" и "Добавить чат" */
@@ -256,6 +310,7 @@
     background-color: rgba(138, 43, 226, 0.5);
     border-radius: 2px;
 }
+
 /* Стиль для заглушки аватара */
 .avatarPlaceholder {
     width: 100%;
@@ -273,7 +328,6 @@
 }
 
 /* Стили для сообщения "Ничего не найдено" */
-
 .noResultsContainer {
     display: flex;
     flex-direction: column;
@@ -317,4 +371,25 @@
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+.giftButton {
+    color: #8a2be2;
+    font-size: 18px;
+    transition: all 0.2s;
+    padding: 5px;
+    border-radius: 4px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.giftButton:hover {
+    color: #00d4ff;
+    background: rgba(138, 43, 226, 0.2);
+    transform: none;
+}
+
+.giftIcon {
+    font-size: inherit;
 }

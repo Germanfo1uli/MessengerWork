@@ -16,10 +16,15 @@ const GroupNavigation = () => {
     const [avatarPreview, setAvatarPreview] = useState(null);
 
     const groups = [
-        { avatar: 'https://avatars.mds.yandex.net/i?id=3a060b00307ec724a511c4e2d8f503bc_l-4120702-images-thumbs&n=13', name: 'Исследования', id: 'group1' },
-        { avatar: 'https://avatars.mds.yandex.net/i?id=3a060b00307ec724a511c4e2d8f503bc_l-4120702-images-thumbs&n=13', name: 'Экипаж', id: 'group2' },
-        { avatar: 'https://avatars.mds.yandex.net/i?id=3a060b00307ec724a511c4e2d8f503bc_l-4120702-images-thumbs&n=13', name: 'Флот', id: 'group3' }
+        { avatar: 'https://avatars.mds.yandex.net/i?id=3a060b00307ec724a511c4e2d8f503bc_l-4120702-images-thumbs&n=13', name: 'Исследования космоса и технологий', id: 'group1' },
+        { avatar: 'https://avatars.mds.yandex.net/i?id=3a060b00307ec724a511c4e2d8f503bc_l-4120702-images-thumbs&n=13', name: 'Экипаж звездолета', id: 'group2' },
+        { avatar: 'https://avatars.mds.yandex.net/i?id=3a060b00307ec724a511c4e2d8f503bc_l-4120702-images-thumbs&n=13', name: 'Флот межгалактический', id: 'group3' }
     ];
+
+    const truncateName = (name) => {
+        const maxLength = 15;
+        return name.length > maxLength ? `${name.substring(0, maxLength)}...` : name;
+    };
 
     const handleAddGroup = () => {
         setModalOpen(true);
@@ -87,7 +92,7 @@ const GroupNavigation = () => {
                                 <img src={group.avatar} alt={group.name} className={styles.avatar} />
                             </div>
                             {tooltip === group.name && (
-                                <span className={styles.tooltip}>{group.name}</span>
+                                <span className={styles.tooltip}>{truncateName(group.name)}</span>
                             )}
                         </div>
                     ))}
