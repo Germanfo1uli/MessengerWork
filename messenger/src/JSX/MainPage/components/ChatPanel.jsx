@@ -5,7 +5,7 @@ import { IoSettingsOutline } from 'react-icons/io5';
 import { IoIosMore } from 'react-icons/io';
 import { IoSearchOutline } from 'react-icons/io5';
 import { IoStarOutline } from 'react-icons/io5';
-import { FaEnvelope, FaGift, FaShoppingCart, FaBox, FaAddressBook, FaQuestionCircle } from 'react-icons/fa';
+import { FaEnvelope, FaGift, FaShoppingCart, FaBox, FaAddressBook, FaQuestionCircle, FaBell } from 'react-icons/fa';
 import Modal from './Modal';
 import AddContactModal from './AddContactModal';
 import { apiRequest } from '../../../hooks/ApiRequest';
@@ -19,6 +19,7 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isAddContactModalOpen, setIsAddContactModalOpen] = useState(false);
     const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+    const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('favorites');
     const [searchQuery, setSearchQuery] = useState('');
     const [user, setUser] = useState({});
@@ -26,9 +27,28 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
     const [searchResults, setSearchResults] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
     const [avatarError, setAvatarError] = useState(false);
+    const [notifications, setNotifications] = useState([
+        {
+            id: '1',
+            type: 'message',
+            chatId: '123',
+            message: 'Привет! Как дела?',
+            username: 'Иван',
+            createdAt: new Date().toISOString()
+        },
+        {
+            id: '2',
+            type: 'invitation',
+            chatId: '456',
+            username: 'Мария',
+            createdAt: new Date(Date.now() - 3600000).toISOString()
+        }
+    ]);
+    const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true);
     const { getStatusString, formatTimeFromISO } = useMainHooks();
     const navigate = useNavigate();
     const moreButtonRef = useRef(null);
+    const notificationsButtonRef = useRef(null);
 
     const debouncedServerSearch = useMemo(
         () =>
@@ -180,10 +200,40 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                     }
                     return [...prev, { ...updatedChat, joined: false }];
                 });
+
+                if (updatedChat.lastMessage && updatedChat.lastMessage.senderId !== userId) {
+                    setNotifications((prev) => [
+                        ...prev,
+                        {
+                            id: `${updatedChat.id}-${Date.now()}`,
+                            type: 'message',
+                            chatId: updatedChat.id,
+                            message: updatedChat.lastMessage.comment,
+                            username: updatedChat.secondUser?.username || 'Unknown',
+                            createdAt: updatedChat.lastMessage.createdAt
+                        }
+                    ]);
+                    setHasUnreadNotifications(true);
+                }
+            });
+
+            connection.on('ReceiveInvitation', (invitation) => {
+                setNotifications((prev) => [
+                    ...prev,
+                    {
+                        id: `${invitation.chatId}-${Date.now()}`,
+                        type: 'invitation',
+                        chatId: invitation.chatId,
+                        username: invitation.senderUsername || 'Unknown',
+                        createdAt: new Date().toISOString()
+                    }
+                ]);
+                setHasUnreadNotifications(true);
             });
 
             return () => {
                 connection.off('UpdateChatList');
+                connection.off('ReceiveInvitation');
             };
         }
     }, [connection, isConnected, userId]);
@@ -198,6 +248,10 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
         const handleClickOutside = (event) => {
             if (moreButtonRef.current && !moreButtonRef.current.contains(event.target)) {
                 setIsMoreMenuOpen(false);
+            }
+            if (notificationsButtonRef.current && !notificationsButtonRef.current.contains(event.target)) {
+                setIsNotificationsOpen(false);
+                setHasUnreadNotifications(false);
             }
         };
 
@@ -217,6 +271,13 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
 
     const toggleMoreMenu = () => {
         setIsMoreMenuOpen(!isMoreMenuOpen);
+    };
+
+    const toggleNotifications = () => {
+        setIsNotificationsOpen(!isNotificationsOpen);
+        if (isNotificationsOpen) {
+            setHasUnreadNotifications(false);
+        }
     };
 
     const handleChatClick = (chat) => {
@@ -305,13 +366,37 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                     <p className={cl.profileStatus}>{user.status}</p>
                 </div>
                 <div className={cl.profileActions}>
-                    <button
-                        className={`${cl.iconButton} ${cl.giftButton}`}
-                        onClick={() => navigate('/gift')}
-                        title="Подарки"
-                    >
-                        <FaGift className={cl.giftIcon} />
-                    </button>
+                    <div className={cl.notificationsContainer} ref={notificationsButtonRef}>
+                        <button
+                            className={`${cl.iconButton} ${hasUnreadNotifications ? cl.notificationActive : ''}`}
+                            onClick={toggleNotifications}
+                            title="Уведомления"
+                        >
+                            <FaBell />
+                        </button>
+                        {isNotificationsOpen && (
+                            <div className={cl.notificationsMenu}>
+                                {notifications.length > 0 ? (
+                                    notifications.map((notification) => (
+                                        <div key={notification.id} className={cl.notificationItem}>
+                                            <span>
+                                                {notification.type === 'message'
+                                                    ? `Новое сообщение от ${notification.username}: ${notification.message}`
+                                                    : `Новое приглашение от ${notification.username}`}
+                                            </span>
+                                            <span className={cl.notificationTime}>
+                                                {formatTimeFromISO(notification.createdAt)}
+                                            </span>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className={cl.noNotifications}>
+                                        Нет новых уведомлений
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
                     <button
                         className={cl.iconButton}
                         onClick={() => navigate('/settings')}
@@ -328,6 +413,13 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                         </button>
                         {isMoreMenuOpen && (
                             <div className={cl.moreMenu}>
+                                <button
+                                    className={cl.moreMenuItem}
+                                    onClick={() => navigate('/gift')}
+                                >
+                                    <FaGift className={cl.moreMenuIcon} />
+                                    <span>Подарки</span>
+                                </button>
                                 <button
                                     className={cl.moreMenuItem}
                                     onClick={() => navigate('/marketplace')}

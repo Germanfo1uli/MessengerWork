@@ -1,5 +1,5 @@
 .container {
-    width: 300px;
+    width: 350px;
     height: 100vh;
     display: flex;
     flex-direction: column;
@@ -392,4 +392,69 @@
 
 .giftIcon {
     font-size: inherit;
+}
+
+.notificationsContainer {
+    position: relative;
+}
+
+.notificationActive {
+    color: #ff4d4f;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.notificationsMenu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: rgba(20, 20, 50, 0.95);
+    border: 1px solid rgba(138, 43, 226, 0.3);
+    border-radius: 8px;
+    padding: 8px 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    z-index: 1001;
+    min-width: 250px;
+    max-height: 400px;
+    overflow-y: auto;
+    animation: slideIn 0.2s ease-out;
+}
+
+.notificationItem {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 15px;
+    border-bottom: 1px solid rgba(138, 43, 226, 0.1);
+    color: #e0e0ff;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+
+.notificationItem:hover {
+    background: rgba(138, 43, 226, 0.2);
+}
+
+.notificationTime {
+    color: #b0b0ff;
+    font-size: 11px;
+    margin-top: 4px;
+    opacity: 0.8;
+}
+
+.noNotifications {
+    padding: 15px;
+    text-align: center;
+    color: #b0b0ff;
+    font-size: 13px;
 }
