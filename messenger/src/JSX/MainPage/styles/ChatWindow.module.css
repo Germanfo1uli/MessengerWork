@@ -4,13 +4,12 @@
     flex-direction: column;
     height: 100%;
     min-width: 0;
-    max-width: calc(100% - 0px - 90px);
+    max-width: calc(100% - 90px);
     margin-left: auto;
-    background-color: #0f0c29;
-    background-image: radial-gradient(circle at top center, #1a1547 0%, #0f0c29 70%);
     color: white;
-    border-left: 1px solid #2f3136;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
     position: relative;
+    overflow: hidden;
 }
 
 .emptyChat {
@@ -20,12 +19,10 @@
     align-items: center;
     height: 100%;
     min-width: 0;
-    max-width: calc(100% - 0px - 30px);
+    max-width: calc(100% - 30px);
     margin-left: auto;
-    background-color: #0f0c29;
-    background-image: radial-gradient(circle at center, #1a1547 0%, #0f0c29 70%);
     color: white;
-    border-left: 1px solid #2f3136;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
     position: relative;
     overflow: hidden;
 }
@@ -153,9 +150,10 @@
     justify-content: space-between;
     align-items: center;
     padding: 15px 20px;
-    background: radial-gradient(circle at 30% 50%, rgba(120, 60, 220, 0.2) 0%, rgba(15, 12, 41, 1) 70%), linear-gradient(to right, #0f0c29, #1a1547);
-    border-bottom: 1px solid rgba(255, 176, 255, 0.2);
     position: relative;
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+    z-index: 10;
 }
 
 .headerDecoration {
@@ -202,14 +200,13 @@
 .userDetails h3 {
     margin: 0;
     font-size: 16px;
-    color: #e0e0ff;
-    text-shadow: 0 0 5px rgba(176, 176, 255, 0.4);
+    transition: color 0.3s ease;
 }
 
 .userStatus {
     margin: 0;
     font-size: 12px;
-    color: #b0b0ff;
+    transition: color 0.3s ease;
 }
 
 .userStatus[data-status="online"] {
@@ -223,19 +220,15 @@
 }
 
 .actionButton {
-    background: rgba(255, 255, 255, 0.1);
-    border: none;
-    color: #e0e0ff;
     width: 36px;
     height: 36px;
+    border: none;
     border-radius: 50%;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s;
-    position: relative;
-    overflow: hidden;
+    transition: all 0.3s ease;
 }
 
 .actionButton::before {
@@ -275,7 +268,8 @@
 
 .searchBar {
     padding: 10px 20px;
-    background: linear-gradient(to bottom, #1a1547, #0f0c29);
+    background: rgba(15, 12, 41, 0.95);
+    backdrop-filter: blur(5px);
 }
 
 .searchBar input {
@@ -327,7 +321,6 @@
 .message {
     max-width: 70%;
     padding: 10px 15px;
-    border-radius: 18px;
     position: relative;
     word-wrap: break-word;
     align-self: flex-start;
@@ -335,17 +328,11 @@
 }
 
 .contactMessage {
-    background: linear-gradient(135deg, #3a1c71, #6a3093);
     border-bottom-left-radius: 5px;
-    border-bottom-right-radius: 18px;
-    box-shadow: 0 0 12px rgba(106, 48, 147, 0.5);
 }
 
 .userMessage {
-    background: linear-gradient(135deg, #d33682, #ed6a5a);
     border-bottom-left-radius: 5px;
-    border-bottom-right-radius: 18px;
-    box-shadow: 0 0 8px rgba(237, 106, 90, 0.5), inset 0 0 10px rgba(211, 54, 130, 0.3);
 }
 
 .messageContent {
@@ -397,13 +384,12 @@
 
 .contextMenu {
     position: fixed;
-    background: linear-gradient(135deg, #1a1547, #0f0c29);
-    border: 1px solid rgba(255, 176, 255, 0.2);
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     z-index: 1000;
     min-width: 160px;
     padding: 8px 0;
+    backdrop-filter: blur(5px);
 }
 
 .contextMenu button {
@@ -414,7 +400,6 @@
     padding: 8px 16px;
     background: none;
     border: none;
-    color: #e0e0ff;
     font-size: 14px;
     cursor: pointer;
     transition: background 0.2s ease;
@@ -435,6 +420,14 @@
     border-top: 1px solid rgba(255, 176, 255, 0.2);
     background: rgba(15, 12, 41, 0.9);
     border-radius: 0 0 8px 8px;
+}
+
+.chatHeader,
+.messageInputContainer,
+.userDetails h3,
+.userStatus,
+.messageInputField::placeholder {
+    transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease;
 }
 
 .reactionButton {
@@ -461,22 +454,20 @@
 .messageInputContainer {
     display: flex;
     padding: 12px 16px;
-    background: linear-gradient(to top, rgba(26, 21, 71, 0.9), rgba(15, 12, 41, 0.95));
-    border-top: 1px solid rgba(74, 20, 140, 0.5);
     align-items: center;
     gap: 12px;
     backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+    z-index: 10;
 }
 
 .inputWrapper {
     display: flex;
     flex: 1;
     align-items: center;
-    background: rgba(255, 255, 255, 0.08);
     border-radius: 24px;
     padding: 0 8px;
     transition: all 0.3s ease;
-    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .inputWrapper:focus-within {
@@ -489,16 +480,17 @@
     padding: 10px 12px;
     border: none;
     background: transparent;
-    color: #e0e0ff;
     font-size: 14px;
     outline: none;
 }
 
 .messageInputField::placeholder {
-    color: rgba(224, 224, 255, 0.5);
+    opacity: 0.7;
+    transition: color 0.3s ease;
 }
 
-.attachmentButton, .emojiButton {
+.attachmentButton,
+.emojiButton {
     width: 36px;
     height: 36px;
     display: flex;
@@ -507,9 +499,9 @@
     background: transparent;
     border: none;
     border-radius: 50%;
-    color: rgba(224, 224, 255, 0.8);
     cursor: pointer;
     transition: all 0.2s ease;
+    padding: 0;
 }
 
 .attachmentButton:hover, .emojiButton:hover {
@@ -528,35 +520,60 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #8a2be2, #9932cc);
     border: none;
     border-radius: 50%;
-    color: white;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(138, 43, 226, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+.sendButton::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, rgba(255, 111, 145, 0.3), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
 }
 
 .sendButton:hover {
-    background: linear-gradient(135deg, #9932cc, #8a2be2);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(138, 43, 226, 0.6);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.sendButton:hover::before {
+    opacity: 1;
 }
 
 .sendButton:active {
     transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .sendButton:disabled {
-    background: rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: rgba(255, 255, 255, 0.3) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
     box-shadow: none;
     cursor: not-allowed;
     transform: none;
 }
 
+.sendButton:disabled::before {
+    opacity: 0;
+}
+
 .sendIcon {
     font-size: 18px;
+    transition: transform 0.2s;
+}
+
+.sendButton:hover .sendIcon {
+    transform: scale(1.1);
 }
 
 .messagesArea {
@@ -567,7 +584,7 @@
     display: flex;
     background: rgba(255, 255, 255, 0.07);
     border-radius: 12px;
-    padding: 8px 12px;
+    padding: 8px;
     margin-bottom: 10px;
     margin-left: -10px;
     position: relative;
@@ -622,7 +639,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 10px 16px;
-    background: linear-gradient(90deg, rgba(26, 21, 71, 0.9), rgba(15, 12, 41, 0.95));
+    background: rgba(15, 12, 41, 0.95);
     border-top: 1px solid rgba(138, 43, 226, 0.4);
     border-bottom: 1px solid rgba(138, 43, 226, 0.2);
     box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.2);

@@ -1,3 +1,4 @@
+// src/JSX/SettingsPage/components/AppearanceSettings.js
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/AppearanceSettings.module.css';
@@ -5,34 +6,32 @@ import ChatPanelPreview from './ChatPanelPreview';
 import ChatWindowPreview from './ChatWindowPreview';
 import GroupNavigationPreview from './GroupNavigationPreview';
 import Sidebar from './Sidebar';
+import { useTheme } from './ThemeContext';
 
 const AppearanceSettings = () => {
     const navigate = useNavigate();
     const fileInputRef = useRef(null);
+    const { themeSettings, updateThemeSettings, fontFamilies } = useTheme();
 
-    // General settings
-    const [theme, setTheme] = useState('dark');
-    const [backgroundType, setBackgroundType] = useState('solid');
-    const [customBackground, setCustomBackground] = useState(null);
-    const [backgroundBlur, setBackgroundBlur] = useState(0);
-    const [backgroundOpacity, setBackgroundOpacity] = useState(0.8);
-    const [backgroundSize, setBackgroundSize] = useState('cover');
-    const [backgroundPosition, setBackgroundPosition] = useState('center');
-
-    // ChatPanel settings
-    const [panelAccentColor, setPanelAccentColor] = useState('#6a5acd');
-    const [panelFontSize, setPanelFontSize] = useState(16);
-    const [panelFontFamily, setPanelFontFamily] = useState('default');
-    const [panelSpacing, setPanelSpacing] = useState('normal');
-    const [panelAvatarShape, setPanelAvatarShape] = useState('round');
-
-    // ChatWindow settings
-    const [windowChatStyle, setWindowChatStyle] = useState('bubbles');
-    const [windowAccentColor, setWindowAccentColor] = useState('#6a5acd');
-    const [windowFontSize, setWindowFontSize] = useState(16);
-    const [windowFontFamily, setWindowFontFamily] = useState('default');
-    const [messageCornerRadius, setMessageCornerRadius] = useState(12);
-    const [messageShadow, setMessageShadow] = useState(true);
+    // Инициализируем локальное состояние из контекста
+    const [theme, setTheme] = useState(themeSettings.theme);
+    const [backgroundType, setBackgroundType] = useState(themeSettings.backgroundType);
+    const [customBackground, setCustomBackground] = useState(themeSettings.customBackground);
+    const [backgroundBlur, setBackgroundBlur] = useState(themeSettings.backgroundBlur);
+    const [backgroundOpacity, setBackgroundOpacity] = useState(themeSettings.backgroundOpacity);
+    const [backgroundSize, setBackgroundSize] = useState(themeSettings.backgroundSize);
+    const [backgroundPosition, setBackgroundPosition] = useState(themeSettings.backgroundPosition);
+    const [panelAccentColor, setPanelAccentColor] = useState(themeSettings.panelAccentColor);
+    const [panelFontSize, setPanelFontSize] = useState(themeSettings.panelFontSize);
+    const [panelFontFamily, setPanelFontFamily] = useState(themeSettings.panelFontFamily);
+    const [panelSpacing, setPanelSpacing] = useState(themeSettings.panelSpacing);
+    const [panelAvatarShape, setPanelAvatarShape] = useState(themeSettings.panelAvatarShape);
+    const [windowChatStyle, setWindowChatStyle] = useState(themeSettings.windowChatStyle);
+    const [windowAccentColor, setWindowAccentColor] = useState(themeSettings.windowAccentColor);
+    const [windowFontSize, setWindowFontSize] = useState(themeSettings.windowFontSize);
+    const [windowFontFamily, setWindowFontFamily] = useState(themeSettings.windowFontFamily);
+    const [messageCornerRadius, setMessageCornerRadius] = useState(themeSettings.messageCornerRadius);
+    const [messageShadow, setMessageShadow] = useState(themeSettings.messageShadow);
 
     const themes = [
         { id: 'dark', name: 'Темная', preview: '#1e1e2d' },
@@ -83,13 +82,6 @@ const AppearanceSettings = () => {
 
     const fontSizes = [12, 14, 16, 18, 20, 22];
 
-    const fontFamilies = [
-        { id: 'default', name: 'Системный', value: 'system-ui' },
-        { id: 'sans', name: 'Без засечек', value: '"Segoe UI", Roboto, sans-serif' },
-        { id: 'serif', name: 'С засечками', value: 'Georgia, serif' },
-        { id: 'mono', name: 'Моноширинный', value: 'Menlo, Consolas, monospace' },
-    ];
-
     const spacingOptions = [
         { id: 'compact', name: 'Компактный' },
         { id: 'normal', name: 'Обычный' },
@@ -107,35 +99,56 @@ const AppearanceSettings = () => {
     }, [theme]);
 
     const handleReset = () => {
-        setTheme('dark');
-        setBackgroundType('solid');
-        setCustomBackground(null);
-        setBackgroundBlur(0);
-        setBackgroundOpacity(0.8);
-        setBackgroundSize('cover');
-        setBackgroundPosition('center');
-        setPanelAccentColor('#6a5acd');
-        setPanelFontSize(16);
-        setPanelFontFamily('default');
-        setPanelSpacing('normal');
-        setPanelAvatarShape('round');
-        setWindowChatStyle('bubbles');
-        setWindowAccentColor('#6a5acd');
-        setWindowFontSize(16);
-        setWindowFontFamily('default');
-        setMessageCornerRadius(12);
-        setMessageShadow(true);
+        const defaultSettings = {
+            theme: 'dark',
+            backgroundType: 'solid',
+            customBackground: null,
+            backgroundBlur: 0,
+            backgroundOpacity: 0.8,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            panelAccentColor: '#6a5acd',
+            panelFontSize: 16,
+            panelFontFamily: 'default',
+            panelSpacing: 'normal',
+            panelAvatarShape: 'round',
+            windowChatStyle: 'bubbles',
+            windowAccentColor: '#6a5acd',
+            windowFontSize: 16,
+            windowFontFamily: 'default',
+            messageCornerRadius: 12,
+            messageShadow: true,
+        };
+
+        setTheme(defaultSettings.theme);
+        setBackgroundType(defaultSettings.backgroundType);
+        setCustomBackground(defaultSettings.customBackground);
+        setBackgroundBlur(defaultSettings.backgroundBlur);
+        setBackgroundOpacity(defaultSettings.backgroundOpacity);
+        setBackgroundSize(defaultSettings.backgroundSize);
+        setBackgroundPosition(defaultSettings.backgroundPosition);
+        setPanelAccentColor(defaultSettings.panelAccentColor);
+        setPanelFontSize(defaultSettings.panelFontSize);
+        setPanelFontFamily(defaultSettings.panelFontFamily);
+        setPanelSpacing(defaultSettings.panelSpacing);
+        setPanelAvatarShape(defaultSettings.panelAvatarShape);
+        setWindowChatStyle(defaultSettings.windowChatStyle);
+        setWindowAccentColor(defaultSettings.windowAccentColor);
+        setWindowFontSize(defaultSettings.windowFontSize);
+        setWindowFontFamily(defaultSettings.windowFontFamily);
+        setMessageCornerRadius(defaultSettings.messageCornerRadius);
+        setMessageShadow(defaultSettings.messageShadow);
+
+        updateThemeSettings(defaultSettings);
     };
 
     const handleBackgroundUpload = (e) => {
         const file = e.target.files[0];
         if (!file) return;
-
         if (!file.type.match('image.*')) {
             alert('Пожалуйста, выберите файл изображения (jpg, png, gif)');
             return;
         }
-
         if (file.size > 5 * 1024 * 1024) {
             alert('Размер файла не должен превышать 5MB');
             return;
@@ -163,22 +176,43 @@ const AppearanceSettings = () => {
         setBackgroundPosition('center');
     };
 
+    const handleSave = () => {
+        updateThemeSettings({
+            theme,
+            backgroundType,
+            customBackground,
+            backgroundBlur,
+            backgroundOpacity,
+            backgroundSize,
+            backgroundPosition,
+            panelAccentColor,
+            panelFontSize,
+            panelFontFamily,
+            panelSpacing,
+            panelAvatarShape,
+            windowChatStyle,
+            windowAccentColor,
+            windowFontSize,
+            windowFontFamily,
+            messageCornerRadius,
+            messageShadow,
+        });
+        navigate('/settings');
+    };
+
     return (
         <div className={styles.pageContainer}>
             <Sidebar />
-
             <div className={styles.mainContent}>
                 <div className={styles.header}>
                     <h1>Настройки внешнего вида</h1>
                     <p>Персонализируйте интерфейс под свой вкус</p>
                 </div>
-
                 <div className={styles.settingsContainer}>
                     <div className={styles.settingsPanel}>
                         {/* General settings */}
                         <div className={`${styles.settingGroup} ${styles.withBorder}`}>
                             <h3>Общие настройки</h3>
-
                             <div className={styles.subSettingGroup}>
                                 <h4>Цветовая тема</h4>
                                 <div className={styles.themeOptions}>
@@ -197,7 +231,6 @@ const AppearanceSettings = () => {
                                     ))}
                                 </div>
                             </div>
-
                             <div className={styles.subSettingGroup}>
                                 <h4>Тип фона</h4>
                                 <div className={styles.styleOptions}>
@@ -212,7 +245,6 @@ const AppearanceSettings = () => {
                                     ))}
                                 </div>
                             </div>
-
                             {backgroundType === 'image' && (
                                 <div className={styles.subSettingGroup}>
                                     <h4>Пользовательский фон</h4>
@@ -233,7 +265,7 @@ const AppearanceSettings = () => {
                                                         backgroundSize: backgroundSize,
                                                         backgroundPosition: backgroundPosition,
                                                         filter: `blur(${backgroundBlur}px)`,
-                                                        opacity: backgroundOpacity
+                                                        opacity: backgroundOpacity,
                                                     }}
                                                 />
                                                 <div className={styles.imageActions}>
@@ -266,7 +298,6 @@ const AppearanceSettings = () => {
                                             </div>
                                         )}
                                     </div>
-
                                     {customBackground && (
                                         <>
                                             <div className={styles.rangeSetting}>
@@ -326,7 +357,6 @@ const AppearanceSettings = () => {
                         {/* ChatPanel settings */}
                         <div className={`${styles.settingGroup} ${styles.withBorder}`}>
                             <h3>Панель чатов</h3>
-
                             <div className={styles.subSettingGroup}>
                                 <h4>Акцентный цвет</h4>
                                 <div className={styles.colorOptions}>
@@ -348,7 +378,6 @@ const AppearanceSettings = () => {
                                     </div>
                                 </div>
                             </div>
-
                             <div className={styles.subSettingGroup}>
                                 <h4>Размер текста</h4>
                                 <div className={styles.fontSizeOptions}>
@@ -363,7 +392,6 @@ const AppearanceSettings = () => {
                                     ))}
                                 </div>
                             </div>
-
                             <div className={styles.subSettingGroup}>
                                 <h4>Шрифт</h4>
                                 <div className={styles.styleOptions}>
@@ -379,7 +407,6 @@ const AppearanceSettings = () => {
                                     ))}
                                 </div>
                             </div>
-
                             <div className={styles.subSettingGroup}>
                                 <h4>Расстояние между элементами</h4>
                                 <div className={styles.styleOptions}>
@@ -394,7 +421,6 @@ const AppearanceSettings = () => {
                                     ))}
                                 </div>
                             </div>
-
                             <div className={styles.subSettingGroup}>
                                 <h4>Форма аватаров</h4>
                                 <div className={styles.avatarShapeOptions}>
@@ -415,7 +441,6 @@ const AppearanceSettings = () => {
                         {/* ChatWindow settings */}
                         <div className={styles.settingGroup}>
                             <h3>Окно чата</h3>
-
                             <div className={styles.subSettingGroup}>
                                 <h4>Стиль сообщений</h4>
                                 <div className={styles.styleOptions}>
@@ -430,7 +455,6 @@ const AppearanceSettings = () => {
                                     ))}
                                 </div>
                             </div>
-
                             <div className={styles.subSettingGroup}>
                                 <h4>Акцентный цвет</h4>
                                 <div className={styles.colorOptions}>
@@ -452,7 +476,6 @@ const AppearanceSettings = () => {
                                     </div>
                                 </div>
                             </div>
-
                             <div className={styles.subSettingGroup}>
                                 <h4>Размер текста</h4>
                                 <div className={styles.fontSizeOptions}>
@@ -467,7 +490,6 @@ const AppearanceSettings = () => {
                                     ))}
                                 </div>
                             </div>
-
                             <div className={styles.subSettingGroup}>
                                 <h4>Шрифт</h4>
                                 <div className={styles.styleOptions}>
@@ -483,7 +505,6 @@ const AppearanceSettings = () => {
                                     ))}
                                 </div>
                             </div>
-
                             <div className={styles.subSettingGroup}>
                                 <h4>Скругление сообщений</h4>
                                 <div className={styles.rangeSetting}>
@@ -497,7 +518,6 @@ const AppearanceSettings = () => {
                                     />
                                 </div>
                             </div>
-
                             <div className={styles.subSettingGroup}>
                                 <h4>Тень сообщений</h4>
                                 <label className={styles.checkboxOption}>
@@ -515,7 +535,7 @@ const AppearanceSettings = () => {
                             <button className={styles.resetButton} onClick={handleReset}>
                                 Сбросить настройки
                             </button>
-                            <button className={styles.saveButton} onClick={() => navigate('/settings')}>
+                            <button className={styles.saveButton} onClick={handleSave}>
                                 Сохранить изменения
                             </button>
                         </div>
@@ -536,13 +556,12 @@ const AppearanceSettings = () => {
                                         theme={theme}
                                         accentColor={panelAccentColor}
                                         fontSize={panelFontSize}
-                                        fontFamily={fontFamilies.find(f => f.id === panelFontFamily)?.value}
+                                        fontFamily={fontFamilies.find((f) => f.id === panelFontFamily)?.value}
                                         spacing={panelSpacing}
                                         avatarShape={panelAvatarShape}
                                     />
                                 </div>
                             </div>
-
                             <h3 className={styles.previewSubtitle}>Предпросмотр окна чата</h3>
                             <div className={styles.chatWindowPreviewContainer}>
                                 <ChatWindowPreview
@@ -550,7 +569,7 @@ const AppearanceSettings = () => {
                                     chatStyle={windowChatStyle}
                                     accentColor={windowAccentColor}
                                     fontSize={windowFontSize}
-                                    fontFamily={fontFamilies.find(f => f.id === windowFontFamily)?.value}
+                                    fontFamily={fontFamilies.find((f) => f.id === windowFontFamily)?.value}
                                     cornerRadius={messageCornerRadius}
                                     showShadow={messageShadow}
                                     customBackground={backgroundType === 'image' ? customBackground : null}

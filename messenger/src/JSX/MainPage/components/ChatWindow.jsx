@@ -6,6 +6,7 @@ import { apiRequest } from '../../../hooks/ApiRequest';
 import { useAuth } from '../../../hooks/UseAuth';
 import useMainHooks from '../../../hooks/UseMainHooks';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../../SettingsPage/components/ThemeContext';
 
 const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) => {
     const [message, setMessage] = useState('');
@@ -21,8 +22,104 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
     const messagesEndRef = useRef(null);
     const messagesAreaRef = useRef(null);
     const inputRef = useRef(null);
-
     const availableReactions = ['😊', '👍', '❤️', '😂', '😢'];
+    const { themeSettings, fontFamilies } = useTheme();
+
+    const {
+        theme,
+        backgroundType,
+        customBackground,
+        backgroundBlur,
+        backgroundOpacity,
+        backgroundSize,
+        backgroundPosition,
+        windowChatStyle,
+        windowAccentColor,
+        windowFontSize,
+        windowFontFamily,
+        messageCornerRadius,
+        messageShadow,
+    } = themeSettings;
+
+    const getThemeStyles = () => {
+        switch (theme) {
+            case 'cosmic':
+                return {
+                    headerBg: 'rgba(26, 21, 71, 0.95)',
+                    headerBorder: 'rgba(255, 176, 255, 0.2)',
+                    inputBg: 'rgba(26, 21, 71, 0.95)',
+                    inputBorder: 'rgba(74, 20, 140, 0.5)',
+                    inputWrapperBg: 'rgba(255, 255, 255, 0.08)',
+                    textColor: '#e0e0ff',
+                    secondaryText: '#b0b0ff',
+                    actionButtonBg: 'rgba(255, 255, 255, 0.1)',
+                    replyBg: 'rgba(255, 255, 255, 0.07)'
+                };
+            case 'sunset':
+                return {
+                    headerBg: 'rgba(254, 180, 123, 0.95)',
+                    headerBorder: 'rgba(255, 126, 95, 0.3)',
+                    inputBg: 'rgba(254, 180, 123, 0.95)',
+                    inputBorder: 'rgba(255, 126, 95, 0.5)',
+                    inputWrapperBg: 'rgba(255, 255, 255, 0.15)',
+                    textColor: '#5a2c0a',
+                    secondaryText: '#7a4c2a',
+                    actionButtonBg: 'rgba(255, 255, 255, 0.2)',
+                    replyBg: 'rgba(255, 255, 255, 0.15)'
+                };
+            case 'ocean':
+                return {
+                    headerBg: 'rgba(0, 93, 234, 0.95)',
+                    headerBorder: 'rgba(0, 198, 251, 0.3)',
+                    inputBg: 'rgba(0, 93, 234, 0.95)',
+                    inputBorder: 'rgba(0, 198, 251, 0.5)',
+                    inputWrapperBg: 'rgba(255, 255, 255, 0.15)',
+                    textColor: '#e0f7ff',
+                    secondaryText: '#b0e7ff',
+                    actionButtonBg: 'rgba(255, 255, 255, 0.2)',
+                    replyBg: 'rgba(255, 255, 255, 0.1)'
+                };
+            case 'forest':
+                return {
+                    headerBg: 'rgba(17, 153, 142, 0.95)',
+                    headerBorder: 'rgba(56, 239, 125, 0.3)',
+                    inputBg: 'rgba(17, 153, 142, 0.95)',
+                    inputBorder: 'rgba(56, 239, 125, 0.5)',
+                    inputWrapperBg: 'rgba(255, 255, 255, 0.15)',
+                    textColor: '#e0fff5',
+                    secondaryText: '#b0ffea',
+                    actionButtonBg: 'rgba(255, 255, 255, 0.2)',
+                    replyBg: 'rgba(255, 255, 255, 0.1)'
+                };
+            case 'light':
+                return {
+                    headerBg: 'rgba(240, 240, 240, 0.95)',
+                    headerBorder: 'rgba(160, 160, 160, 0.2)',
+                    inputBg: 'rgba(240, 240, 240, 0.95)',
+                    inputBorder: 'rgba(160, 160, 160, 0.3)',
+                    inputWrapperBg: 'rgba(0, 0, 0, 0.05)',
+                    textColor: '#333',
+                    secondaryText: '#666',
+                    actionButtonBg: 'rgba(0, 0, 0, 0.05)',
+                    replyBg: 'rgba(0, 0, 0, 0.03)'
+                };
+            default:
+                return {
+                    headerBg: 'rgba(15, 12, 41, 0.95)',
+                    headerBorder: 'rgba(255, 176, 255, 0.2)',
+                    inputBg: 'rgba(15, 12, 41, 0.95)',
+                    inputBorder: 'rgba(74, 20, 140, 0.5)',
+                    inputWrapperBg: 'rgba(255, 255, 255, 0.08)',
+                    textColor: '#e0e0ff',
+                    secondaryText: '#b0b0ff',
+                    actionButtonBg: 'rgba(255, 255, 255, 0.1)',
+                    replyBg: 'rgba(255, 255, 255, 0.07)'
+                };
+        }
+    };
+
+    const themeStyles = getThemeStyles();
+    const fontFamilyValue = fontFamilies.find((f) => f.id === windowFontFamily)?.value || 'system-ui';
 
     useEffect(() => {
         scrollToBottom();
@@ -35,25 +132,24 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
     useEffect(() => {
         const fetchData = async () => {
             if (!activeChat?.id) return;
-
             try {
                 const response = await apiRequest(`/api/messages/chat/${activeChat.id}`, {
                     method: 'GET',
-                    authenticated: isAuthenticated
+                    authenticated: isAuthenticated,
                 });
-
                 const messages = Array.isArray(response)
-                    ? response.map(message => ({
+                    ? response.map((message) => ({
                         ...message,
                         isUser: userId === message.senderId,
                         reactions: message.reactions || [],
-                        replyTo: message.replyTo ? {
-                            ...message.replyTo,
-                            sender: message.replyTo.senderId === userId ? "You" : activeChat.secondUser.username
-                        } : null
+                        replyTo: message.replyTo
+                            ? {
+                                ...message.replyTo,
+                                sender: message.replyTo.senderId === userId ? 'You' : activeChat.secondUser.username,
+                            }
+                            : null,
                     }))
                     : response;
-
                 setMessages(messages);
             } catch (error) {
                 console.error('Failed to fetch messages:', error);
@@ -77,23 +173,27 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
 
         const handleNewMessage = (newMessage) => {
             if (activeChat.id === newMessage.chatId) {
-                setMessages(prevMessages => {
+                setMessages((prevMessages) => {
                     if (newMessage.isTemporary) return prevMessages;
-
-                    const isDuplicate = prevMessages.some(msg =>
-                        msg.tempId === newMessage.tempId &&
-                        msg.senderId === newMessage.senderId
+                    const isDuplicate = prevMessages.some(
+                        (msg) => msg.tempId === newMessage.tempId && msg.senderId === newMessage.senderId
                     );
-
-                    return isDuplicate ? prevMessages : [...prevMessages, {
-                        ...newMessage,
-                        isUser: userId === newMessage.senderId,
-                        reactions: newMessage.reactions || [],
-                        replyTo: newMessage.replyTo ? {
-                            ...newMessage.replyTo,
-                            sender: newMessage.replyTo.senderId === userId ? "You" : activeChat.secondUser.username
-                        } : null
-                    }];
+                    return isDuplicate
+                        ? prevMessages
+                        : [
+                            ...prevMessages,
+                            {
+                                ...newMessage,
+                                isUser: userId === newMessage.senderId,
+                                reactions: newMessage.reactions || [],
+                                replyTo: newMessage.replyTo
+                                    ? {
+                                        ...newMessage.replyTo,
+                                        sender: newMessage.replyTo.senderId === userId ? 'You' : activeChat.secondUser.username,
+                                    }
+                                    : null,
+                            },
+                        ];
                 });
             }
         };
@@ -108,7 +208,6 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                 setContextMenu(null);
             }
         };
-
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
@@ -117,7 +216,6 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
         if (!message.trim() || !activeChat?.id || !userId) return;
 
         const tempId = Math.floor(10000000 + Math.random() * 90000000);
-
         const newMessage = {
             id: tempId.toString(),
             tempId: tempId,
@@ -128,26 +226,28 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
             chatId: activeChat.id,
             isTemporary: true,
             reactions: [],
-            replyTo: replyingTo ? {
-                id: replyingTo.id,
-                comment: replyingTo.comment,
-                senderId: replyingTo.senderId,
-                sender: replyingTo.isUser ? "You" : activeChat.secondUser.username
-            } : null
+            replyTo: replyingTo
+                ? {
+                    id: replyingTo.id,
+                    comment: replyingTo.comment,
+                    senderId: replyingTo.senderId,
+                    sender: replyingTo.isUser ? 'You' : activeChat.secondUser.username,
+                }
+                : null,
         };
 
-        setMessages(prev => [...prev, newMessage]);
+        setMessages((prev) => [...prev, newMessage]);
         setMessage('');
         setReplyingTo(null);
 
         try {
-            await connection.invoke("SendMessage", activeChat.id, userId, message, tempId, replyingTo?.id);
-            setMessages(prev => prev.map(msg =>
-                msg.id === tempId ? { ...msg, isTemporary: false } : msg
-            ));
+            await connection.invoke('SendMessage', activeChat.id, userId, message, tempId, replyingTo?.id);
+            setMessages((prev) =>
+                prev.map((msg) => (msg.id === tempId ? { ...msg, isTemporary: false } : msg))
+            );
         } catch (error) {
-            console.error("Ошибка отправки:", error);
-            setMessages(prev => prev.filter(msg => msg.id !== tempId));
+            console.error('Ошибка отправки:', error);
+            setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
         }
     };
 
@@ -191,7 +291,7 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
         setContextMenu({
             messageId: message.id,
             x: rect.left,
-            y: rect.top + window.scrollY - contextMenuHeight - 5
+            y: rect.top + window.scrollY - contextMenuHeight - 5,
         });
     };
 
@@ -206,7 +306,7 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
     };
 
     const handleContextMenuAction = (action, messageId, emoji = null) => {
-        const message = messages.find(msg => msg.id === messageId);
+        const message = messages.find((msg) => msg.id === messageId);
         switch (action) {
             case 'reply':
                 handleReply(message);
@@ -227,16 +327,20 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                 console.log(`Selecting message ${messageId}`);
                 break;
             case 'react':
-                setMessages(prev => prev.map(msg =>
-                    msg.id === messageId
-                        ? {
-                            ...msg,
-                            reactions: msg.reactions.some(r => r.emoji === emoji)
-                                ? msg.reactions.map(r => r.emoji === emoji ? { ...r, count: r.count + 1 } : r)
-                                : [...msg.reactions, { emoji, count: 1 }]
-                        }
-                        : msg
-                ));
+                setMessages((prev) =>
+                    prev.map((msg) =>
+                        msg.id === messageId
+                            ? {
+                                ...msg,
+                                reactions: msg.reactions.some((r) => r.emoji === emoji)
+                                    ? msg.reactions.map((r) =>
+                                        r.emoji === emoji ? { ...r, count: r.count + 1 } : r
+                                    )
+                                    : [...msg.reactions, { emoji, count: 1 }],
+                            }
+                            : msg
+                    )
+                );
                 break;
             default:
                 break;
@@ -272,8 +376,39 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
     }
 
     return (
-        <div className={cl.chatWindow}>
-            <div className={cl.chatHeader}>
+        <div
+            className={cl.chatWindow}
+            style={{
+                backgroundImage:
+                    backgroundType === 'image' && customBackground
+                        ? `url(${customBackground})`
+                        : theme === 'cosmic'
+                            ? 'radial-gradient(circle at top center, #1a1547 0%, #0f0c29 70%)'
+                            : theme === 'sunset'
+                                ? 'linear-gradient(135deg, #ff7e5f, #feb47b)'
+                                : theme === 'ocean'
+                                    ? 'linear-gradient(135deg, #00c6fb, #005bea)'
+                                    : theme === 'forest'
+                                        ? 'linear-gradient(135deg, #11998e, #38ef7d)'
+                                        : theme === 'light'
+                                            ? 'linear-gradient(to bottom, #f5f5f5, #e0e0e0)'
+                                            : 'radial-gradient(circle at top center, #1a1547 0%, #0f0c29 70%)',
+                backgroundSize: backgroundType === 'image' ? backgroundSize : 'cover',
+                backgroundPosition: backgroundType === 'image' ? backgroundPosition : 'center',
+                filter: backgroundType === 'image' ? `blur(${backgroundBlur}px)` : 'none',
+                opacity: backgroundType === 'image' ? backgroundOpacity : 1,
+                fontFamily: fontFamilyValue,
+                fontSize: `${windowFontSize}px`,
+            }}
+        >
+            <div
+                className={cl.chatHeader}
+                style={{
+                    background: themeStyles.headerBg,
+                    borderBottom: `1px solid ${themeStyles.headerBorder}`,
+                    color: themeStyles.textColor
+                }}
+            >
                 <div className={cl.userInfo}>
                     <button className={cl.avatarButton} onClick={handleAvatarClick}>
                         <div className={cl.avatar} style={{ backgroundColor: activeChat.avatarColor }}>
@@ -281,26 +416,38 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                         </div>
                     </button>
                     <div className={cl.userDetails}>
-                        <h3>{activeChat.secondUser.username}</h3>
-                        <p className={cl.userStatus} data-status={activeChat.secondUser.onlineStatus}>
+                        <h3 style={{ color: themeStyles.textColor }}>{activeChat.secondUser.username}</h3>
+                        <p
+                            className={cl.userStatus}
+                            data-status={activeChat.secondUser.onlineStatus}
+                            style={{ color: themeStyles.secondaryText }}
+                        >
                             {getStatusString(activeChat.secondUser.onlineStatus)}
                         </p>
                     </div>
                 </div>
                 <div className={cl.chatActions}>
-                    <button className={cl.actionButton}>
+                    <button
+                        className={cl.actionButton}
+                        style={{ background: themeStyles.actionButtonBg, color: themeStyles.textColor }}
+                    >
                         <FiSearch className={cl.actionIcon} />
                     </button>
-                    <button className={cl.actionButton}>
+                    <button
+                        className={cl.actionButton}
+                        style={{ background: themeStyles.actionButtonBg, color: themeStyles.textColor }}
+                    >
                         <FiPhone className={cl.actionIcon} />
                     </button>
-                    <button className={cl.actionButton}>
+                    <button
+                        className={cl.actionButton}
+                        style={{ background: themeStyles.actionButtonBg, color: themeStyles.textColor }}
+                    >
                         <FiMoreVertical className={cl.actionIcon} />
                     </button>
                 </div>
                 <div className={cl.headerDecoration}></div>
             </div>
-
             {searchQuery && (
                 <div className={cl.searchBar}>
                     <input
@@ -308,36 +455,61 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                         placeholder="Поиск сообщений..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
+                        style={{
+                            background: themeStyles.inputWrapperBg,
+                            color: themeStyles.textColor
+                        }}
                     />
                 </div>
             )}
-
             <div className={cl.messagesArea} ref={messagesAreaRef}>
                 {messages.map((msg) => (
                     <div
                         key={msg.id}
                         className={`${cl.message} ${msg.isUser ? cl.userMessage : cl.contactMessage}`}
                         onContextMenu={(e) => handleContextMenu(e, msg)}
+                        style={{
+                            borderRadius:
+                                windowChatStyle === 'bubbles'
+                                    ? `${messageCornerRadius}px ${messageCornerRadius}px ${messageCornerRadius}px 5px`
+                                    : windowChatStyle === 'minimal'
+                                        ? '5px'
+                                        : '10px',
+                            boxShadow: messageShadow
+                                ? msg.isUser
+                                    ? `0 0 8px rgba(${parseInt(windowAccentColor.slice(1, 3), 16)}, ${parseInt(windowAccentColor.slice(3, 5), 16)}, ${parseInt(windowAccentColor.slice(5, 7), 16)}, 0.5)`
+                                    : '0 0 12px rgba(106, 48, 147, 0.5)'
+                                : 'none',
+                            background:
+                                msg.isUser
+                                    ? `linear-gradient(135deg, ${windowAccentColor}, ${adjustColor(windowAccentColor, -20)})`
+                                    : 'linear-gradient(135deg, #3a1c71, #6a3093)',
+                        }}
                     >
                         {msg.replyTo && (
-                            <div className={cl.replyPreview}>
+                            <div
+                                className={cl.replyPreview}
+                                style={{ background: themeStyles.replyBg }}
+                            >
                                 <div className={cl.replyLine}></div>
                                 <div className={cl.replyContent}>
-                                    <span className={cl.replyAuthor}>{msg.replyTo.sender}</span>
-                                    <p className={cl.replyText}>{msg.replyTo.comment}</p>
+                                    <span className={cl.replyAuthor} style={{ color: themeStyles.textColor }}>{msg.replyTo.sender}</span>
+                                    <p className={cl.replyText} style={{ color: themeStyles.secondaryText }}>{msg.replyTo.comment}</p>
                                 </div>
                             </div>
                         )}
                         <div className={cl.messageContent}>
-                            <p>{msg.comment}</p>
-                            <span className={cl.messageTime}>{formatTimeFromISO(msg.createdAt)}</span>
+                            <p style={{ color: msg.isUser ? '#fff' : '#e0e0ff' }}>{msg.comment}</p>
+                            <span className={cl.messageTime} style={{ color: msg.isUser ? 'rgba(255,255,255,0.7)' : 'rgba(224,224,255,0.7)' }}>
+                                {formatTimeFromISO(msg.createdAt)}
+                            </span>
                         </div>
                         {msg.reactions.length > 0 && (
                             <div className={cl.reactions}>
                                 {msg.reactions.map((reaction, index) => (
                                     <span key={index} className={cl.reaction}>
-                    {reaction.emoji} {reaction.count > 1 ? reaction.count : ''}
-                  </span>
+                                        {reaction.emoji} {reaction.count > 1 ? reaction.count : ''}
+                                    </span>
                                 ))}
                             </div>
                         )}
@@ -348,32 +520,63 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                     <div
                         ref={contextMenuRef}
                         className={cl.contextMenu}
-                        style={{ top: contextMenu.y, left: contextMenu.x }}
+                        style={{
+                            top: contextMenu.y,
+                            left: contextMenu.x,
+                            background: themeStyles.headerBg,
+                            border: `1px solid ${themeStyles.headerBorder}`,
+                            color: themeStyles.textColor
+                        }}
                     >
-                        <button onClick={() => handleContextMenuAction('reply', contextMenu.messageId)}>
+                        <button
+                            onClick={() => handleContextMenuAction('reply', contextMenu.messageId)}
+                            style={{ color: themeStyles.textColor }}
+                        >
                             <FiCornerUpLeft /> Ответить
                         </button>
-                        <button onClick={() => handleContextMenuAction('pin', contextMenu.messageId)}>
+                        <button
+                            onClick={() => handleContextMenuAction('pin', contextMenu.messageId)}
+                            style={{ color: themeStyles.textColor }}
+                        >
                             <FiMapPin /> Закрепить
                         </button>
-                        <button onClick={() => handleContextMenuAction('copy', contextMenu.messageId)}>
+                        <button
+                            onClick={() => handleContextMenuAction('copy', contextMenu.messageId)}
+                            style={{ color: themeStyles.textColor }}
+                        >
                             <FiCopy /> Копировать текст
                         </button>
-                        <button onClick={() => handleContextMenuAction('forward', contextMenu.messageId)}>
+                        <button
+                            onClick={() => handleContextMenuAction('forward', contextMenu.messageId)}
+                            style={{ color: themeStyles.textColor }}
+                        >
                             <FiShare2 /> Переслать
                         </button>
-                        <button onClick={() => handleContextMenuAction('report', contextMenu.messageId)}>
+                        <button
+                            onClick={() => handleContextMenuAction('report', contextMenu.messageId)}
+                            style={{ color: themeStyles.textColor }}
+                        >
                             <FiFlag /> Пожаловаться
                         </button>
-                        <button onClick={() => handleContextMenuAction('select', contextMenu.messageId)}>
+                        <button
+                            onClick={() => handleContextMenuAction('select', contextMenu.messageId)}
+                            style={{ color: themeStyles.textColor }}
+                        >
                             <FiCheckSquare /> Выделить
                         </button>
-                        <div className={cl.reactionPicker}>
+                        <div
+                            className={cl.reactionPicker}
+                            style={{
+                                borderTop: `1px solid ${themeStyles.headerBorder}`,
+                                background: themeStyles.inputBg
+                            }}
+                        >
                             {availableReactions.map((emoji) => (
                                 <button
                                     key={emoji}
                                     onClick={() => handleContextMenuAction('react', contextMenu.messageId, emoji)}
                                     className={cl.reactionButton}
+                                    style={{ background: themeStyles.actionButtonBg }}
                                 >
                                     {emoji}
                                 </button>
@@ -383,22 +586,46 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                 )}
                 <div className={cl.messageDecoration}></div>
             </div>
-
             {replyingTo && (
-                <div className={cl.replyIndicator}>
+                <div
+                    className={cl.replyIndicator}
+                    style={{
+                        background: themeStyles.inputBg,
+                        borderTop: `1px solid ${themeStyles.inputBorder}`,
+                        borderBottom: `1px solid ${themeStyles.inputBorder}`
+                    }}
+                >
                     <div className={cl.replyInfo}>
-                        <span>Replying to {replyingTo.isUser ? "yourself" : activeChat.secondUser.username}</span>
-                        <p>{replyingTo.comment}</p>
+                        <span style={{ color: themeStyles.textColor }}>
+                            Replying to {replyingTo.isUser ? 'yourself' : activeChat.secondUser.username}
+                        </span>
+                        <p style={{ color: themeStyles.secondaryText }}>{replyingTo.comment}</p>
                     </div>
-                    <button className={cl.cancelReply} onClick={cancelReply}>
+                    <button
+                        className={cl.cancelReply}
+                        onClick={cancelReply}
+                        style={{ color: themeStyles.textColor }}
+                    >
                         <FiX />
                     </button>
                 </div>
             )}
-
-            <div className={cl.messageInputContainer}>
-                <div className={cl.inputWrapper}>
-                    <button className={cl.attachmentButton}>
+            <div
+                className={cl.messageInputContainer}
+                style={{
+                    background: themeStyles.inputBg,
+                    borderTop: `1px solid ${themeStyles.inputBorder}`,
+                    color: themeStyles.textColor
+                }}
+            >
+                <div
+                    className={cl.inputWrapper}
+                    style={{ background: themeStyles.inputWrapperBg }}
+                >
+                    <button
+                        className={cl.attachmentButton}
+                        style={{ color: themeStyles.textColor }}
+                    >
                         <FiPaperclip className={cl.icon} />
                     </button>
                     <input
@@ -409,16 +636,28 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                         onChange={(e) => setMessage(e.target.value)}
                         onKeyPress={handleKeyPress}
                         className={cl.messageInputField}
+                        style={{ color: themeStyles.textColor }}
                     />
-                    <button className={cl.emojiButton}>
+                    <button
+                        className={cl.emojiButton}
+                        style={{ color: themeStyles.textColor }}
+                    >
                         <FiSmile className={cl.icon} />
                     </button>
                 </div>
-                <button className={cl.sendButton} onClick={handleSendMessage} disabled={!message.trim()}>
+                <button
+                    className={cl.sendButton}
+                    onClick={handleSendMessage}
+                    disabled={!message.trim()}
+                    style={{
+                        background: themeStyles.actionButtonBg,
+                        color: themeStyles.textColor,
+                        border: `1px solid ${themeStyles.inputBorder}`,
+                    }}
+                >
                     <FiSend className={cl.sendIcon} />
                 </button>
             </div>
-
             {isProfileOpen && (
                 <UserProfileModal
                     user={{
@@ -427,8 +666,8 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                         avatarColor: activeChat.avatarColor,
                         status: activeChat.status,
                         isFavorite: activeChat.isFavorite,
-                        tag: "#0000",
-                        quote: "Статус пользователя"
+                        tag: '#0000',
+                        quote: 'Статус пользователя',
                     }}
                     onClose={closeProfile}
                     onStartChat={handleStartChat}
@@ -439,6 +678,23 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
             )}
         </div>
     );
+};
+
+const adjustColor = (color, amount) => {
+    let usePound = false;
+    if (color[0] === '#') {
+        color = color.slice(1);
+        usePound = true;
+    }
+    const num = parseInt(color, 16);
+    let r = (num >> 16) + amount;
+    let g = ((num >> 8) & 0x00ff) + amount;
+    let b = (num & 0x0000ff) + amount;
+    r = Math.min(255, Math.max(0, r));
+    g = Math.min(255, Math.max(0, g));
+    b = Math.min(255, Math.max(0, b));
+    const newColor = (r << 16) | (g << 8) | b;
+    return (usePound ? '#' : '') + newColor.toString(16).padStart(6, '0');
 };
 
 export default ChatWindow;
