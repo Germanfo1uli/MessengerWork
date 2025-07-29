@@ -6,7 +6,7 @@ import ChatPanelPreview from './ChatPanelPreview';
 import ChatWindowPreview from './ChatWindowPreview';
 import GroupNavigationPreview from './GroupNavigationPreview';
 import Sidebar from './Sidebar';
-import { useTheme } from './ThemeContext';
+import { useTheme } from './Context/ThemeContext';
 
 const AppearanceSettings = () => {
     const navigate = useNavigate();

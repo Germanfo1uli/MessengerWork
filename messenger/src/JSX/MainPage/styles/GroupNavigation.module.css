@@ -1,7 +1,6 @@
 .navPanel {
     width: 100px;
     height: 100vh;
-    background: linear-gradient(180deg, #1a1a2e, #16213e);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -11,13 +10,12 @@
     left: 0;
     top: 0;
     z-index: 998;
-    border-right: 1px solid rgba(138, 43, 226, 0.3);
+    transition: all 0.3s ease;
 }
 
 .homeButton {
     background: none;
     border: none;
-    color: #e0e0ff;
     font-size: 24px;
     cursor: pointer;
     margin-bottom: 10px;
@@ -25,15 +23,14 @@
 }
 
 .homeButton:hover {
-    color: #00d4ff;
     transform: scale(1.2);
 }
 
 .separator {
     width: 40px;
     height: 2px;
-    background: #b0b0ff;
     margin-bottom: 15px;
+    transition: background 0.3s ease;
 }
 
 .groupList {
@@ -52,7 +49,7 @@
     height: 50px;
     overflow: hidden;
     border-radius: 10px;
-    transition: transform 0.3s ease;
+    transition: all 0.3s ease;
     position: relative;
 }
 
@@ -64,25 +61,18 @@
 }
 
 .avatarWrapper:hover {
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7)!important;
+    transform: scale(1.1);
 }
 
 .avatarWrapper.selected {
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.7) !important;
 }
 
-.groupItem:hover .avatarWrapper {
-    transform: scale(1.1);
-}
-
-
 .tooltip {
     position: absolute;
     left: 50%;
     top: calc(100% + 10px);
     transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.9);
-    color: #e0e0ff;
     padding: 6px 12px;
     z-index: 2147483647;
     border-radius: 6px;
@@ -98,7 +88,6 @@
     isolation: isolate;
     will-change: transform, opacity;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .groupItem:hover .tooltip {
@@ -124,67 +113,15 @@
     margin-top: 10px;
 }
 
-.formGroup select {
-
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background: rgba(20, 20, 50, 0.5);
-    border: 1px solid rgba(100, 149, 237, 0.2);
-    border-radius: 12px;
-    color: #ffffff;
-    font-size: 15px;
-    padding: 14px 40px 14px 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-    width: 100%;
-    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23b0b0ff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%2F%3E%3C%2Fsvg%3E'); /* Кастомная стрелка */
-    background-repeat: no-repeat;
-    background-position: right 16px center;
-}
-
-.formGroup select:focus {
-    outline: none;
-    border-color: #4fc3f7;
-    box-shadow: 0 0 0 2px rgba(79, 195, 247, 0.2);
-}
-
-.formGroup select option {
-
-    background: #1a1a3a;
-    color: #e0e0ff;
-    font-size: 15px;
-    padding: 10px;
-    border: none;
-}
-
-
-.formGroup select option:hover {
-    background: rgba(79, 195, 247, 0.3);
-    color: #ffffff;
-}
-
-
-.formGroup select option:checked {
-    background: linear-gradient(135deg, rgba(79, 195, 247, 0.3), rgba(100, 149, 237, 0.3));
-    color: #ffffff;
-    font-weight: 500;
-}
-
 .addGroupButton .avatarWrapper {
-    background: rgba(30, 30, 70, 0.7);
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px dashed rgba(138, 43, 226, 0.5);
     transition: all 0.3s ease;
 }
 
-.addGroupButton .avatarWrapper:hover {
-    background: rgba(138, 43, 226, 0.2);
-    border-color: #8a2be2;
-    box-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+.addGroupButton:hover .avatarWrapper {
+    transform: scale(1.1);
 }
 
 .plusIcon {
@@ -198,7 +135,6 @@
 
 .addGroupButton:hover .plusIcon {
     transform: scale(1.2);
-    color: #00d4ff;
 }
 
 .modalOverlay {
@@ -222,15 +158,14 @@
 }
 
 .modal {
-    background: linear-gradient(145deg, #0f0f23, #1a1a3a);
     border-radius: 20px;
     width: 480px;
     max-width: 95%;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(100, 149, 237, 0.2);
     overflow: hidden;
     position: relative;
     animation: modalSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: all 0.3s ease;
 }
 
 @keyframes modalSlideIn {
@@ -248,9 +183,7 @@
     position: absolute;
     top: 10px;
     right: 10px;
-    background: rgba(30, 30, 60, 0.5);
     border: none;
-    color: #e0e0ff;
     cursor: pointer;
     transition: all 0.3s ease;
     width: 36px;
@@ -263,8 +196,6 @@
 }
 
 .closeButton:hover {
-    background: rgba(79, 195, 247, 0.2);
-    color: #4fc3f7;
     transform: rotate(90deg);
 }
 
@@ -273,35 +204,33 @@
 }
 
 .modalTitle {
-    color: #e0e0ff;
     font-size: 24px;
     font-weight: 600;
     margin: 0 0 8px 0;
     text-align: center;
+    transition: color 0.3s ease;
 }
 
 .modalDescription {
-    color: #b0b0ff;
     font-size: 14px;
     line-height: 1.5;
     margin: 0 0 16px 0;
     text-align: center;
+    transition: color 0.3s ease;
 }
 
 .tabs {
     display: flex;
     gap: 8px;
-    background: rgba(20, 20, 50, 0.5);
     border-radius: 12px;
     padding: 4px;
+    transition: background 0.3s ease;
 }
 
 .tabButton {
     flex: 1;
     padding: 12px;
-    background: transparent;
     border: none;
-    color: #b0b0ff;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -311,14 +240,12 @@
 }
 
 .tabButton:hover {
-    color: #e0e0ff;
-    background: rgba(79, 195, 247, 0.1);
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .tabButton.active {
-    background: linear-gradient(135deg, rgba(79, 195, 247, 0.3), rgba(100, 149, 237, 0.3));
     color: #ffffff;
-    box-shadow: 0 4px 12px rgba(79, 195, 247, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .modalContent {
@@ -338,19 +265,16 @@
 }
 
 .formGroup label {
-    color: #b0b0ff;
     font-size: 14px;
     font-weight: 500;
+    transition: color 0.3s ease;
 }
 
 .formGroup input,
 .formGroup textarea,
 .formGroup select {
     padding: 14px 16px;
-    background: rgba(20, 20, 50, 0.5);
-    border: 1px solid rgba(100, 149, 237, 0.2);
     border-radius: 12px;
-    color: #ffffff;
     font-size: 15px;
     transition: all 0.3s ease;
 }
@@ -359,8 +283,7 @@
 .formGroup textarea:focus,
 .formGroup select:focus {
     outline: none;
-    border-color: #4fc3f7;
-    box-shadow: 0 0 0 2px rgba(79, 195, 247, 0.2);
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
 }
 
 .formGroup textarea {
@@ -386,7 +309,6 @@
     height: 120px;
     border-radius: 50%;
     overflow: hidden;
-    border: 2px solid rgba(100, 149, 237, 0.3);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
     transition: all 0.3s ease;
 }
@@ -403,7 +325,6 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -419,22 +340,17 @@
     width: 120px;
     height: 120px;
     border-radius: 50%;
-    background: rgba(20, 20, 50, 0.5);
-    border: 2px dashed rgba(100, 149, 237, 0.5);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: #b0b0ff;
     transition: all 0.3s ease;
     text-align: center;
     padding-right: 5px;
 }
 
 .uploadPlaceholder:hover {
-    background: rgba(79, 195, 247, 0.1);
-    border-color: #4fc3f7;
-    color: #e0e0ff;
+    color: inherit;
 }
 
 .uploadPlaceholder span {
@@ -458,17 +374,15 @@
 .agreement input {
     width: 18px;
     height: 18px;
-    accent-color: #4fc3f7;
 }
 
 .agreement label {
-    color: #b0b0ff;
     font-size: 14px;
     line-height: 1.5;
+    transition: color 0.3s ease;
 }
 
 .agreement a {
-    color: #4fc3f7;
     text-decoration: none;
     transition: all 0.2s ease;
 }
@@ -479,56 +393,64 @@
 
 .submitButton {
     padding: 14px;
-    background: linear-gradient(135deg, #4fc3f7, #6393f1);
     border: none;
     border-radius: 12px;
-    color: #0a0a1a;
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
     margin-top: 10px;
-    box-shadow: 0 4px 15px rgba(79, 195, 247, 0.3);
+    color: #0a0a1a;
 }
 
 .submitButton:hover {
-    background: linear-gradient(135deg, #63d2ff, #7aa3ff);
-    box-shadow: 0 6px 20px rgba(79, 195, 247, 0.4);
     transform: translateY(-2px);
 }
 
 .example {
     margin-top: 10px;
     padding: 12px;
-    background: rgba(20, 20, 50, 0.3);
     border-radius: 8px;
     font-size: 14px;
-    color: #b0b0ff;
     line-height: 1.5;
+    transition: all 0.3s ease;
 }
 
 .example p {
     margin: 0 0 6px 0;
-    color: #e0e0ff;
+    transition: color 0.3s ease;
 }
 
 .example code {
     display: block;
     padding: 8px;
-    background: rgba(0, 0, 0, 0.2);
     border-radius: 6px;
     font-family: 'Courier New', monospace;
-    color: #4fc3f7;
     overflow-x: auto;
+    transition: all 0.3s ease;
 }
 
 .termsLink {
-    color: #4b83f8;
     text-decoration: none;
     transition: all 0.2s ease;
 }
 
 .termsLink:hover {
-    color: #4fc3f7;
     text-decoration: underline;
+}
+
+/* Анимации для плавного перехода между темами */
+.navPanel,
+.modal,
+.modalTitle,
+.modalDescription,
+.formGroup label,
+.formGroup input,
+.formGroup textarea,
+.formGroup select,
+.agreement label,
+.example,
+.example p,
+.example code {
+    transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease;
 }

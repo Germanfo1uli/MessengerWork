@@ -15,7 +15,7 @@ import GiftPage from './JSX/GiftPage/components/GiftPage';
 import TradingPlatformPage from './JSX/GiftPage/components/TradingPlatformPage';
 import InventoryPage from './JSX/GiftPage/components/InventoryPage';
 import GroupSettings from './JSX/SettingsPage/components/GroupSettings';
-import { ThemeProvider } from './JSX/SettingsPage/components/ThemeContext';
+import { ThemeProvider } from './JSX/SettingsPage/components/Context/ThemeContext';
 
 const AppContent = () => {
     const [currentScreen, setCurrentScreen] = useState('welcome');

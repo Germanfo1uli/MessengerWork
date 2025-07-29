@@ -6,7 +6,7 @@ import { apiRequest } from '../../../hooks/ApiRequest';
 import { useAuth } from '../../../hooks/UseAuth';
 import useMainHooks from '../../../hooks/UseMainHooks';
 import { useNavigate } from 'react-router-dom';
-import { useTheme } from '../../SettingsPage/components/ThemeContext';
+import { useTheme } from '../../SettingsPage/components/Context/ThemeContext';
 
 const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) => {
     const [message, setMessage] = useState('');
@@ -15,6 +15,8 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [contextMenu, setContextMenu] = useState(null);
     const [replyingTo, setReplyingTo] = useState(null);
+    const [avatarText, setAvatarText] = useState('');
+    const [avatarColor, setAvatarColor] = useState('#4B0082');
     const { isLoading, userId, username, isAuthenticated, logout } = useAuth();
     const { getStatusString, formatTimeFromISO } = useMainHooks();
     const navigate = useNavigate();
@@ -41,11 +43,28 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
         messageShadow,
     } = themeSettings;
 
+    useEffect(() => {
+        if (activeChat?.secondUser?.username) {
+            const initials = activeChat.secondUser.username
+                .split(' ')
+                .map(word => word.charAt(0))
+                .join('')
+                .slice(0, 2)
+                .toUpperCase();
+            setAvatarText(initials);
+
+            const today = new Date();
+            const hash = today.toDateString().split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            const dynamicColor = `hsl(${hash % 360}, 70%, 40%)`;
+            setAvatarColor(dynamicColor);
+        }
+    }, [activeChat?.secondUser?.username]);
+
     const getThemeStyles = () => {
         switch (theme) {
             case 'cosmic':
                 return {
-                    headerBg: 'rgba(26, 21, 71, 0.95)',
+                    headerBg: 'rgba(26, 21, 71, 1)', // Убрана прозрачность для четкости
                     headerBorder: 'rgba(255, 176, 255, 0.2)',
                     inputBg: 'rgba(26, 21, 71, 0.95)',
                     inputBorder: 'rgba(74, 20, 140, 0.5)',
@@ -57,7 +76,7 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                 };
             case 'sunset':
                 return {
-                    headerBg: 'rgba(254, 180, 123, 0.95)',
+                    headerBg: 'rgba(254, 180, 123, 1)',
                     headerBorder: 'rgba(255, 126, 95, 0.3)',
                     inputBg: 'rgba(254, 180, 123, 0.95)',
                     inputBorder: 'rgba(255, 126, 95, 0.5)',
@@ -69,7 +88,7 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                 };
             case 'ocean':
                 return {
-                    headerBg: 'rgba(0, 93, 234, 0.95)',
+                    headerBg: 'rgba(0, 93, 234, 1)',
                     headerBorder: 'rgba(0, 198, 251, 0.3)',
                     inputBg: 'rgba(0, 93, 234, 0.95)',
                     inputBorder: 'rgba(0, 198, 251, 0.5)',
@@ -81,7 +100,7 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                 };
             case 'forest':
                 return {
-                    headerBg: 'rgba(17, 153, 142, 0.95)',
+                    headerBg: 'rgba(17, 153, 142, 1)',
                     headerBorder: 'rgba(56, 239, 125, 0.3)',
                     inputBg: 'rgba(17, 153, 142, 0.95)',
                     inputBorder: 'rgba(56, 239, 125, 0.5)',
@@ -93,7 +112,7 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                 };
             case 'light':
                 return {
-                    headerBg: 'rgba(240, 240, 240, 0.95)',
+                    headerBg: 'rgba(240, 240, 240, 1)',
                     headerBorder: 'rgba(160, 160, 160, 0.2)',
                     inputBg: 'rgba(240, 240, 240, 0.95)',
                     inputBorder: 'rgba(160, 160, 160, 0.3)',
@@ -105,7 +124,7 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                 };
             default:
                 return {
-                    headerBg: 'rgba(15, 12, 41, 0.95)',
+                    headerBg: 'rgba(15, 12, 41, 1)',
                     headerBorder: 'rgba(255, 176, 255, 0.2)',
                     inputBg: 'rgba(15, 12, 41, 0.95)',
                     inputBorder: 'rgba(74, 20, 140, 0.5)',
@@ -258,6 +277,7 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
     };
 
     const handleAvatarClick = () => {
+        console.log('Avatar clicked!'); // Для отладки
         setIsProfileOpen(true);
     };
 
@@ -281,6 +301,7 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
         if (onToggleFavorite) {
             onToggleFavorite();
         }
+        closeProfile();
     };
 
     const handleContextMenu = (e, message) => {
@@ -411,8 +432,8 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
             >
                 <div className={cl.userInfo}>
                     <button className={cl.avatarButton} onClick={handleAvatarClick}>
-                        <div className={cl.avatar} style={{ backgroundColor: activeChat.avatarColor }}>
-                            {activeChat.avatarText}
+                        <div className={cl.avatar} style={{ backgroundColor: avatarColor }}>
+                            {avatarText}
                         </div>
                     </button>
                     <div className={cl.userDetails}>
@@ -661,13 +682,13 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
             {isProfileOpen && (
                 <UserProfileModal
                     user={{
-                        name: activeChat.name,
-                        avatarText: activeChat.avatarText,
-                        avatarColor: activeChat.avatarColor,
-                        status: activeChat.status,
+                        name: activeChat.secondUser.username,
+                        avatarText: avatarText,
+                        avatarColor: avatarColor,
+                        status: activeChat.secondUser.onlineStatus,
                         isFavorite: activeChat.isFavorite,
-                        tag: '#0000',
-                        quote: 'Статус пользователя',
+                        tag: "#0000",
+                        quote: "Статус пользователя"
                     }}
                     onClose={closeProfile}
                     onStartChat={handleStartChat}
