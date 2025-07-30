@@ -1,3 +1,5 @@
+/* GroupNavigation.module.css */
+
 .navPanel {
     width: 100px;
     height: 100vh;
@@ -20,10 +22,17 @@
     cursor: pointer;
     margin-bottom: 10px;
     transition: transform 0.3s ease, color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
 }
 
 .homeButton:hover {
-    transform: scale(1.2);
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .separator {
@@ -31,17 +40,23 @@
     height: 2px;
     margin-bottom: 15px;
     transition: background 0.3s ease;
+    opacity: 0.3;
 }
 
 .groupList {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    align-items: center;
+    width: 100%;
+    padding: 0 10px;
 }
 
 .groupItem {
     position: relative;
     cursor: pointer;
+    display: flex;
+    justify-content: center;
 }
 
 .avatarWrapper {
@@ -51,6 +66,9 @@
     border-radius: 10px;
     transition: all 0.3s ease;
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .avatar {
@@ -62,10 +80,12 @@
 
 .avatarWrapper:hover {
     transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
 .avatarWrapper.selected {
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7) !important;
+    box-shadow: 0 0 15px currentColor !important;
+    transform: scale(1.05);
 }
 
 .tooltip {
@@ -85,8 +105,6 @@
     opacity: 0;
     transition: opacity 0.2s ease, transform 0.2s ease;
     transform-origin: top center;
-    isolation: isolate;
-    will-change: transform, opacity;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
@@ -96,32 +114,21 @@
     animation: tooltipFadeIn 0.2s ease-out forwards;
 }
 
-@keyframes tooltipFadeIn {
-    from {
-        opacity: 0;
-        transform: translateX(-50%) scale(0.9);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(-50%) scale(1);
-    }
-}
-
 .addGroupButton {
     position: relative;
     cursor: pointer;
     margin-top: 10px;
+    display: flex;
+    justify-content: center;
 }
 
 .addGroupButton .avatarWrapper {
-    display: flex;
-    align-items: center;
-    justify-content: center;
     transition: all 0.3s ease;
 }
 
 .addGroupButton:hover .avatarWrapper {
     transform: scale(1.1);
+    box-shadow: 0 0 10px currentColor;
 }
 
 .plusIcon {
@@ -137,6 +144,7 @@
     transform: scale(1.2);
 }
 
+/* Modal Styles */
 .modalOverlay {
     position: fixed;
     top: 0;
@@ -152,37 +160,22 @@
     animation: fadeIn 0.3s ease-out;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
 .modal {
-    border-radius: 20px;
+    border-radius: 16px;
     width: 480px;
     max-width: 95%;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    overflow: hidden;
+    max-height: 90vh;
+    overflow-y: auto;
     position: relative;
     animation: modalSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     transition: all 0.3s ease;
-}
-
-@keyframes modalSlideIn {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 .closeButton {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 12px;
+    right: 12px;
     border: none;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -196,66 +189,72 @@
 }
 
 .closeButton:hover {
-    transform: rotate(90deg);
+    transform: rotate(90deg) scale(1.1);
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .modalHeader {
-    padding: 24px 24px 0;
+    padding: 24px 24px 16px;
+    position: sticky;
+    top: 0;
+    background: inherit;
+    z-index: 1;
+    border-bottom: 1px solid transparent;
 }
 
 .modalTitle {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 600;
     margin: 0 0 8px 0;
     text-align: center;
-    transition: color 0.3s ease;
 }
 
 .modalDescription {
     font-size: 14px;
     line-height: 1.5;
-    margin: 0 0 16px 0;
+    margin: 0 0 20px 0;
     text-align: center;
-    transition: color 0.3s ease;
+    opacity: 0.8;
 }
 
 .tabs {
     display: flex;
-    gap: 8px;
+    gap: 4px;
     border-radius: 12px;
     padding: 4px;
-    transition: background 0.3s ease;
+    margin-bottom: 16px;
 }
 
 .tabButton {
     flex: 1;
-    padding: 12px;
+    padding: 10px 12px;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 500;
     text-align: center;
 }
 
-.tabButton:hover {
-    background: rgba(255, 255, 255, 0.1);
+.tabButton.active {
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-.tabButton.active {
-    color: #ffffff;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+.tabButton:not(.active):hover {
+    opacity: 0.9;
 }
 
 .modalContent {
-    padding: 24px;
+    padding: 0 24px 24px;
 }
 
-.createForm, .joinForm {
+.createForm,
+.joinForm {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 16px;
 }
 
 .formGroup {
@@ -267,23 +266,25 @@
 .formGroup label {
     font-size: 14px;
     font-weight: 500;
-    transition: color 0.3s ease;
+    opacity: 0.9;
 }
 
 .formGroup input,
 .formGroup textarea,
 .formGroup select {
-    padding: 14px 16px;
-    border-radius: 12px;
+    padding: 12px 14px;
+    border-radius: 10px;
     font-size: 15px;
+    border: 1px solid;
     transition: all 0.3s ease;
+    width: 100%;
 }
 
 .formGroup input:focus,
 .formGroup textarea:focus,
 .formGroup select:focus {
     outline: none;
-    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 0 2px currentColor;
 }
 
 .formGroup textarea {
@@ -291,6 +292,24 @@
     resize: vertical;
 }
 
+.selectWrapper {
+    position: relative;
+}
+
+.selectWrapper select {
+    appearance: none;
+    padding-right: 32px;
+}
+
+.selectArrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+/* Avatar Upload */
 .avatarUpload {
     display: flex;
     justify-content: center;
@@ -305,11 +324,10 @@
 
 .avatarPreviewContainer {
     position: relative;
-    width: 120px;
-    height: 120px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
     overflow: hidden;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
     transition: all 0.3s ease;
 }
 
@@ -330,6 +348,7 @@
     justify-content: center;
     opacity: 0;
     transition: all 0.3s ease;
+    background: rgba(0, 0, 0, 0.5);
 }
 
 .avatarPreviewContainer:hover .avatarOverlay {
@@ -337,8 +356,8 @@
 }
 
 .uploadPlaceholder {
-    width: 120px;
-    height: 120px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
     display: flex;
     flex-direction: column;
@@ -346,15 +365,14 @@
     justify-content: center;
     transition: all 0.3s ease;
     text-align: center;
-    padding-right: 5px;
+    border: 2px dashed currentColor;
 }
 
-.uploadPlaceholder:hover {
-    color: inherit;
+.uploadPlaceholder svg {
+    margin-bottom: 8px;
 }
 
-.uploadPlaceholder span {
-    margin-top: 8px;
+.uploadText {
     font-size: 12px;
     max-width: 90px;
     line-height: 1.2;
@@ -364,61 +382,98 @@
     display: none;
 }
 
-.agreement {
+/* Checkbox */
+.checkboxContainer {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin: 10px 0;
-}
-
-.agreement input {
-    width: 18px;
-    height: 18px;
-}
-
-.agreement label {
+    position: relative;
+    padding-left: 28px;
+    cursor: pointer;
     font-size: 14px;
-    line-height: 1.5;
-    transition: color 0.3s ease;
+    user-select: none;
+    line-height: 1.4;
 }
 
-.agreement a {
-    text-decoration: none;
+.checkboxContainer input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkmark {
+    position: absolute;
+    top: 2px;
+    left: 0;
+    height: 18px;
+    width: 18px;
+    border-radius: 4px;
     transition: all 0.2s ease;
+    border: 1px solid;
 }
 
-.agreement a:hover {
-    text-decoration: underline;
+.checkboxContainer:hover input ~ .checkmark {
+    opacity: 0.8;
 }
 
+.checkboxContainer input:checked ~ .checkmark {
+    background-color: currentColor;
+}
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.checkboxContainer input:checked ~ .checkmark:after {
+    display: block;
+}
+
+.checkboxContainer .checkmark:after {
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Buttons */
 .submitButton {
-    padding: 14px;
+    padding: 12px;
     border: none;
-    border-radius: 12px;
-    font-size: 16px;
+    border-radius: 10px;
+    font-size: 15px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
     margin-top: 10px;
-    color: #0a0a1a;
+    width: 100%;
 }
 
 .submitButton:hover {
     transform: translateY(-2px);
+    opacity: 0.9;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
+/* Example Box */
 .example {
     margin-top: 10px;
     padding: 12px;
     border-radius: 8px;
     font-size: 14px;
     line-height: 1.5;
-    transition: all 0.3s ease;
+    border: 1px solid;
+    opacity: 0.8;
 }
 
 .example p {
     margin: 0 0 6px 0;
-    transition: color 0.3s ease;
+    font-weight: 500;
 }
 
 .example code {
@@ -427,30 +482,97 @@
     border-radius: 6px;
     font-family: 'Courier New', monospace;
     overflow-x: auto;
-    transition: all 0.3s ease;
+    background: rgba(0, 0, 0, 0.1);
 }
 
+/* Links */
 .termsLink {
     text-decoration: none;
     transition: all 0.2s ease;
+    font-weight: 500;
 }
 
 .termsLink:hover {
     text-decoration: underline;
 }
 
-/* Анимации для плавного перехода между темами */
-.navPanel,
-.modal,
-.modalTitle,
-.modalDescription,
-.formGroup label,
-.formGroup input,
-.formGroup textarea,
-.formGroup select,
-.agreement label,
-.example,
-.example p,
-.example code {
-    transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease;
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes tooltipFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+    }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .modal {
+        width: 90%;
+        max-height: 85vh;
+    }
+
+    .modalHeader {
+        padding: 20px 16px 12px;
+    }
+
+    .modalContent {
+        padding: 0 16px 20px;
+    }
+
+    .avatarPreviewContainer,
+    .uploadPlaceholder {
+        width: 80px;
+        height: 80px;
+    }
+
+    .modalTitle {
+        font-size: 20px;
+    }
+
+    .modalDescription {
+        font-size: 13px;
+    }
+}
+
+/* Scrollbar */
+.modal::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 0 16px 16px 0;
+}
+
+.modal::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.modal::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
 }

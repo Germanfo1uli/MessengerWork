@@ -10,7 +10,6 @@ const GroupNavigation = () => {
     const [formData, setFormData] = useState({
         name: '',
         description: '',
-        theme: 'exploration',
         agreement: false,
         inviteLink: ''
     });
@@ -30,85 +29,115 @@ const GroupNavigation = () => {
                 return {
                     navBg: 'rgba(15, 12, 41, 0.95)',
                     navBorder: 'rgba(255, 176, 255, 0.2)',
-                    modalBg: 'rgba(15, 12, 41, 0.95)',
-                    modalBorder: 'rgba(255, 176, 255, 0.2)',
+                    modalBg: 'rgba(15, 12, 41, 0.98)',
+                    modalBorder: 'rgba(255, 176, 255, 0.3)',
                     textColor: '#e0e0ff',
                     secondaryText: '#b0b0ff',
                     accentColor: '#8a2be2',
                     buttonHover: '#ff6f91',
                     tooltipBg: 'rgba(15, 12, 41, 0.9)',
+                    tooltipText: '#ffffff',
                     inputBg: 'rgba(255, 255, 255, 0.08)',
-                    inputBorder: 'rgba(74, 20, 140, 0.5)'
+                    inputBorder: 'rgba(74, 20, 140, 0.5)',
+                    inputFocus: 'rgba(138, 43, 226, 0.4)',
+                    tabInactive: 'rgba(255, 255, 255, 0.1)',
+                    checkboxBg: 'rgba(138, 43, 226, 0.2)',
+                    modalShadow: '0 10px 30px rgba(0, 0, 0, 0.5)'
                 };
             case 'sunset':
                 return {
                     navBg: 'rgba(254, 180, 123, 0.95)',
                     navBorder: 'rgba(255, 126, 95, 0.3)',
-                    modalBg: 'rgba(254, 180, 123, 0.95)',
-                    modalBorder: 'rgba(255, 126, 95, 0.2)',
+                    modalBg: 'rgba(254, 180, 123, 0.98)',
+                    modalBorder: 'rgba(255, 126, 95, 0.3)',
                     textColor: '#5a2c0a',
                     secondaryText: '#7a4c2a',
                     accentColor: '#ff7e5f',
                     buttonHover: '#feb47b',
                     tooltipBg: 'rgba(254, 180, 123, 0.9)',
+                    tooltipText: '#5a2c0a',
                     inputBg: 'rgba(255, 255, 255, 0.15)',
-                    inputBorder: 'rgba(255, 126, 95, 0.5)'
+                    inputBorder: 'rgba(255, 126, 95, 0.5)',
+                    inputFocus: 'rgba(255, 126, 95, 0.4)',
+                    tabInactive: 'rgba(255, 255, 255, 0.15)',
+                    checkboxBg: 'rgba(255, 126, 95, 0.2)',
+                    modalShadow: '0 10px 30px rgba(0, 0, 0, 0.3)'
                 };
             case 'ocean':
                 return {
                     navBg: 'rgba(0, 93, 234, 0.95)',
                     navBorder: 'rgba(0, 198, 251, 0.3)',
-                    modalBg: 'rgba(0, 93, 234, 0.95)',
-                    modalBorder: 'rgba(0, 198, 251, 0.2)',
+                    modalBg: 'rgba(0, 93, 234, 0.98)',
+                    modalBorder: 'rgba(0, 198, 251, 0.3)',
                     textColor: '#e0f7ff',
                     secondaryText: '#b0e7ff',
                     accentColor: '#00c6fb',
                     buttonHover: '#005bea',
                     tooltipBg: 'rgba(0, 93, 234, 0.9)',
+                    tooltipText: '#ffffff',
                     inputBg: 'rgba(255, 255, 255, 0.15)',
-                    inputBorder: 'rgba(0, 198, 251, 0.5)'
+                    inputBorder: 'rgba(0, 198, 251, 0.5)',
+                    inputFocus: 'rgba(0, 198, 251, 0.4)',
+                    tabInactive: 'rgba(255, 255, 255, 0.15)',
+                    checkboxBg: 'rgba(0, 198, 251, 0.2)',
+                    modalShadow: '0 10px 30px rgba(0, 0, 0, 0.5)'
                 };
             case 'forest':
                 return {
                     navBg: 'rgba(17, 153, 142, 0.95)',
                     navBorder: 'rgba(56, 239, 125, 0.3)',
-                    modalBg: 'rgba(17, 153, 142, 0.95)',
-                    modalBorder: 'rgba(56, 239, 125, 0.2)',
+                    modalBg: 'rgba(17, 153, 142, 0.98)',
+                    modalBorder: 'rgba(56, 239, 125, 0.3)',
                     textColor: '#e0fff5',
                     secondaryText: '#b0ffea',
                     accentColor: '#11998e',
                     buttonHover: '#38ef7d',
                     tooltipBg: 'rgba(17, 153, 142, 0.9)',
+                    tooltipText: '#ffffff',
                     inputBg: 'rgba(255, 255, 255, 0.15)',
-                    inputBorder: 'rgba(56, 239, 125, 0.5)'
+                    inputBorder: 'rgba(56, 239, 125, 0.5)',
+                    inputFocus: 'rgba(56, 239, 125, 0.4)',
+                    tabInactive: 'rgba(255, 255, 255, 0.15)',
+                    checkboxBg: 'rgba(56, 239, 125, 0.2)',
+                    modalShadow: '0 10px 30px rgba(0, 0, 0, 0.4)'
                 };
             case 'light':
                 return {
                     navBg: 'rgba(240, 240, 240, 0.95)',
                     navBorder: 'rgba(160, 160, 160, 0.2)',
-                    modalBg: 'rgba(240, 240, 240, 0.95)',
-                    modalBorder: 'rgba(160, 160, 160, 0.2)',
+                    modalBg: 'rgba(240, 240, 240, 0.98)',
+                    modalBorder: 'rgba(160, 160, 160, 0.3)',
                     textColor: '#333333',
                     secondaryText: '#666666',
                     accentColor: '#4b83f8',
                     buttonHover: '#6ba3ff',
                     tooltipBg: 'rgba(240, 240, 240, 0.9)',
-                    inputBg: 'rgba(255, 255, 255, 0.05)',
-                    inputBorder: 'rgba(160, 160, 160, 0.3)'
+                    tooltipText: '#333333',
+                    inputBg: 'rgba(255, 255, 255, 0.8)',
+                    inputBorder: 'rgba(160, 160, 160, 0.3)',
+                    inputFocus: 'rgba(75, 131, 248, 0.4)',
+                    tabInactive: 'rgba(255, 255, 255, 0.8)',
+                    checkboxBg: 'rgba(75, 131, 248, 0.2)',
+                    modalShadow: '0 10px 30px rgba(0, 0, 0, 0.1)'
                 };
             default:
                 return {
                     navBg: 'rgba(15, 12, 41, 0.95)',
                     navBorder: 'rgba(255, 176, 255, 0.2)',
-                    modalBg: 'rgba(15, 12, 41, 0.95)',
-                    modalBorder: 'rgba(255, 176, 255, 0.2)',
+                    modalBg: 'rgba(15, 12, 41, 0.98)',
+                    modalBorder: 'rgba(255, 176, 255, 0.3)',
                     textColor: '#e0e0ff',
                     secondaryText: '#b0b0ff',
                     accentColor: '#8a2be2',
                     buttonHover: '#ff6f91',
                     tooltipBg: 'rgba(15, 12, 41, 0.9)',
+                    tooltipText: '#ffffff',
                     inputBg: 'rgba(255, 255, 255, 0.08)',
-                    inputBorder: 'rgba(74, 20, 140, 0.5)'
+                    inputBorder: 'rgba(74, 20, 140, 0.5)',
+                    inputFocus: 'rgba(138, 43, 226, 0.4)',
+                    tabInactive: 'rgba(255, 255, 255, 0.1)',
+                    checkboxBg: 'rgba(138, 43, 226, 0.2)',
+                    modalShadow: '0 10px 30px rgba(0, 0, 0, 0.5)'
                 };
         }
     };
@@ -129,7 +158,6 @@ const GroupNavigation = () => {
         setFormData({
             name: '',
             description: '',
-            theme: 'exploration',
             agreement: false,
             inviteLink: ''
         });
@@ -206,7 +234,7 @@ const GroupNavigation = () => {
                                     className={styles.tooltip}
                                     style={{
                                         background: themeStyles.tooltipBg,
-                                        color: themeStyles.textColor,
+                                        color: themeStyles.tooltipText,
                                         border: `1px solid ${themeStyles.navBorder}`
                                     }}
                                 >
@@ -240,7 +268,7 @@ const GroupNavigation = () => {
                                 className={styles.tooltip}
                                 style={{
                                     background: themeStyles.tooltipBg,
-                                    color: themeStyles.textColor,
+                                    color: themeStyles.tooltipText,
                                     border: `1px solid ${themeStyles.navBorder}`
                                 }}
                             >
@@ -258,7 +286,8 @@ const GroupNavigation = () => {
                         onClick={e => e.stopPropagation()}
                         style={{
                             background: themeStyles.modalBg,
-                            border: `1px solid ${themeStyles.modalBorder}`
+                            border: `1px solid ${themeStyles.modalBorder}`,
+                            boxShadow: themeStyles.modalShadow
                         }}
                     >
                         <button
@@ -275,31 +304,21 @@ const GroupNavigation = () => {
                         </button>
 
                         <div className={styles.modalHeader}>
-                            <h2
-                                className={styles.modalTitle}
-                                style={{ color: themeStyles.textColor }}
-                            >
+                            <h2 className={styles.modalTitle} style={{ color: themeStyles.textColor }}>
                                 {activeTab === 'create' ? 'Создайте свой сервер' : 'Присоединитесь к серверу'}
                             </h2>
-                            <p
-                                className={styles.modalDescription}
-                                style={{ color: themeStyles.secondaryText }}
-                            >
+                            <p className={styles.modalDescription} style={{ color: themeStyles.secondaryText }}>
                                 {activeTab === 'create'
                                     ? 'Объединяйтесь с единомышленниками для обсуждения космоса и технологий!'
                                     : 'Найдите сообщество по интересам и станьте его частью!'}
                             </p>
-                            <div
-                                className={styles.tabs}
-                                style={{ background: themeStyles.inputBg }}
-                            >
+                            <div className={styles.tabs} style={{ background: themeStyles.tabInactive }}>
                                 <button
                                     className={`${styles.tabButton} ${activeTab === 'create' ? styles.active : ''}`}
                                     onClick={() => setActiveTab('create')}
                                     style={{
-                                        color: activeTab === 'create' ? '#fff' : themeStyles.secondaryText,
-                                        background: activeTab === 'create' ?
-                                            `linear-gradient(135deg, ${themeStyles.accentColor}, ${themeStyles.buttonHover})` : 'transparent'
+                                        color: activeTab === 'create' ? themeStyles.textColor : themeStyles.secondaryText,
+                                        background: activeTab === 'create' ? themeStyles.accentColor : 'transparent'
                                     }}
                                 >
                                     Создать группу
@@ -308,9 +327,8 @@ const GroupNavigation = () => {
                                     className={`${styles.tabButton} ${activeTab === 'join' ? styles.active : ''}`}
                                     onClick={() => setActiveTab('join')}
                                     style={{
-                                        color: activeTab === 'join' ? '#fff' : themeStyles.secondaryText,
-                                        background: activeTab === 'join' ?
-                                            `linear-gradient(135deg, ${themeStyles.accentColor}, ${themeStyles.buttonHover})` : 'transparent'
+                                        color: activeTab === 'join' ? themeStyles.textColor : themeStyles.secondaryText,
+                                        background: activeTab === 'join' ? themeStyles.accentColor : 'transparent'
                                     }}
                                 >
                                     Вступить в группу
@@ -397,39 +415,23 @@ const GroupNavigation = () => {
                                         />
                                     </div>
 
-                                    <div className={styles.formGroup}>
-                                        <label htmlFor="theme" style={{ color: themeStyles.secondaryText }}>Тематика группы</label>
-                                        <select
-                                            id="theme"
-                                            name="theme"
-                                            value={formData.theme}
-                                            onChange={handleInputChange}
-                                            style={{
-                                                background: themeStyles.inputBg,
-                                                border: `1px solid ${themeStyles.inputBorder}`,
-                                                color: themeStyles.textColor,
-                                                backgroundImage: `url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22${encodeURIComponent(themeStyles.secondaryText)}%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%2F%3E%3C%2Fsvg%3E')`
-                                            }}
-                                        >
-                                            <option value="exploration">Космические исследования</option>
-                                            <option value="science">Астрономия</option>
-                                            <option value="fiction">Научная фантастика</option>
-                                            <option value="technology">Космические технологии</option>
-                                            <option value="community">Космическое сообщество</option>
-                                        </select>
-                                    </div>
-
                                     <div className={styles.agreement}>
-                                        <input
-                                            type="checkbox"
-                                            id="agreement"
-                                            name="agreement"
-                                            checked={formData.agreement}
-                                            onChange={handleInputChange}
-                                            required
-                                            style={{ accentColor: themeStyles.accentColor }}
-                                        />
-                                        <label htmlFor="agreement" style={{ color: themeStyles.secondaryText }}>
+                                        <label className={styles.checkboxContainer} style={{ color: themeStyles.secondaryText }}>
+                                            <input
+                                                type="checkbox"
+                                                id="agreement"
+                                                name="agreement"
+                                                checked={formData.agreement}
+                                                onChange={handleInputChange}
+                                                required
+                                            />
+                                            <span
+                                                className={styles.checkmark}
+                                                style={{
+                                                    background: formData.agreement ? themeStyles.accentColor : themeStyles.checkboxBg,
+                                                    border: `1px solid ${themeStyles.inputBorder}`
+                                                }}
+                                            ></span>
                                             Я согласен с <a href="#" className={styles.termsLink} style={{ color: themeStyles.accentColor }}>Условиями группы</a> и <a href="#" className={styles.termsLink} style={{ color: themeStyles.accentColor }}>Правилами сообщества</a>
                                         </label>
                                     </div>
@@ -438,7 +440,8 @@ const GroupNavigation = () => {
                                         type="submit"
                                         className={styles.submitButton}
                                         style={{
-                                            background: `linear-gradient(135deg, ${themeStyles.accentColor}, ${themeStyles.buttonHover})`,
+                                            background: themeStyles.accentColor,
+                                            color: theme === 'sunset' ? '#5a2c0a' : (theme === 'light' ? '#ffffff' : '#0a0a1a'),
                                             boxShadow: `0 4px 15px ${themeStyles.accentColor}33`
                                         }}
                                     >
@@ -469,7 +472,8 @@ const GroupNavigation = () => {
                                         className={styles.example}
                                         style={{
                                             background: themeStyles.inputBg,
-                                            color: themeStyles.secondaryText
+                                            color: themeStyles.secondaryText,
+                                            border: `1px solid ${themeStyles.inputBorder}`
                                         }}
                                     >
                                         <p style={{ color: themeStyles.textColor }}>Пример корректной ссылки:</p>
@@ -482,7 +486,8 @@ const GroupNavigation = () => {
                                         type="submit"
                                         className={styles.submitButton}
                                         style={{
-                                            background: `linear-gradient(135deg, ${themeStyles.accentColor}, ${themeStyles.buttonHover})`,
+                                            background: themeStyles.accentColor,
+                                            color: theme === 'sunset' ? '#5a2c0a' : (theme === 'light' ? '#ffffff' : '#0a0a1a'),
                                             boxShadow: `0 4px 15px ${themeStyles.accentColor}33`
                                         }}
                                     >
