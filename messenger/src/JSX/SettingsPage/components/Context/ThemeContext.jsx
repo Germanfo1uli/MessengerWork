@@ -1,10 +1,10 @@
-// src/contexts/ThemeContext.js
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-    const [themeSettings, setThemeSettings] = useState({
+    // Начальные настройки темы
+    const defaultThemeSettings = {
         theme: 'dark',
         backgroundType: 'solid',
         customBackground: null,
@@ -23,6 +23,12 @@ export const ThemeProvider = ({ children }) => {
         windowFontFamily: 'default',
         messageCornerRadius: 12,
         messageShadow: true,
+    };
+
+    // Загружаем настройки из localStorage или используем значения по умолчанию
+    const [themeSettings, setThemeSettings] = useState(() => {
+        const savedSettings = localStorage.getItem('themeSettings');
+        return savedSettings ? JSON.parse(savedSettings) : defaultThemeSettings;
     });
 
     const fontFamilies = [
@@ -31,6 +37,11 @@ export const ThemeProvider = ({ children }) => {
         { id: 'serif', name: 'С засечками', value: 'Georgia, serif' },
         { id: 'mono', name: 'Моноширинный', value: 'Menlo, Consolas, monospace' },
     ];
+
+    // Сохраняем настройки в localStorage при их изменении
+    useEffect(() => {
+        localStorage.setItem('themeSettings', JSON.stringify(themeSettings));
+    }, [themeSettings]);
 
     const updateThemeSettings = (newSettings) => {
         setThemeSettings((prev) => ({ ...prev, ...newSettings }));
