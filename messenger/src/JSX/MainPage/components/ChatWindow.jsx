@@ -98,12 +98,13 @@ const ChatWindow = ({ connection, activeChat, setActiveChat, onToggleFavorite, i
             }
         };
 
-        if (isLoading || !userId || !isAuthenticated) {
-            if (!isAuthenticated) {
-                logout();
-                navigate('/');
-            }
+        if (isLoading) {
             return;
+        }
+
+        if (!isAuthenticated) {
+            logout();
+            navigate('/');
         }
 
         fetchData();

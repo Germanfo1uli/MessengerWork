@@ -99,7 +99,6 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                             return baseItem;
                         })
                         : [];
-                    console.log('Search results:', enhancedResults);
                     setSearchResults(enhancedResults);
                 } catch (error) {
                     console.error('Search error:', error);
@@ -138,8 +137,7 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                         joined: false
                     }))
                     : [];
-                
-                    console.log(profileResponse)
+
                 setUser({
                     username: profileResponse.user.username || username,
                     status: getStatusString(profileResponse.user.onlineStatus),
@@ -151,13 +149,14 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
             }
         };
 
-        if (isLoading || !userId) {
+        if (isLoading) {
             return;
         }
 
-        if (!isAuthenticated) {
+        if (!isAuthenticated || !userId) {
             logout();
             navigate('/');
+            return;
         }
 
         fetchData();
@@ -348,7 +347,6 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
             }
         };
 
-        console.log('Selected chat:', targetChat);
         onChatSelect(targetChat);
     };
 
@@ -415,8 +413,6 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
             return new Date(dateB || 0) - new Date(dateA || 0);
         });
     }, [data, searchResults, activeTab, searchQuery]);
-
-    console.log(user)
 
     return (
         <div className={cl.container}>
