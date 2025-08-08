@@ -227,11 +227,11 @@ namespace CosmoBack.CosmoDBContext
                 .HasIndex(r => r.ReplyMessageId);
 
             modelBuilder.Entity<Reaction>()
-                .HasKey(r => new { r.MessageId, r.UserId });
-
+                .HasKey(r => r.Id); 
+            modelBuilder.Entity<Reaction>()
+                .HasIndex(r => new { r.MessageId, r.UserId }); 
             modelBuilder.Entity<Reaction>()
                 .HasIndex(r => r.MessageId);
-
             modelBuilder.Entity<Reaction>()
                 .HasIndex(r => r.UserId);
         }

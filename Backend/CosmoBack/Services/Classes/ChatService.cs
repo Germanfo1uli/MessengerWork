@@ -4,42 +4,31 @@ using CosmoBack.Models;
 using CosmoBack.Models.Dtos;
 using CosmoBack.Repositories.Interfaces;
 using CosmoBack.Services.Interfaces;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace CosmoBack.Services.Classes
 {
-    public class ChatService : IChatService
+    public class ChatService(
+        IChatRepository chatRepository,
+        IMessageRepository messageRepository,
+        IUserRepository userRepository,
+        IChatMembersRepository chatMembersRepository,
+        INotificationService notificationService,
+        IReactionRepository reactionRepository,
+        CosmoDbContext context,
+        ILogger<ChatService> logger,
+        IHttpContextAccessor httpContextAccessor) : IChatService
     {
-        private readonly IChatRepository _chatRepository;
-        private readonly IMessageRepository _messageRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly IChatMembersRepository _chatMembersRepository;
-        private readonly INotificationService _notificationService;
-        private readonly CosmoDbContext _context;
-        private readonly ILogger<ChatService> _logger;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-
-        public ChatService(
-            IChatRepository chatRepository,
-            IMessageRepository messageRepository,
-            IUserRepository userRepository,
-            IChatMembersRepository chatMembersRepository,
-            INotificationService notificationService,
-            CosmoDbContext context,
-            ILogger<ChatService> logger,
-            IHttpContextAccessor httpContextAccessor)
-        {
-            _chatRepository = chatRepository;
-            _messageRepository = messageRepository;
-            _userRepository = userRepository;
-            _chatMembersRepository = chatMembersRepository;
-            _notificationService = notificationService;
-            _context = context;
-            _logger = logger;
-            _httpContextAccessor = httpContextAccessor;
-        }
+        private readonly IChatRepository _chatRepository = chatRepository;
+        private readonly IMessageRepository _messageRepository = messageRepository;
+        private readonly IUserRepository _userRepository = userRepository;
+        private readonly IChatMembersRepository _chatMembersRepository = chatMembersRepository;
+        private readonly INotificationService _notificationService = notificationService;
+        private readonly IReactionRepository _reactionRepository = reactionRepository;
+        private readonly CosmoDbContext _context = context;
+        private readonly ILogger<ChatService> _logger = logger;
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
         public async Task<ChatDto> GetChatByIdAsync(Guid id)
         {
@@ -49,7 +38,6 @@ namespace CosmoBack.Services.Classes
                 var currentUserId = Guid.Parse(_httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
                     ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
 
-                // Получаем чаты с деталями для текущего пользователя
                 var chats = await _chatRepository.GetChatsWithDetailsAsync(currentUserId);
                 var chatData = chats.FirstOrDefault(c => (c.GetType().GetProperty("Chat").GetValue(c) as Chat)?.Id == id);
 
@@ -64,6 +52,12 @@ namespace CosmoBack.Services.Classes
                 var lastMessageData = chatData.GetType().GetProperty("LastMessageData").GetValue(chatData);
                 var secondUser = chatData.GetType().GetProperty("SecondUser").GetValue(chatData);
 
+                var lastMessageId = lastMessageData != null
+                    ? (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message)?.Id : (Guid?)null;
+
+                var aggregatedReactions = lastMessageId.HasValue
+                    ? await _reactionRepository.GetAggregatedByMessageIdAsync(lastMessageId.Value) : new List<(string Emoji, int Count, List<Reaction> Reactions)>();
+
                 var chatDto = new ChatDto
                 {
                     Id = chat.Id,
@@ -73,8 +67,7 @@ namespace CosmoBack.Services.Classes
                     SecondUserId = chat.SecondUserId,
                     CreatedAt = chat.CreatedAt,
                     LastMessageAt = lastMessageData != null
-                        ? (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message)?.CreatedAt
-                        : null,
+                        ? (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message)?.CreatedAt : null,
                     LastMessage = lastMessageData != null ? new ChatMessageDto
                     {
                         Id = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).Id,
@@ -83,7 +76,20 @@ namespace CosmoBack.Services.Classes
                         Comment = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).Comment,
                         CreatedAt = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).CreatedAt,
                         Username = lastMessageData.GetType().GetProperty("Username").GetValue(lastMessageData)?.ToString() ?? string.Empty,
-                        AvatarImageId = lastMessageData.GetType().GetProperty("AvatarImageId").GetValue(lastMessageData) as Guid?
+                        AvatarImageId = lastMessageData.GetType().GetProperty("AvatarImageId").GetValue(lastMessageData) as Guid?,
+                        Reactions = aggregatedReactions.Select(r => new AggregatedReactionDto
+                        {
+                            Emoji = r.Emoji,
+                            Count = r.Count,
+                            UserReactions = r.Reactions.Select(re => new ReactionDto
+                            {
+                                Id = re.Id,
+                                UserId = re.UserId,
+                                Username = re.User.Username,
+                                Emoji = re.Emoji,
+                                CreatedAt = re.CreatedAt
+                            }).ToList()
+                        }).ToList()
                     } : null,
                     SecondUser = secondUser != null ? new SecondUserDto
                     {
@@ -93,7 +99,6 @@ namespace CosmoBack.Services.Classes
                     } : null
                 };
 
-                _logger.LogInformation("Retrieved chat with ID {ChatId} for user {UserId}", id, currentUserId);
                 return chatDto;
             }
             catch (Exception ex)
@@ -103,7 +108,7 @@ namespace CosmoBack.Services.Classes
             }
         }
 
-        public async Task<IEnumerable<ChatDto>> GetUserChatsAsync(Guid userId)
+        public async Task<IEnumerable<(ChatDto, ImageDto?)>> GetUserChatsAsync(Guid userId)
         {
             _logger.LogInformation("Getting chats for user {UserId}", userId);
             try
@@ -112,20 +117,29 @@ namespace CosmoBack.Services.Classes
                     ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
                 if (userId != currentUserId)
                 {
-                    _logger.LogWarning("User {UserId} is not authorized to access chats for user {RequestedUserId}", currentUserId, userId);
+                    _logger.LogWarning("User {CurrentUserId} is not authorized to access chats for user {UserId}", currentUserId, userId);
                     throw new UnauthorizedAccessException("Недостаточно прав для получения чатов другого пользователя");
                 }
 
                 var chats = await _chatRepository.GetChatsWithDetailsAsync(userId);
-                var chatDtos = new List<ChatDto>();
+                var result = new List<(ChatDto, ImageDto?)>();
 
-                foreach (var c in chats)
+                foreach (var chatData in chats)
                 {
-                    var chat = c.GetType().GetProperty("Chat").GetValue(c) as Chat;
+                    var chat = chatData.GetType().GetProperty("Chat").GetValue(chatData) as Chat;
                     var chatMember = await _chatMembersRepository.GetByChatAndUserIdAsync(chat.Id, userId);
-                    var lastMessageData = c.GetType().GetProperty("LastMessageData").GetValue(c);
+                    var lastMessageData = chatData.GetType().GetProperty("LastMessageData").GetValue(chatData);
+                    var secondUser = chatData.GetType().GetProperty("SecondUser").GetValue(chatData);
 
-                    chatDtos.Add(new ChatDto
+                    var lastMessageId = lastMessageData != null
+                        ? (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message)?.Id
+                        : (Guid?)null;
+
+                    var aggregatedReactions = lastMessageId.HasValue
+                        ? await _reactionRepository.GetAggregatedByMessageIdAsync(lastMessageId.Value)
+                        : new List<(string Emoji, int Count, List<Reaction> Reactions)>();
+
+                    var chatDto = new ChatDto
                     {
                         Id = chat.Id,
                         PublicId = chat.PublicId,
@@ -144,24 +158,39 @@ namespace CosmoBack.Services.Classes
                             Comment = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).Comment,
                             CreatedAt = (lastMessageData.GetType().GetProperty("Message").GetValue(lastMessageData) as Message).CreatedAt,
                             Username = lastMessageData.GetType().GetProperty("Username").GetValue(lastMessageData)?.ToString() ?? string.Empty,
-                            AvatarImageId = lastMessageData.GetType().GetProperty("AvatarImageId").GetValue(lastMessageData) as Guid?
+                            AvatarImageId = lastMessageData.GetType().GetProperty("AvatarImageId").GetValue(lastMessageData) as Guid?,
+                            Reactions = aggregatedReactions.Select(r => new AggregatedReactionDto
+                            {
+                                Emoji = r.Emoji,
+                                Count = r.Count,
+                                UserReactions = r.Reactions.Select(re => new ReactionDto
+                                {
+                                    Id = re.Id,
+                                    UserId = re.UserId,
+                                    Username = re.User.Username,
+                                    Emoji = re.Emoji,
+                                    CreatedAt = re.CreatedAt
+                                }).ToList()
+                            }).ToList()
                         } : null,
-                        SecondUser = c.GetType().GetProperty("SecondUser").GetValue(c) != null ? new SecondUserDto
+                        SecondUser = secondUser != null ? new SecondUserDto
                         {
-                            Username = c.GetType().GetProperty("SecondUser").GetValue(c).GetType().GetProperty("Username").GetValue(c.GetType().GetProperty("SecondUser").GetValue(c)).ToString(),
-                            OnlineStatus = (OnlineStatus)c.GetType().GetProperty("SecondUser").GetValue(c).GetType().GetProperty("OnlineStatus").GetValue(c.GetType().GetProperty("SecondUser").GetValue(c)),
-                            ContactTag = c.GetType().GetProperty("SecondUser").GetValue(c)?.GetType().GetProperty("ContactTag").GetValue(c.GetType().GetProperty("SecondUser").GetValue(c))?.ToString()
+                            Username = secondUser.GetType().GetProperty("Username").GetValue(secondUser)?.ToString() ?? string.Empty,
+                            OnlineStatus = (OnlineStatus)secondUser.GetType().GetProperty("OnlineStatus").GetValue(secondUser),
+                            ContactTag = secondUser.GetType().GetProperty("ContactTag").GetValue(secondUser)?.ToString()
                         } : null
-                    });
+                    };
+
+                    var avatarImage = chatData.GetType().GetProperty("AvatarImage").GetValue(chatData) as ImageDto;
+                    result.Add((chatDto, avatarImage));
                 }
 
-                _logger.LogInformation("Retrieved {ChatCount} chats for user {UserId}", chatDtos.Count, userId);
-                return chatDtos;
+                return result;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving chats for user {UserId}", userId);
-                throw new Exception($"Ошибка при получении чатов пользователя: {ex.Message}", ex);
+                throw new Exception($"Ошибка при получении списка чатов: {ex.Message}", ex);
             }
         }
 

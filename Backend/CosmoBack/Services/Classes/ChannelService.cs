@@ -79,7 +79,23 @@ namespace CosmoBack.Services.Classes
                             Comment = m.Comment,
                             CreatedAt = m.CreatedAt,
                             Username = u.Username,
-                            AvatarImageId = u.AvatarImageId
+                            AvatarImageId = u.AvatarImageId,
+                            Reactions = _context.Reactions
+                                .Where(r => r.MessageId == m.Id)
+                                .GroupBy(r => r.Emoji)
+                                .Select(g => new AggregatedReactionDto
+                                {
+                                    Emoji = g.Key,
+                                    Count = g.Count(),
+                                    UserReactions = g.Select(r => new ReactionDto
+                                    {
+                                        Id = r.Id,
+                                        UserId = r.UserId,
+                                        Username = r.User.Username,
+                                        Emoji = r.Emoji,
+                                        CreatedAt = r.CreatedAt
+                                    }).ToList()
+                                }).ToList()
                         })
                     .OrderByDescending(m => m.CreatedAt)
                     .FirstOrDefaultAsync();
@@ -119,16 +135,19 @@ namespace CosmoBack.Services.Classes
                     ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
                 if (userId != currentUserId)
                 {
-                    _logger.LogWarning("User {CurrentUserId} is not authorized to access channels for user {RequestedUserId}", currentUserId, userId);
+                    _logger.LogWarning("User {CurrentUserId} is not authorized to access channels for user {UserId}", currentUserId, userId);
                     throw new UnauthorizedAccessException("Недостаточно прав для получения каналов другого пользователя");
                 }
 
                 var channels = await _channelRepository.GetChannelsByUserIdAsync(userId);
-                var channelDtos = new List<(ChannelDto, ImageDto?)>();
+                var result = new List<(ChannelDto, ImageDto?)>();
 
                 foreach (var channel in channels)
                 {
                     var channelMember = await _channelMembersRepository.GetByChannelAndUserIdAsync(channel.Id, userId);
+                    if (channelMember == null)
+                        continue;
+
                     var lastMessage = await _context.Messages
                         .Where(m => m.ChannelId == channel.Id)
                         .Join(_context.Users,
@@ -142,33 +161,28 @@ namespace CosmoBack.Services.Classes
                                 Comment = m.Comment,
                                 CreatedAt = m.CreatedAt,
                                 Username = u.Username,
-                                AvatarImageId = u.AvatarImageId
+                                AvatarImageId = u.AvatarImageId,
+                                Reactions = _context.Reactions
+                                    .Where(r => r.MessageId == m.Id)
+                                    .GroupBy(r => r.Emoji)
+                                    .Select(g => new AggregatedReactionDto
+                                    {
+                                        Emoji = g.Key,
+                                        Count = g.Count(),
+                                        UserReactions = g.Select(r => new ReactionDto
+                                        {
+                                            Id = r.Id,
+                                            UserId = r.UserId,
+                                            Username = r.User.Username,
+                                            Emoji = r.Emoji,
+                                            CreatedAt = r.CreatedAt
+                                        }).ToList()
+                                    }).ToList()
                             })
                         .OrderByDescending(m => m.CreatedAt)
                         .FirstOrDefaultAsync();
 
-                    ImageDto? avatarImage = null;
-                    if (channel.AvatarImageId.HasValue)
-                    {
-                        var image = await _context.Images.FirstOrDefaultAsync(i => i.Id == channel.AvatarImageId);
-                        if (image != null)
-                        {
-                            avatarImage = new ImageDto
-                            {
-                                Id = image.Id,
-                                FileName = image.FileName,
-                                MimeType = image.MimeType,
-                                FileSize = image.FileSize,
-                                Data = image.Data,
-                                EntityType = image.EntityType,
-                                EntityId = image.EntityId,
-                                UploadDate = image.UploadDate,
-                                Url = image.Url
-                            };
-                        }
-                    }
-
-                    channelDtos.Add((new ChannelDto
+                    var channelDto = new ChannelDto
                     {
                         Id = channel.Id,
                         PublicId = channel.PublicId,
@@ -178,22 +192,24 @@ namespace CosmoBack.Services.Classes
                         ChannelTag = channel.ChannelTag,
                         Description = channel.Description,
                         AvatarImageId = channel.AvatarImageId,
+                        AvatarImage = channel.AvatarImage,
                         CreatedAt = channel.CreatedAt,
                         IsActive = channel.IsActive,
                         MembersNumber = channel.MembersNumber,
-                        IsFavorite = channelMember?.IsFavorite ?? false,
+                        IsFavorite = channelMember.IsFavorite,
                         LastMessageAt = lastMessage?.CreatedAt,
                         LastMessage = lastMessage
-                    }, avatarImage));
+                    };
+
+                    result.Add((channelDto, channel.AvatarImage));
                 }
 
-                _logger.LogInformation("Retrieved {ChannelCount} channels for user {UserId}", channelDtos.Count, userId);
-                return channelDtos;
+                return result;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving channels for user {UserId}", userId);
-                throw new Exception($"Ошибка при получении каналов пользователя: {ex.Message}", ex);
+                throw new Exception($"Ошибка при получении списка каналов: {ex.Message}", ex);
             }
         }
 

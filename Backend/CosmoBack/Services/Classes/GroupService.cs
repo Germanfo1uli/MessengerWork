@@ -68,12 +68,26 @@ namespace CosmoBack.Services.Classes
                             Comment = m.Comment,
                             CreatedAt = m.CreatedAt,
                             Username = u.Username,
-                            AvatarImageId = u.AvatarImageId
+                            AvatarImageId = u.AvatarImageId,
+                            Reactions = _context.Reactions
+                                .Where(r => r.MessageId == m.Id)
+                                .GroupBy(r => r.Emoji)
+                                .Select(g => new AggregatedReactionDto
+                                {
+                                    Emoji = g.Key,
+                                    Count = g.Count(),
+                                    UserReactions = g.Select(r => new ReactionDto
+                                    {
+                                        Id = r.Id,
+                                        UserId = r.UserId,
+                                        Username = r.User.Username,
+                                        Emoji = r.Emoji,
+                                        CreatedAt = r.CreatedAt
+                                    }).ToList()
+                                }).ToList()
                         })
                     .OrderByDescending(m => m.CreatedAt)
                     .FirstOrDefaultAsync();
-
-               
 
                 return new GroupDto
                 {
@@ -110,16 +124,22 @@ namespace CosmoBack.Services.Classes
                     ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
                 if (userId != currentUserId)
                 {
-                    _logger.LogWarning("User {CurrentUserId} is not authorized to access groups for user {RequestedUserId}", currentUserId, userId);
+                    _logger.LogWarning("User {CurrentUserId} is not authorized to access groups for user {UserId}", currentUserId, userId);
                     throw new UnauthorizedAccessException("Недостаточно прав для получения групп другого пользователя");
                 }
 
                 var groups = await _groupRepository.GetGroupsByUserIdAsync(userId);
-                var groupDtos = new List<(GroupDto, ImageDto?)>();
+                var result = new List<(GroupDto, ImageDto?)>();
 
                 foreach (var group in groups)
                 {
                     var groupMember = await _groupMembersRepository.GetByGroupAndUserIdAsync(group.Id, userId);
+                    if (groupMember == null)
+                        continue;
+
+                    var membersCount = await _context.GroupMembers
+                        .CountAsync(gm => gm.GroupId == group.Id);
+
                     var lastMessage = await _context.Messages
                         .Where(m => m.GroupId == group.Id)
                         .Join(_context.Users,
@@ -133,36 +153,28 @@ namespace CosmoBack.Services.Classes
                                 Comment = m.Comment,
                                 CreatedAt = m.CreatedAt,
                                 Username = u.Username,
-                                AvatarImageId = u.AvatarImageId
+                                AvatarImageId = u.AvatarImageId,
+                                Reactions = _context.Reactions
+                                    .Where(r => r.MessageId == m.Id)
+                                    .GroupBy(r => r.Emoji)
+                                    .Select(g => new AggregatedReactionDto
+                                    {
+                                        Emoji = g.Key,
+                                        Count = g.Count(),
+                                        UserReactions = g.Select(r => new ReactionDto
+                                        {
+                                            Id = r.Id,
+                                            UserId = r.UserId,
+                                            Username = r.User.Username,
+                                            Emoji = r.Emoji,
+                                            CreatedAt = r.CreatedAt
+                                        }).ToList()
+                                    }).ToList()
                             })
                         .OrderByDescending(m => m.CreatedAt)
                         .FirstOrDefaultAsync();
 
-                    var membersCount = await _context.GroupMembers
-                        .CountAsync(gm => gm.GroupId == group.Id);
-
-                    ImageDto? avatarImage = null;
-                    if (group.AvatarImageId.HasValue)
-                    {
-                        var image = await _context.Images.FirstOrDefaultAsync(i => i.Id == group.AvatarImageId);
-                        if (image != null)
-                        {
-                            avatarImage = new ImageDto
-                            {
-                                Id = image.Id,
-                                FileName = image.FileName,
-                                MimeType = image.MimeType,
-                                FileSize = image.FileSize,
-                                Data = image.Data,
-                                EntityType = image.EntityType,
-                                EntityId = image.EntityId,
-                                UploadDate = image.UploadDate,
-                                Url = image.Url
-                            };
-                        }
-                    }
-
-                    groupDtos.Add((new GroupDto
+                    var groupDto = new GroupDto
                     {
                         Id = group.Id,
                         PublicId = group.PublicId,
@@ -172,22 +184,24 @@ namespace CosmoBack.Services.Classes
                         GroupTag = group.GroupTag,
                         Description = group.Description,
                         AvatarImageId = group.AvatarImageId,
+                        AvatarImage = group.AvatarImage,
                         CreatedAt = group.CreatedAt,
                         IsActive = group.IsActive,
-                        IsFavorite = groupMember?.IsFavorite ?? false,
+                        IsFavorite = groupMember.IsFavorite,
                         LastMessageAt = lastMessage?.CreatedAt,
                         LastMessage = lastMessage,
                         MembersCount = membersCount
-                    }, avatarImage));
+                    };
+
+                    result.Add((groupDto, group.AvatarImage));
                 }
 
-                _logger.LogInformation("Retrieved {GroupCount} groups for user {UserId}", groupDtos.Count, userId);
-                return groupDtos;
+                return result;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving groups for user {UserId}", userId);
-                throw new Exception($"Ошибка при получении групп пользователя: {ex.Message}", ex);
+                throw new Exception($"Ошибка при получении списка групп: {ex.Message}", ex);
             }
         }
 

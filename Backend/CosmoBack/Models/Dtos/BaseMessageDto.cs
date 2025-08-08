@@ -10,6 +10,7 @@ namespace CosmoBack.Models.Dtos
         public Guid? AvatarImageId { get; set; }
         public MessageReplyDto? ReplyTo { get; set; }
         public ImageDto? AvatarImage { get; set; }
+        public List<AggregatedReactionDto> Reactions { get; set; } = new List<AggregatedReactionDto>();
     }
 
     public class MessageReplyDto

@@ -7,9 +7,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CosmoBack.Services
 {
-    public class MessageService(IMessageRepository messageRepository, CosmoDbContext context) : IMessageService
+    public class MessageService(IMessageRepository messageRepository, IReactionRepository reactionRepository, CosmoDbContext context) : IMessageService
     {
         private readonly IMessageRepository _messageRepository = messageRepository;
+        private readonly IReactionRepository _reactionRepository = reactionRepository;
         private readonly CosmoDbContext _context = context;
 
         public async Task<Message> GetMessageByIdAsync(Guid id)
@@ -41,7 +42,7 @@ namespace CosmoBack.Services
                         (m, u) => new { Message = m, User = u })
                     .GroupJoin(_context.Replies,
                         mu => mu.Message.Id,
-                        r => r.ReplyMessageId, // Изменено: присоединяем по ReplyMessageId
+                        r => r.ReplyMessageId,
                         (mu, replies) => new { mu.Message, mu.User, Replies = replies })
                     .SelectMany(
                         mur => mur.Replies.DefaultIfEmpty(),
@@ -64,7 +65,23 @@ namespace CosmoBack.Services
                                 Username = x.Reply.OriginalMessage.Sender.Username,
                                 Comment = x.Reply.OriginalMessage.Comment
                             })
-                            .FirstOrDefault()
+                            .FirstOrDefault(),
+                        Reactions = _context.Reactions
+                            .Where(r => r.MessageId == g.First().Message.Id)
+                            .GroupBy(r => r.Emoji)
+                            .Select(rg => new AggregatedReactionDto
+                            {
+                                Emoji = rg.Key,
+                                Count = rg.Count(),
+                                UserReactions = rg.Select(r => new ReactionDto
+                                {
+                                    Id = r.Id,
+                                    UserId = r.UserId,
+                                    Username = r.User.Username,
+                                    Emoji = r.Emoji,
+                                    CreatedAt = r.CreatedAt
+                                }).ToList()
+                            }).ToList()
                     })
                     .OrderBy(m => m.CreatedAt)
                     .ToListAsync();
@@ -89,7 +106,7 @@ namespace CosmoBack.Services
                         (m, u) => new { Message = m, User = u })
                     .GroupJoin(_context.Replies,
                         mu => mu.Message.Id,
-                        r => r.ReplyMessageId, // Изменено: присоединяем по ReplyMessageId
+                        r => r.ReplyMessageId,
                         (mu, replies) => new { mu.Message, mu.User, Replies = replies })
                     .SelectMany(
                         mur => mur.Replies.DefaultIfEmpty(),
@@ -112,7 +129,23 @@ namespace CosmoBack.Services
                                 Username = x.Reply.OriginalMessage.Sender.Username,
                                 Comment = x.Reply.OriginalMessage.Comment
                             })
-                            .FirstOrDefault()
+                            .FirstOrDefault(),
+                        Reactions = _context.Reactions
+                            .Where(r => r.MessageId == g.First().Message.Id)
+                            .GroupBy(r => r.Emoji)
+                            .Select(rg => new AggregatedReactionDto
+                            {
+                                Emoji = rg.Key,
+                                Count = rg.Count(),
+                                UserReactions = rg.Select(r => new ReactionDto
+                                {
+                                    Id = r.Id,
+                                    UserId = r.UserId,
+                                    Username = r.User.Username,
+                                    Emoji = r.Emoji,
+                                    CreatedAt = r.CreatedAt
+                                }).ToList()
+                            }).ToList()
                     })
                     .OrderBy(m => m.CreatedAt)
                     .ToListAsync();
@@ -137,7 +170,7 @@ namespace CosmoBack.Services
                         (m, u) => new { Message = m, User = u })
                     .GroupJoin(_context.Replies,
                         mu => mu.Message.Id,
-                        r => r.ReplyMessageId, // Изменено: присоединяем по ReplyMessageId
+                        r => r.ReplyMessageId,
                         (mu, replies) => new { mu.Message, mu.User, Replies = replies })
                     .SelectMany(
                         mur => mur.Replies.DefaultIfEmpty(),
@@ -160,7 +193,23 @@ namespace CosmoBack.Services
                                 Username = x.Reply.OriginalMessage.Sender.Username,
                                 Comment = x.Reply.OriginalMessage.Comment
                             })
-                            .FirstOrDefault()
+                            .FirstOrDefault(),
+                        Reactions = _context.Reactions
+                            .Where(r => r.MessageId == g.First().Message.Id)
+                            .GroupBy(r => r.Emoji)
+                            .Select(rg => new AggregatedReactionDto
+                            {
+                                Emoji = rg.Key,
+                                Count = rg.Count(),
+                                UserReactions = rg.Select(r => new ReactionDto
+                                {
+                                    Id = r.Id,
+                                    UserId = r.UserId,
+                                    Username = r.User.Username,
+                                    Emoji = r.Emoji,
+                                    CreatedAt = r.CreatedAt
+                                }).ToList()
+                            }).ToList()
                     })
                     .OrderBy(m => m.CreatedAt)
                     .ToListAsync();
