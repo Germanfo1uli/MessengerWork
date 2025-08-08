@@ -26,7 +26,6 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
     const inputRef = useRef(null);
     const availableReactions = ['😊', '👍', '❤️', '😂', '😢'];
     const { themeSettings, fontFamilies } = useTheme();
-
     const {
         theme,
         backgroundType,
@@ -52,7 +51,6 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                 .slice(0, 2)
                 .toUpperCase();
             setAvatarText(initials);
-
             const today = new Date();
             const hash = today.toDateString().split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
             const dynamicColor = `hsl(${hash % 360}, 70%, 40%)`;
@@ -64,7 +62,7 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
         switch (theme) {
             case 'cosmic':
                 return {
-                    headerBg: 'rgba(26, 21, 71, 1)', // Убрана прозрачность для четкости
+                    headerBg: 'rgba(26, 21, 71, 1)',
                     headerBorder: 'rgba(255, 176, 255, 0.2)',
                     inputBg: 'rgba(26, 21, 71, 0.95)',
                     inputBorder: 'rgba(74, 20, 140, 0.5)',
@@ -72,7 +70,14 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                     textColor: '#e0e0ff',
                     secondaryText: '#b0b0ff',
                     actionButtonBg: 'rgba(255, 255, 255, 0.1)',
-                    replyBg: 'rgba(255, 255, 255, 0.07)'
+                    replyBg: 'rgba(255, 255, 255, 0.07)',
+                    emptyChatBg: 'radial-gradient(circle at top center, #1a1547 0%, #0f0c29 70%)',
+                    emptyTextColor: '#e0e0ff',
+                    emptySecondaryText: '#b0b0ff',
+                    nebulaGradient: 'radial-gradient(circle at 20% 30%, rgba(120, 60, 220, 0.3) 0%, rgba(50, 20, 100, 0.2) 40%, transparent 80%)',
+                    planetSmallGradient: 'linear-gradient(135deg, #ff6f91, #4a148c)',
+                    planetLargeGradient: 'linear-gradient(45deg, #3a1c71, #d76d77, #ffaf7b)',
+                    cometGradient: 'linear-gradient(45deg, #ffffff, #b0b0ff)',
                 };
             case 'sunset':
                 return {
@@ -84,7 +89,14 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                     textColor: '#5a2c0a',
                     secondaryText: '#7a4c2a',
                     actionButtonBg: 'rgba(255, 255, 255, 0.2)',
-                    replyBg: 'rgba(255, 255, 255, 0.15)'
+                    replyBg: 'rgba(255, 255, 255, 0.15)',
+                    emptyChatBg: 'linear-gradient(135deg, #ff7e5f, #feb47b)',
+                    emptyTextColor: '#5a2c0a',
+                    emptySecondaryText: '#7a4c2a',
+                    nebulaGradient: 'radial-gradient(circle at 20% 30%, rgba(255, 126, 95, 0.3) 0%, rgba(254, 180, 123, 0.2) 40%, transparent 80%)',
+                    planetSmallGradient: 'linear-gradient(135deg, #ff9a8b, #ff6a38)',
+                    planetLargeGradient: 'linear-gradient(45deg, #ff7e5f, #feb47b, #ffcc99)',
+                    cometGradient: 'linear-gradient(45deg, #ffffff, #ffcc99)',
                 };
             case 'ocean':
                 return {
@@ -96,7 +108,14 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                     textColor: '#e0f7ff',
                     secondaryText: '#b0e7ff',
                     actionButtonBg: 'rgba(255, 255, 255, 0.2)',
-                    replyBg: 'rgba(255, 255, 255, 0.1)'
+                    replyBg: 'rgba(255, 255, 255, 0.1)',
+                    emptyChatBg: 'linear-gradient(135deg, #00c6fb, #005bea)',
+                    emptyTextColor: '#e0f7ff',
+                    emptySecondaryText: '#b0e7ff',
+                    nebulaGradient: 'radial-gradient(circle at 20% 30%, rgba(0, 198, 251, 0.3) 0%, rgba(0, 93, 234, 0.2) 40%, transparent 80%)',
+                    planetSmallGradient: 'linear-gradient(135deg, #00c6fb, #007bff)',
+                    planetLargeGradient: 'linear-gradient(45deg, #005bea, #00c6fb, #66e0ff)',
+                    cometGradient: 'linear-gradient(45deg, #ffffff, #b0e7ff)',
                 };
             case 'forest':
                 return {
@@ -108,7 +127,14 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                     textColor: '#e0fff5',
                     secondaryText: '#b0ffea',
                     actionButtonBg: 'rgba(255, 255, 255, 0.2)',
-                    replyBg: 'rgba(255, 255, 255, 0.1)'
+                    replyBg: 'rgba(255, 255, 255, 0.1)',
+                    emptyChatBg: 'linear-gradient(135deg, #11998e, #38ef7d)',
+                    emptyTextColor: '#e0fff5',
+                    emptySecondaryText: '#b0ffea',
+                    nebulaGradient: 'radial-gradient(circle at 20% 30%, rgba(56, 239, 125, 0.3) 0%, rgba(17, 153, 142, 0.2) 40%, transparent 80%)',
+                    planetSmallGradient: 'linear-gradient(135deg, #38ef7d, #11998e)',
+                    planetLargeGradient: 'linear-gradient(45deg, #11998e, #38ef7d, #66ff99)',
+                    cometGradient: 'linear-gradient(45deg, #ffffff, #b0ffea)',
                 };
             case 'light':
                 return {
@@ -120,7 +146,14 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                     textColor: '#333',
                     secondaryText: '#666',
                     actionButtonBg: 'rgba(0, 0, 0, 0.05)',
-                    replyBg: 'rgba(0, 0, 0, 0.03)'
+                    replyBg: 'rgba(0, 0, 0, 0.03)',
+                    emptyChatBg: 'linear-gradient(to bottom, #f5f5f5, #e0e0e0)',
+                    emptyTextColor: '#333',
+                    emptySecondaryText: '#666',
+                    nebulaGradient: 'radial-gradient(circle at 20% 30%, rgba(160, 160, 160, 0.2) 0%, rgba(200, 200, 200, 0.1) 40%, transparent 80%)',
+                    planetSmallGradient: 'linear-gradient(135deg, #d3d3d3, #a9a9a9)',
+                    planetLargeGradient: 'linear-gradient(45deg, #e0e0e0, #d3d3d3, #f5f5f5)',
+                    cometGradient: 'linear-gradient(45deg, #ffffff, #d3d3d3)',
                 };
             default:
                 return {
@@ -132,7 +165,14 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                     textColor: '#e0e0ff',
                     secondaryText: '#b0b0ff',
                     actionButtonBg: 'rgba(255, 255, 255, 0.1)',
-                    replyBg: 'rgba(255, 255, 255, 0.07)'
+                    replyBg: 'rgba(255, 255, 255, 0.07)',
+                    emptyChatBg: 'radial-gradient(circle at top center, #1a1547 0%, #0f0c29 70%)',
+                    emptyTextColor: '#e0e0ff',
+                    emptySecondaryText: '#b0b0ff',
+                    nebulaGradient: 'radial-gradient(circle at 20% 30%, rgba(120, 60, 220, 0.3) 0%, rgba(50, 20, 100, 0.2) 40%, transparent 80%)',
+                    planetSmallGradient: 'linear-gradient(135deg, #ff6f91, #4a148c)',
+                    planetLargeGradient: 'linear-gradient(45deg, #3a1c71, #d76d77, #ffaf7b)',
+                    cometGradient: 'linear-gradient(45deg, #ffffff, #b0b0ff)',
                 };
         }
     };
@@ -189,7 +229,6 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
 
     useEffect(() => {
         if (!activeChat?.id || !connection || !isConnected) return;
-
         const handleNewMessage = (newMessage) => {
             if (activeChat.id === newMessage.chatId) {
                 setMessages((prevMessages) => {
@@ -216,7 +255,6 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                 });
             }
         };
-
         connection.on('ReceiveMessage', handleNewMessage);
         return () => connection.off('ReceiveMessage', handleNewMessage);
     }, [connection, isConnected, activeChat?.id, userId]);
@@ -233,7 +271,6 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
 
     const handleSendMessage = async () => {
         if (!message.trim() || !activeChat?.id || !userId) return;
-
         const tempId = Math.floor(10000000 + Math.random() * 90000000);
         const newMessage = {
             id: tempId.toString(),
@@ -254,11 +291,9 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                 }
                 : null,
         };
-
         setMessages((prev) => [...prev, newMessage]);
         setMessage('');
         setReplyingTo(null);
-
         try {
             await connection.invoke('SendMessage', activeChat.id, userId, message, tempId, replyingTo?.id);
             setMessages((prev) =>
@@ -277,7 +312,7 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
     };
 
     const handleAvatarClick = () => {
-        console.log('Avatar clicked!'); // Для отладки
+        console.log('Avatar clicked!');
         setIsProfileOpen(true);
     };
 
@@ -371,12 +406,31 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
 
     if (!activeChat) {
         return (
-            <div className={cl.emptyChat}>
-                <div className={cl.emptyContent}>
-                    <h2>Зажгите свою звезду чата</h2>
-                    <p>Выберите чат и исследуйте бескрайние просторы диалогов</p>
+            <div
+                className={cl.emptyChat}
+                style={{
+                    background: themeStyles.emptyChatBg,
+                    fontFamily: fontFamilyValue,
+                    fontSize: `${windowFontSize}px`,
+                }}
+            >
+                <div
+                    className={cl.emptyContent}
+                    style={{
+                        color: themeStyles.emptyTextColor,
+                    }}
+                >
+                    <h2 style={{ color: themeStyles.emptyTextColor, textShadow: `0 0 12px ${themeStyles.secondaryText}` }}>
+                        Зажгите свою звезду чата
+                    </h2>
+                    <p style={{ color: themeStyles.emptySecondaryText, textShadow: `0 0 6px ${themeStyles.secondaryText}` }}>
+                        Выберите чат и исследуйте бескрайние просторы диалогов
+                    </p>
                     <div className={cl.cosmicDecoration}>
-                        <div className={cl.nebula}></div>
+                        <div
+                            className={cl.nebula}
+                            style={{ background: themeStyles.nebulaGradient }}
+                        ></div>
                         <div className={cl.starField}>
                             <div className={cl.star}></div>
                             <div className={cl.star}></div>
@@ -387,9 +441,18 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                             <div className={cl.star}></div>
                             <div className={cl.star}></div>
                         </div>
-                        <div className={cl.planetSmall}></div>
-                        <div className={cl.planetLarge}></div>
-                        <div className={cl.comet}></div>
+                        <div
+                            className={cl.planetSmall}
+                            style={{ background: themeStyles.planetSmallGradient }}
+                        ></div>
+                        <div
+                            className={cl.planetLarge}
+                            style={{ background: themeStyles.planetLargeGradient }}
+                        ></div>
+                        <div
+                            className={cl.comet}
+                            style={{ background: themeStyles.cometGradient }}
+                        ></div>
                     </div>
                 </div>
             </div>
@@ -403,17 +466,7 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                 backgroundImage:
                     backgroundType === 'image' && customBackground
                         ? `url(${customBackground})`
-                        : theme === 'cosmic'
-                            ? 'radial-gradient(circle at top center, #1a1547 0%, #0f0c29 70%)'
-                            : theme === 'sunset'
-                                ? 'linear-gradient(135deg, #ff7e5f, #feb47b)'
-                                : theme === 'ocean'
-                                    ? 'linear-gradient(135deg, #00c6fb, #005bea)'
-                                    : theme === 'forest'
-                                        ? 'linear-gradient(135deg, #11998e, #38ef7d)'
-                                        : theme === 'light'
-                                            ? 'linear-gradient(to bottom, #f5f5f5, #e0e0e0)'
-                                            : 'radial-gradient(circle at top center, #1a1547 0%, #0f0c29 70%)',
+                        : themeStyles.emptyChatBg,
                 backgroundSize: backgroundType === 'image' ? backgroundSize : 'cover',
                 backgroundPosition: backgroundType === 'image' ? backgroundPosition : 'center',
                 filter: backgroundType === 'image' ? `blur(${backgroundBlur}px)` : 'none',
@@ -427,7 +480,7 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                 style={{
                     background: themeStyles.headerBg,
                     borderBottom: `1px solid ${themeStyles.headerBorder}`,
-                    color: themeStyles.textColor
+                    color: themeStyles.textColor,
                 }}
             >
                 <div className={cl.userInfo}>
@@ -478,7 +531,7 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                         onChange={(e) => setSearchQuery(e.target.value)}
                         style={{
                             background: themeStyles.inputWrapperBg,
-                            color: themeStyles.textColor
+                            color: themeStyles.textColor,
                         }}
                     />
                 </div>
@@ -501,10 +554,9 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                                     ? `0 0 8px rgba(${parseInt(windowAccentColor.slice(1, 3), 16)}, ${parseInt(windowAccentColor.slice(3, 5), 16)}, ${parseInt(windowAccentColor.slice(5, 7), 16)}, 0.5)`
                                     : '0 0 12px rgba(106, 48, 147, 0.5)'
                                 : 'none',
-                            background:
-                                msg.isUser
-                                    ? `linear-gradient(135deg, ${windowAccentColor}, ${adjustColor(windowAccentColor, -20)})`
-                                    : 'linear-gradient(135deg, #3a1c71, #6a3093)',
+                            background: msg.isUser
+                                ? `linear-gradient(135deg, ${windowAccentColor}, ${adjustColor(windowAccentColor, -20)})`
+                                : 'linear-gradient(135deg, #3a1c71, #6a3093)',
                         }}
                     >
                         {msg.replyTo && (
@@ -514,14 +566,21 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                             >
                                 <div className={cl.replyLine}></div>
                                 <div className={cl.replyContent}>
-                                    <span className={cl.replyAuthor} style={{ color: themeStyles.textColor }}>{msg.replyTo.sender}</span>
-                                    <p className={cl.replyText} style={{ color: themeStyles.secondaryText }}>{msg.replyTo.comment}</p>
+                                    <span className={cl.replyAuthor} style={{ color: themeStyles.textColor }}>
+                                        {msg.replyTo.sender}
+                                    </span>
+                                    <p className={cl.replyText} style={{ color: themeStyles.secondaryText }}>
+                                        {msg.replyTo.comment}
+                                    </p>
                                 </div>
                             </div>
                         )}
                         <div className={cl.messageContent}>
                             <p style={{ color: msg.isUser ? '#fff' : '#e0e0ff' }}>{msg.comment}</p>
-                            <span className={cl.messageTime} style={{ color: msg.isUser ? 'rgba(255,255,255,0.7)' : 'rgba(224,224,255,0.7)' }}>
+                            <span
+                                className={cl.messageTime}
+                                style={{ color: msg.isUser ? 'rgba(255,255,255,0.7)' : 'rgba(224,224,255,0.7)' }}
+                            >
                                 {formatTimeFromISO(msg.createdAt)}
                             </span>
                         </div>
@@ -546,7 +605,7 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                             left: contextMenu.x,
                             background: themeStyles.headerBg,
                             border: `1px solid ${themeStyles.headerBorder}`,
-                            color: themeStyles.textColor
+                            color: themeStyles.textColor,
                         }}
                     >
                         <button
@@ -589,7 +648,7 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                             className={cl.reactionPicker}
                             style={{
                                 borderTop: `1px solid ${themeStyles.headerBorder}`,
-                                background: themeStyles.inputBg
+                                background: themeStyles.inputBg,
                             }}
                         >
                             {availableReactions.map((emoji) => (
@@ -613,7 +672,7 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                     style={{
                         background: themeStyles.inputBg,
                         borderTop: `1px solid ${themeStyles.inputBorder}`,
-                        borderBottom: `1px solid ${themeStyles.inputBorder}`
+                        borderBottom: `1px solid ${themeStyles.inputBorder}`,
                     }}
                 >
                     <div className={cl.replyInfo}>
@@ -636,7 +695,7 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                 style={{
                     background: themeStyles.inputBg,
                     borderTop: `1px solid ${themeStyles.inputBorder}`,
-                    color: themeStyles.textColor
+                    color: themeStyles.textColor,
                 }}
             >
                 <div
@@ -688,7 +747,7 @@ const ChatWindow = ({ connection, activeChat, onToggleFavorite, isConnected }) =
                         status: activeChat.secondUser.onlineStatus,
                         isFavorite: activeChat.isFavorite,
                         tag: "#0000",
-                        quote: "Статус пользователя"
+                        quote: "Статус пользователя",
                     }}
                     onClose={closeProfile}
                     onStartChat={handleStartChat}
