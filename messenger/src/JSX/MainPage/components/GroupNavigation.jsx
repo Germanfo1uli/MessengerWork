@@ -88,18 +88,24 @@ const GroupNavigation = () => {
                     navBorder: 'rgba(56, 239, 125, 0.3)',
                     modalBg: 'rgba(17, 153, 142, 0.98)',
                     modalBorder: 'rgba(56, 239, 125, 0.3)',
-                    textColor: '#e0fff5',
-                    secondaryText: '#b0ffea',
-                    accentColor: '#11998e',
+                    textColor: '#ffffff', // Изменено на белый для лучшей читаемости
+                    secondaryText: '#d0ffe7', // Более яркий вторичный текст
+                    accentColor: '#00ff9d', // Яркий неоново-зеленый акцент
                     buttonHover: '#38ef7d',
-                    tooltipBg: 'rgba(17, 153, 142, 0.9)',
-                    tooltipText: '#ffffff',
+                    tooltipBg: 'rgba(0, 50, 40, 0.9)', // Более темный фон для контраста
+                    tooltipText: '#ffffff', // Белый текст в подсказках
                     inputBg: 'rgba(255, 255, 255, 0.15)',
                     inputBorder: 'rgba(56, 239, 125, 0.5)',
                     inputFocus: 'rgba(56, 239, 125, 0.4)',
                     tabInactive: 'rgba(255, 255, 255, 0.15)',
                     checkboxBg: 'rgba(56, 239, 125, 0.2)',
-                    modalShadow: '0 10px 30px rgba(0, 0, 0, 0.4)'
+                    modalShadow: '0 10px 30px rgba(0, 0, 0, 0.4)',
+                    // Добавляем новые свойства для лучшего контроля
+                    iconColor: '#ffffff', // Цвет иконок
+                    iconHoverColor: '#00ff9d', // Цвет иконок при наведении
+                    placeholderColor: 'rgba(208, 255, 231, 0.7)', // Цвет плейсхолдеров
+                    activeTabText: '#0a2e24', // Темный текст для активной вкладки
+                    errorColor: '#ff4d4f' // Цвет ошибок
                 };
             case 'light':
                 return {
@@ -432,7 +438,7 @@ const GroupNavigation = () => {
                                                     border: `1px solid ${themeStyles.inputBorder}`
                                                 }}
                                             ></span>
-                                            Я согласен с <a href="#" className={styles.termsLink} style={{ color: themeStyles.accentColor }}>Условиями группы</a> и <a href="#" className={styles.termsLink} style={{ color: themeStyles.accentColor }}>Правилами сообщества</a>
+                                            Я согласен сﾠ<a href="#" className={styles.termsLink} style={{ color: themeStyles.accentColor }}> Условиями группы</a>ﾠиﾠ<a href="#" className={styles.termsLink} style={{ color: themeStyles.accentColor }}>Правилами сообщества</a>
                                         </label>
                                     </div>
 
