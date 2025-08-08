@@ -69,8 +69,16 @@ const AuthScreen = ({ onBack }) => {
             const body = isPhone
                 ? { Phone: data.identifier, Password: data.password }
                 : { Username: data.identifier, Password: data.password };
-
-            const response = await apiRequest('/api/auth/login/phone', {
+            
+            let response;
+            body.Username != null ? 
+            response = await apiRequest('/api/auth/login/username', {
+                method: 'POST',
+                body,
+                authenticated: false
+            })
+            : 
+            response = await apiRequest('/api/auth/login/phone', {
                 method: 'POST',
                 body,
                 authenticated: false

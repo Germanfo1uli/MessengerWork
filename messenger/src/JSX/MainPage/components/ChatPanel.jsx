@@ -138,10 +138,11 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                         joined: false
                     }))
                     : [];
-
+                
+                    console.log(profileResponse)
                 setUser({
-                    username: profileResponse.username || username,
-                    status: getStatusString(profileResponse.onlineStatus),
+                    username: profileResponse.user.username || username,
+                    status: getStatusString(profileResponse.user.onlineStatus),
                     avatarUrl: profileResponse.avatarUrl || '/default-avatar.png'
                 });
                 setData(enhancedChats);
@@ -414,6 +415,8 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
             return new Date(dateB || 0) - new Date(dateA || 0);
         });
     }, [data, searchResults, activeTab, searchQuery]);
+
+    console.log(user)
 
     return (
         <div className={cl.container}>
