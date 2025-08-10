@@ -14,22 +14,21 @@ import { useNavigate } from 'react-router-dom';
 import useMainHooks from '../../../hooks/UseMainHooks';
 import debounce from 'lodash.debounce';
 import { useTheme } from '../../SettingsPage/components/Context/ThemeContext';
+import {useUser} from "../../SettingsPage/components/Context/UserContext";
+
+
 
 const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
-    const { isLoading, userId, username, isAuthenticated, logout } = useAuth();
+    const { isLoading, userId, isAuthenticated, logout } = useAuth();
+    const { user, updateUser } = useUser(); // Use UserContext
     const { themeSettings } = useTheme();
-    const { theme } = themeSettings;
+    const { theme, avatarBorderColor, backgroundColor } = themeSettings;
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isAddContactModalOpen, setIsAddContactModalOpen] = useState(false);
     const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('favorites');
     const [searchQuery, setSearchQuery] = useState('');
-    const [user, setUser] = useState({
-        username: '',
-        status: '',
-        avatarUrl: '/default-avatar.png'
-    });
     const [data, setData] = useState([]);
     const [searchResults, setSearchResults] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
@@ -52,10 +51,17 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
         }
     ]);
     const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true);
-    const { getStatusString, formatTimeFromISO } = useMainHooks();
+    const { formatTimeFromISO } = useMainHooks(); // Removed getStatusString
     const navigate = useNavigate();
     const moreButtonRef = useRef(null);
     const notificationsButtonRef = useRef(null);
+
+    // Fallback user data if UserContext is not initialized
+    const fallbackUser = {
+        username: user?.username || 'User',
+        avatarUrl: user?.avatarUrl || '/default-avatar.png',
+        status: user?.status || 'Offline'
+    };
 
     const getThemeStyles = () => {
         switch (theme) {
@@ -315,16 +321,11 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [profileResponse, chatsResponse] = await Promise.all([
-                    apiRequest(`/api/user/${userId}`, {
-                        method: 'GET',
-                        authenticated: isAuthenticated
-                    }),
-                    apiRequest(`/api/chat/user/${userId}`, {
-                        method: 'GET',
-                        authenticated: isAuthenticated
-                    })
-                ]);
+                // Fetch chats
+                const chatsResponse = await apiRequest(`/api/chat/user/${userId}`, {
+                    method: 'GET',
+                    authenticated: isAuthenticated
+                });
 
                 const enhancedChats = Array.isArray(chatsResponse)
                     ? chatsResponse.map(chat => ({
@@ -338,15 +339,31 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                         joined: false
                     }))
                     : [];
-
-                setUser({
-                    username: profileResponse.username || username || 'User',
-                    status: getStatusString(profileResponse.onlineStatus),
-                    avatarUrl: profileResponse.avatarUrl || '/default-avatar.png'
-                });
                 setData(enhancedChats);
+
+                // Fetch user profile if UserContext is not initialized
+                if (!user?.username || !user?.avatarUrl || !user?.status) {
+                    try {
+                        const profileResponse = await apiRequest(`/api/user/${userId}`, {
+                            method: 'GET',
+                            authenticated: isAuthenticated
+                        });
+                        updateUser({
+                            username: profileResponse.username || 'User',
+                            avatarUrl: profileResponse.avatarUrl || '/default-avatar.png',
+                            status: profileResponse.status || 'Offline' // Use status directly
+                        });
+                    } catch (error) {
+                        console.error('Failed to fetch user profile:', error);
+                        updateUser({
+                            username: 'User',
+                            avatarUrl: '/default-avatar.png',
+                            status: 'Offline'
+                        });
+                    }
+                }
             } catch (error) {
-                console.error('Failed to fetch user data:', error);
+                console.error('Failed to fetch chats:', error);
             }
         };
 
@@ -354,13 +371,15 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
             return;
         }
 
-        if (!isAuthenticated) {
+        // Only redirect if explicitly not authenticated
+        if (!isAuthenticated && !isLoading) {
             logout();
             navigate('/');
+            return;
         }
 
         fetchData();
-    }, [isLoading, userId, username, isAuthenticated, logout, navigate]);
+    }, [isLoading, userId, isAuthenticated, logout, navigate, user, updateUser]);
 
     useEffect(() => {
         if (connection && isConnected && data.length > 0) {
@@ -534,6 +553,21 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
         }
     };
 
+    const getChatStatusClass = (onlineStatus) => {
+        switch (onlineStatus) {
+            case 1:
+                return cl.online;
+            case 0:
+                return cl.offline;
+            case 2:
+                return cl.idle;
+            case 3:
+                return cl.busy;
+            default:
+                return cl.offline;
+        }
+    };
+
     const filteredChats = useMemo(() => {
         const source = searchQuery.startsWith('@') ? searchResults : data;
         return (activeTab === 'favorites' ? source.filter((chat) => chat.isFavorite) : source)
@@ -563,7 +597,7 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                 style={{ background: themeStyles.profileHeaderBg }}
             >
                 <div className={cl.avatarContainer} onClick={toggleModal}>
-                    {avatarError || !user.avatarUrl ? (
+                    {avatarError || !fallbackUser.avatarUrl ? (
                         <div
                             className={cl.avatarPlaceholder}
                             style={{
@@ -572,11 +606,11 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                                 color: themeStyles.textColor
                             }}
                         >
-                            {(user.username && user.username.length > 0) ? user.username.charAt(0).toUpperCase() : 'U'}
+                            {(fallbackUser.username && fallbackUser.username.length > 0) ? fallbackUser.username.charAt(0).toUpperCase() : 'U'}
                         </div>
                     ) : (
                         <img
-                            src={user.avatarUrl}
+                            src={fallbackUser.avatarUrl}
                             alt="Аватар"
                             className={cl.avatarImage}
                             onError={handleAvatarError}
@@ -584,10 +618,10 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                         />
                     )}
                     <div
-                        className={`${cl.statusBadge} ${cl[user.status.toLowerCase()]}`}
+                        className={`${cl.statusBadge} ${fallbackUser.status.toLowerCase() === 'online' ? cl.online : cl.offline}`}
                         style={{
                             border: `2px solid ${themeStyles.profileHeaderBg}`,
-                            background: themeStyles[`status${user.status.charAt(0).toUpperCase() + user.status.slice(1).toLowerCase()}`]
+                            background: fallbackUser.status.toLowerCase() === 'online' ? themeStyles.statusOnline : themeStyles.statusOffline
                         }}
                     ></div>
                 </div>
@@ -596,13 +630,13 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                         className={cl.profileName}
                         style={{ color: themeStyles.textColor }}
                     >
-                        {user.username || 'User'}
+                        {fallbackUser.username || 'User'}
                     </h3>
                     <p
                         className={cl.profileStatus}
                         style={{ color: themeStyles.secondaryText }}
                     >
-                        {user.status || 'Offline'}
+                        {fallbackUser.status || 'Offline'}
                     </p>
                 </div>
                 <div className={cl.profileActions}>
@@ -731,7 +765,7 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
             <Modal
                 isOpen={isModalOpen}
                 onClose={toggleModal}
-                user={user}
+                user={fallbackUser}
             />
 
             <AddContactModal
@@ -800,7 +834,11 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
 
             <div
                 className={cl.chatsList}
-                style={{ background: themeStyles.chatsListBg }}
+                style={{
+                    background: themeStyles.chatsListBg,
+                    overflowY: 'auto', // Ensure scrollable chats list
+                    flexGrow: 1 // Ensure chats list takes available space
+                }}
             >
                 {filteredChats.length > 0 ? (
                     filteredChats.map((chat, index) => (
@@ -810,8 +848,8 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                                 unread={10}
                                 lastMessage={chat.lastMessage?.comment ?? "Нет сообщений"}
                                 time={formatTimeFromISO(chat.lastMessage?.createdAt)}
-                                status={getStatusString(chat.secondUser.onlineStatus)}
-                                isFavorite={false}
+                                statusClass={getChatStatusClass(chat.secondUser.onlineStatus)} // Pass CSS class for status
+                                isFavorite={chat.isFavorite}
                                 messageStatus={"sent"}
                                 isSentByUser={chat.lastMessage?.isSentByUser ?? false}
                             />

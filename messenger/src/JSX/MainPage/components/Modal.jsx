@@ -1,21 +1,27 @@
-import { useEffect, useState } from "react";
-import { FaEdit, FaTimes, FaCircle, FaRegCircle, FaRocket, FaCopy, FaEye, FaEyeSlash, FaGift } from "react-icons/fa";
-import { IoMdPlanet } from "react-icons/io";
+import React, { useEffect, useState } from 'react';
+import { FaEdit, FaTimes, FaCircle, FaRegCircle, FaRocket, FaCopy, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { IoMdPlanet } from 'react-icons/io';
 import styles from '../styles/Modal.module.css';
+import { useUser } from '../../SettingsPage/components/Context/UserContext';
+import { useTheme } from '../../SettingsPage/components/Context/ThemeContext';
 
-const Modal = ({ isOpen, onClose, user }) => {
+const Modal = ({ isOpen, onClose }) => {
+    const { user } = useUser();
+    const { getThemeStyles } = useTheme();
     const [isStatusHidden, setIsStatusHidden] = useState(false);
     const [copied, setCopied] = useState(false);
     const [avatarError, setAvatarError] = useState(false);
 
+    const themeStyles = getThemeStyles();
+
     useEffect(() => {
-        if (isOpen) document.body.style.overflow = "hidden";
-        else document.body.style.overflow = "unset";
-        return () => (document.body.style.overflow = "unset");
+        if (isOpen) document.body.style.overflow = 'hidden';
+        else document.body.style.overflow = 'unset';
+        return () => (document.body.style.overflow = 'unset');
     }, [isOpen]);
 
     const copyTag = () => {
-        navigator.clipboard.writeText(user.tag || "#0000");
+        navigator.clipboard.writeText(user.tag || '#0000');
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
@@ -30,16 +36,17 @@ const Modal = ({ isOpen, onClose, user }) => {
 
     if (!isOpen) return null;
 
-    const gifts = [
-        { id: 1, image: "https://cdn1.ozone.ru/s3/multimedia-1-h/7548608069.jpg", name: "Золотой лабубу" },
-        { id: 2, image: "https://avatars.mds.yandex.net/get-mpic/13527901/2a000001971b61fbaf300b399920a6a840f3/orig", name: "Никита" },
-        { id: 3, image: "https://avatars.mds.yandex.net/i?id=3eaffa6d84e0523f6ed1786307f4e0a4_l-5295169-images-thumbs&n=13", name: "Лабуба" }
-    ];
-
     const getAvatarContent = () => {
         if (avatarError || !user.avatarUrl) {
             return (
-                <div className={styles.avatarPlaceholder}>
+                <div
+                    className={styles.avatarPlaceholder}
+                    style={{
+                        background: `linear-gradient(135deg, ${themeStyles.accentColor}, ${themeStyles.buttonHover})`,
+                        color: themeStyles.textColor,
+                        border: `2px solid ${user.avatarBorderColor || '#4d79f6'}`
+                    }}
+                >
                     {user.username?.charAt(0).toUpperCase() || 'U'}
                 </div>
             );
@@ -55,73 +62,154 @@ const Modal = ({ isOpen, onClose, user }) => {
     };
 
     return (
-        <div className={styles.overlay} onClick={onClose}>
-            <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-                {/* Космический баннер */}
-                <div className={styles.banner}>
+        <div
+            className={styles.overlay}
+            onClick={onClose}
+            style={{ background: themeStyles.modalOverlay }}
+        >
+            <div
+                className={styles.modal}
+                onClick={(e) => e.stopPropagation()}
+                style={{ background: themeStyles.modalBg }}
+            >
+                <div
+                    className={styles.banner}
+                    style={{
+                        background: user.banner.type === 'image'
+                            ? `url(${user.banner.value}) center/cover`
+                            : user.banner.value || themeStyles.bannerBg,
+                        border: themeStyles.bannerBorder
+                    }}
+                >
                     <div className={styles.stars}></div>
                     <IoMdPlanet className={styles.planetIcon} />
                 </div>
 
-                {/* Аватар с индикатором онлайн-статуса */}
-                <div className={styles.avatarWrapper}>
+                <div
+                    className={styles.avatarWrapper}
+                    style={{ border: `3px solid ${user.avatarBorderColor || '#4d79f6'}` }}
+                >
                     {getAvatarContent()}
                     {!isStatusHidden ? (
-                        <FaCircle className={styles.statusOnline} />
+                        <FaCircle
+                            className={styles.statusOnline}
+                            style={{ color: themeStyles.statusOnline }}
+                        />
                     ) : (
-                        <FaRegCircle className={styles.statusOffline} />
+                        <FaRegCircle
+                            className={styles.statusOffline}
+                            style={{ color: themeStyles.statusOffline }}
+                        />
                     )}
-                    <div className={styles.avatarGlow}></div>
+                    <div
+                        className={styles.avatarGlow}
+                        style={{ background: `radial-gradient(circle at center, ${themeStyles.accentColor}20, transparent 70%)` }}
+                    ></div>
                 </div>
 
-                {/* Информация о пользователе */}
                 <div className={styles.userInfo}>
-                    <h2 className={styles.username2}>{user.username || "armisaelb"}</h2>
-                    <div className={styles.userTag} onClick={copyTag}>
-                        {user.tag || "#0000"}
+                    <h2
+                        className={styles.username2}
+                        style={{ color: themeStyles.textColor }}
+                    >
+                        {user.username || 'armisaelb'}
+                    </h2>
+                    <div
+                        className={styles.userTag}
+                        onClick={copyTag}
+                        style={{ color: themeStyles.textColor }}
+                    >
+                        {user.tag || '#0000'}
                         <FaCopy className={styles.copyIcon} />
-                        {copied && <span className={styles.copiedTooltip}>Скопировано!</span>}
+                        {copied && (
+                            <span
+                                className={styles.copiedTooltip}
+                                style={{ background: themeStyles.accentColor }}
+                            >
+                                Скопировано!
+                            </span>
+                        )}
                     </div>
-                    <p className={styles.status}>{user.quote || "Исследую космос..."}</p>
-                    <p className={styles.lastSeen}>
+                    <p
+                        className={styles.status}
+                        style={{ color: themeStyles.secondaryText }}
+                    >
+                        {user.status || 'Исследую космос...'}
+                    </p>
+                    <p
+                        className={styles.lastSeen}
+                        style={{ color: themeStyles.secondaryText }}
+                    >
                         <FaRocket className={styles.rocketIcon} />
-                        {isStatusHidden ? "Невидимка" : `В сети`}
+                        {isStatusHidden ? 'Невидимка' : 'В сети'}
                     </p>
                 </div>
 
-                {/* Витрина подарков */}
                 <div className={styles.giftsSection}>
                     <div className={styles.sectionDivider}>
-                        <span className={styles.dividerText}>КОСМИЧЕСКИЕ АРТЕФАКТЫ</span>
+                        <span
+                            className={styles.dividerText}
+                            style={{ color: themeStyles.accentColor }}
+                        >
+                            КОСМИЧЕСКИЕ АРТЕФАКТЫ
+                        </span>
                     </div>
                     <div className={styles.giftsGrid}>
-                        {gifts.map(gift => (
-                            <div key={gift.id} className={styles.giftCard}>
-                                <div className={styles.giftGlow}></div>
-                                <img
-                                    src={gift.image}
-                                    alt={gift.name}
-                                    className={styles.giftImage}
-                                    onError={(e) => {
-                                        e.target.onerror = null;
-                                        e.target.src = "https://i.imgur.com/3Zq3Z8L.png";
+                        {user.gifts
+                            .filter(gift => gift.selected)
+                            .map(gift => (
+                                <div
+                                    key={gift.id}
+                                    className={styles.giftCard}
+                                    style={{
+                                        background: themeStyles.giftCardBg,
+                                        border: `1px solid ${themeStyles.giftCardBorder}`
                                     }}
-                                />
-                                <div className={styles.giftName}>{gift.name}</div>
-                            </div>
-                        ))}
+                                >
+                                    <div
+                                        className={styles.giftGlow}
+                                        style={{
+                                            background: `radial-gradient(circle at center, ${themeStyles.accentColor}30, transparent 70%)`
+                                        }}
+                                    ></div>
+                                    <img
+                                        src={gift.image}
+                                        alt={gift.name}
+                                        className={styles.giftImage}
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = 'https://i.imgur.com/3Zq3Z8L.png';
+                                        }}
+                                    />
+                                    <div
+                                        className={styles.giftName}
+                                        style={{ color: themeStyles.textColor }}
+                                    >
+                                        {gift.name}
+                                    </div>
+                                </div>
+                            ))}
                     </div>
                 </div>
 
-                {/* Кнопка редактирования */}
-                <button className={styles.editButton}>
+                <button
+                    className={styles.editButton}
+                    style={{
+                        background: themeStyles.accentColor,
+                        color: '#ffffff'
+                    }}
+                >
                     <FaEdit className={styles.editIcon} /> Редактировать профиль
                 </button>
 
-                {/* Кнопка смены статуса */}
                 <button
                     className={styles.statusButton}
                     onClick={toggleStatusVisibility}
+                    style={{
+                        background: 'transparent',
+                        border: `1px solid ${themeStyles.accentColor}`,
+                        color: themeStyles.accentColor
+                    }}
                 >
                     {isStatusHidden ? (
                         <>
@@ -134,8 +222,11 @@ const Modal = ({ isOpen, onClose, user }) => {
                     )}
                 </button>
 
-                {/* Кнопка закрытия */}
-                <button className={styles.closeButton} onClick={onClose}>
+                <button
+                    className={styles.closeButton}
+                    onClick={onClose}
+                    style={{ color: themeStyles.textColor }}
+                >
                     <FaTimes />
                 </button>
             </div>

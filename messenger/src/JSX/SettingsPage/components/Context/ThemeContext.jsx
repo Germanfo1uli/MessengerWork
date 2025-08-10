@@ -3,9 +3,9 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-    // Начальные настройки темы
     const defaultThemeSettings = {
-        theme: 'dark',
+        backgroundColor: '#071332',
+        avatarBorderColor: '#4d79f6',
         backgroundType: 'solid',
         customBackground: null,
         backgroundBlur: 0,
@@ -25,7 +25,6 @@ export const ThemeProvider = ({ children }) => {
         messageShadow: true,
     };
 
-    // Загружаем настройки из localStorage или используем значения по умолчанию
     const [themeSettings, setThemeSettings] = useState(() => {
         const savedSettings = localStorage.getItem('themeSettings');
         return savedSettings ? JSON.parse(savedSettings) : defaultThemeSettings;
@@ -38,17 +37,43 @@ export const ThemeProvider = ({ children }) => {
         { id: 'mono', name: 'Моноширинный', value: 'Menlo, Consolas, monospace' },
     ];
 
-    // Сохраняем настройки в localStorage при их изменении
     useEffect(() => {
         localStorage.setItem('themeSettings', JSON.stringify(themeSettings));
     }, [themeSettings]);
 
     const updateThemeSettings = (newSettings) => {
-        setThemeSettings((prev) => ({ ...prev, ...newSettings }));
+        setThemeSettings(prev => ({
+            ...prev,
+            ...newSettings
+        }));
     };
 
+    const getThemeStyles = () => ({
+        bannerBg: themeSettings.backgroundColor,
+        bannerBorder: '1px solid rgba(90, 150, 255, 0.3)',
+        textColor: '#e0e0ff',
+        secondaryText: '#b0b0ff',
+        accentColor: '#6a5acd',
+        buttonHover: '#7b68ee',
+        inputBg: 'rgba(40, 40, 80, 0.7)',
+        inputBorder: 'rgba(90, 150, 255, 0.5)',
+        avatarBorder: themeSettings.avatarBorderColor,
+        statusOnline: '#00ff9d',
+        statusOffline: '#7b68ee',
+        giftCardBg: 'rgba(30, 30, 70, 0.7)',
+        giftCardBorder: 'rgba(90, 150, 255, 0.3)',
+        giftCardHover: 'rgba(90, 150, 255, 0.15)',
+        modalBg: themeSettings.backgroundColor,
+        modalOverlay: 'rgba(10, 10, 30, 0.9)'
+    });
+
     return (
-        <ThemeContext.Provider value={{ themeSettings, updateThemeSettings, fontFamilies }}>
+        <ThemeContext.Provider value={{
+            themeSettings,
+            updateThemeSettings,
+            getThemeStyles,
+            fontFamilies
+        }}>
             {children}
         </ThemeContext.Provider>
     );
