@@ -1,166 +1,207 @@
+:root {
+    --container-bg: linear-gradient(180deg, #1a1a2e, #16213e);
+    --border-color: rgba(138, 43, 226, 0.3);
+    --profile-header-bg: rgba(20, 20, 50, 0.8);
+    --text-color: #e0e0ff;
+    --secondary-text: #b0b0ff;
+    --accent-color: #8a2be2;
+    --button-hover: #ff6f91;
+    --menu-bg: rgba(20, 20, 50, 0.95);
+    --input-bg: rgba(30, 30, 70, 0.8);
+    --input-border: rgba(138, 43, 226, 0.4);
+    --chats-list-bg: rgba(10, 10, 30, 0.6);
+    --avatar-border: #8a2be2;
+    --status-online: #00ff9d;
+    --status-idle: #f39c12;
+    --status-busy: #e74c3c;
+    --status-offline: #7b68ee;
+    --notification-active: #ff4d4f;
+    --no-results-bg: rgba(30, 30, 70, 0.4);
+    --no-results-border: rgba(138, 43, 226, 0.4);
+    --shadow: 0 4px 12px rgba(138, 43, 226, 0.2);
+    --hover-opacity: 0.1;
+    --border-radius: 10px;
+    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
 .container {
-    width: 300px;
+    width: 360px;
     height: 100vh;
     display: flex;
     flex-direction: column;
-    background: linear-gradient(180deg, #1a1a2e, #16213e);
-    border-right: 1px solid rgba(138, 43, 226, 0.3);
+    background: var(--container-bg);
+    border-right: 1px solid var(--border-color);
     overflow: hidden;
     position: fixed;
     left: 100px;
     top: 0;
-    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow);
     z-index: 998;
+
 }
 
-/* Шапка профиля */
+/* Profile Header */
 .profileHeader {
     display: flex;
     align-items: center;
-    padding: 20px 15px;
-    background: rgba(20, 20, 50, 0.7);
-    border-bottom: 1px solid rgba(138, 43, 226, 0.3);
+    padding: 16px;
+    background: var(--profile-header-bg);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
 }
 
 .avatarContainer {
     position: relative;
     margin-right: 12px;
-    width: 42px;
-    height: 42px;
+    width: 48px;
+    height: 48px;
+    transition: transform 0.3s ease;
+}
+
+.avatarContainer:hover {
+    transform: scale(1.05);
 }
 
 .avatarImage {
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    border: 2px solid #8a2be2;
+    border: 2px solid var(--avatar-border);
     object-fit: cover;
-    background-color: #2a2a4a; /* Фон для дефолтного аватара */
-}
-
-.avatarContainer:hover {
-    transform: scale(1.1);
+    background: var(--input-bg);
+    transition: border-color 0.3s ease;
 }
 
 .statusBadge {
     position: absolute;
-    bottom: -2px;
-    right: -2px;
-    width: 12px;
-    height: 12px;
+    bottom: 0;
+    right: 0;
+
+
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
-    border: 2px solid #16213e;
+    border: 2px solid var(--profile-header-bg);
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
 }
 
 .statusBadge.online {
-    background: #00ff9d;
-    box-shadow: 0 0 12px #00ff9d;
+    background: var(--status-online);
+    box-shadow: 0 0 10px var(--status-online);
 }
 
 .statusBadge.idle {
-    background-color: #f39c12;
+    background: var(--status-idle);
+    box-shadow: 0 0 10px var(--status-idle);
 }
 
 .statusBadge.busy {
-    background-color: #e74c3c;
+    background: var(--status-busy);
+    box-shadow: 0 0 10px var(--status-busy);
 }
 
 .statusBadge.offline {
-    background: #7b68ee;
-    box-shadow: 0 0 8px #7b68ee;
+    background: var(--status-offline);
+    box-shadow: 0 0 10px var(--status-offline);
 }
 
 .profileInfo {
     flex: 1;
     min-width: 0;
-    margin-right: 10px;
+    margin-right: 12px;
 }
 
 .profileName {
     margin: 0;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
-    color: #e0e0ff;
+    color: var(--text-color);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 150px;
+    max-width: 160px;
+    line-height: 1.4;
 }
 
 .profileStatus {
-    margin: 3px 0 0 0;
+    margin: 4px 0 0;
     font-size: 12px;
-    color: #b0b0ff;
+    color: var(--secondary-text);
+    opacity: 0.9;
+    line-height: 1.4;
 }
 
 .profileActions {
     display: flex;
-    gap: 10px;
+    gap: 8px;
+    align-items: center;
 }
 
 .iconButton {
     background: transparent;
     border: none;
-    color: #8a2be2;
-    font-size: 18px;
+    color: var(--accent-color);
+    font-size: 20px;
     cursor: pointer;
-    transition: all 0.2s;
-    padding: 5px;
-    border-radius: 4px;
+    padding: 8px;
+    border-radius: var(--border-radius);
+    transition: all 0.3s ease;
 }
 
 .iconButton:hover {
-    color: #00d4ff;
-    background: rgba(138, 43, 226, 0.2);
+    background: rgba(255, 255, 255, var(--hover-opacity));
+    color: var(--button-hover);
+    transform: translateY(-1px);
 }
 
-/* Стили для меню "Ещё" */
+/* More Menu */
 .moreMenuContainer {
     position: relative;
 }
 
 .moreMenu {
     position: absolute;
-    top: 100%;
+    top: calc(100% + 8px);
     right: 0;
-    background: rgba(20, 20, 50, 0.95);
-    border: 1px solid rgba(138, 43, 226, 0.3);
-    border-radius: 8px;
+    background: var(--menu-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
     padding: 8px 0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--shadow);
     z-index: 999;
-    min-width: 180px;
-    animation: slideIn 0.2s ease-out;
+    min-width: 200px;
+    animation: slideIn 0.3s ease-out;
 }
 
 .moreMenuItem {
     display: flex;
     align-items: center;
-    padding: 10px 15px;
+    padding: 12px 16px;
     background: transparent;
     border: none;
-    color: #e0e0ff;
-    font-size: 13px;
+    color: var(--text-color);
+    font-size: 14px;
     width: 100%;
     text-align: left;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s ease;
 }
 
 .moreMenuItem:hover {
-    background: rgba(138, 43, 226, 0.2);
-    color: #00d4ff;
+    background: rgba(255, 255, 255, var(--hover-opacity));
+    color: var(--button-hover);
+    transform: translateX(4px);
 }
 
 .moreMenuIcon {
-    margin-right: 10px;
-    font-size: 16px;
+    margin-right: 12px;
+    font-size: 18px;
 }
 
 @keyframes slideIn {
     from {
         opacity: 0;
-        transform: translateY(-10px);
+        transform: translateY(-12px);
     }
     to {
         opacity: 1;
@@ -168,86 +209,59 @@
     }
 }
 
-/* Кнопки "Подарки" и "Добавить чат" */
-.actionButtons {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 10px;
-    background: rgba(15, 15, 40, 0.7);
-}
-
-.actionButton {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 10px;
-    cursor: pointer;
-    font-size: 13px;
-    color: #b0b0ff;
-    background: rgba(30, 30, 70, 0.7);
-    border: 1px solid rgba(138, 43, 226, 0.3);
-    border-radius: 8px;
-    transition: all 0.2s;
-    margin: 0 5px -10px;
-}
-
-.actionButton:hover {
-    background: rgba(138, 43, 226, 0.2);
-    color: #e0e0ff;
-    border-color: #8a2be2;
-    box-shadow: 0 0 8px rgba(138, 43, 226, 0.3);
-}
-
-.actionIcon {
-    margin-right: 6px;
-    font-size: 16px;
-}
-
-/* Поиск */
+/* Search */
 .searchPanel {
-    padding: 15px;
-    background: rgba(15, 15, 40, 0.7);
+    padding: 12px 16px;
+    background: var(--profile-header-bg);
 }
 
 .searchInputContainer {
     display: flex;
     align-items: center;
-    background: rgba(30, 30, 70, 0.7);
-    border-radius: 8px;
-    padding: 8px 12px;
-    border: 1px solid rgba(138, 43, 226, 0.3);
-    transition: all 0.3s;
+    border-radius: var(--border-radius);
+    padding: 10px 14px;
+    border: 1px solid var(--input-border);
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    backdrop-filter: blur(5px);
+    background: var(--input-bg);
 }
 
 .searchInputContainer:focus-within {
-    border-color: #8a2be2;
-    box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.2);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
 }
 
 .searchIcon {
-    color: #8a2be2;
-    font-size: 16px;
-    margin-right: 8px;
+    color: var(--accent-color);
+    font-size: 18px;
+    margin-right: 12px;
+    transition: var(--transition);
+    opacity: 0.9;
 }
 
 .searchInput {
     flex: 1;
     border: none;
     background: transparent;
-    color: #e0e0ff;
-    font-size: 13px;
+    color: var(--text-color);
+    font-size: 14px;
     outline: none;
+    font-family: var(--font-family);
+    font-weight: 400;
 }
 
 .searchInput::placeholder {
-    color: #b0b0ff;
+    color: var(--secondary-text);
+    opacity: 0.7;
 }
 
-/* Вкладки */
+/* Tabs */
 .tabsContainer {
     display: flex;
-    border-bottom: 1px solid rgba(138, 43, 226, 0.2);
+    border-bottom: 1px solid var(--border-color);
+    background: var(--profile-header-bg);
+    padding: 0 16px;
 }
 
 .tabButton {
@@ -257,49 +271,52 @@
     align-items: center;
     padding: 12px 0;
     cursor: pointer;
-    font-size: 13px;
-    color: #b0b0ff;
-    transition: all 0.2s;
+    font-size: 14px;
+    color: var(--secondary-text);
     background: transparent;
     border: none;
     position: relative;
+    transition: all 0.3s ease;
+    font-family: var(--font-family);
 }
 
 .tabButton:hover {
-    background: rgba(138, 43, 226, 0.1);
-    color: #e0e0ff;
+    background: rgba(255, 255, 255, var(--hover-opacity));
+    color: var(--text-color);
 }
 
 .tabButton.active {
-    color: #8a2be2;
+    color: var(--accent-color);
+    background: rgba(255, 255, 255, var(--hover-opacity));
 }
 
 .tabButton.active::after {
     content: '';
     position: absolute;
     bottom: 0;
-    left: 20%;
-    right: 20%;
-    height: 2px;
-    background: #8a2be2;
+    left: 15%;
+    right: 15%;
+    height: 3px;
+    background: var(--accent-color);
     border-radius: 2px;
 }
 
 .tabIcon {
-    margin-right: 6px;
+    margin-right: 8px;
+    font-size: 16px;
 }
 
-/* Список чатов */
+/* Chats List */
 .chatsList {
     flex: 1;
     overflow-y: auto;
-    padding: 10px 0;
-    background: rgba(10, 10, 30, 0.5);
+    padding: 12px 16px;
+    background: var(--chats-list-bg);
 }
 
-/* Кастомный скролл */
+/* Custom Scrollbar */
 .chatsList::-webkit-scrollbar {
-    width: 4px;
+    width: 6px;
 }
 
 .chatsList::-webkit-scrollbar-track {
@@ -307,65 +324,68 @@
 }
 
 .chatsList::-webkit-scrollbar-thumb {
-    background-color: rgba(138, 43, 226, 0.5);
-    border-radius: 2px;
+    background: var(--accent-color);
+    border-radius: var(--border-radius);
 }
 
-/* Стиль для заглушки аватара */
+/* Avatar Placeholder */
 .avatarPlaceholder {
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    border: 2px solid #8a2be2;
-    background: linear-gradient(135deg, #9370DB, #8A2BE2);
+    border: 2px solid var(--avatar-border);
+    background: linear-gradient(135deg, var(--accent-color), var(--button-hover));
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #FFFACD;
-    font-weight: bold;
-    font-size: 18px;
-    text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+    color: var(--text-color);
+    font-weight: 700;
+    font-size: 20px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    transition: background 0.3s ease;
 }
 
-/* Стили для сообщения "Ничего не найдено" */
+/* No Results */
 .noResultsContainer {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 30px 20px;
+    padding: 24px 16px;
     text-align: center;
-    color: #b0b0ff;
-    background: rgba(30, 30, 70, 0.3);
-    border-radius: 10px;
-    margin: 20px;
-    border: 1px dashed rgba(138, 43, 226, 0.3);
-    animation: fadeIn 0.3s ease-out;
+    color: var(--secondary-text);
+    background: var(--no-results-bg);
+    border-radius: var(--border-radius);
+    margin: 16px;
+    border: 1px dashed var(--no-results-border);
+    box-shadow: var(--shadow);
+    animation: fadeIn 0.4s ease-out;
 }
 
 .noResultsIcon {
-    font-size: 40px;
-    color: #8a2be2;
-    margin-bottom: 15px;
-    opacity: 0.7;
+    font-size: 36px;
+    color: var(--accent-color);
+    margin-bottom: 12px;
+    opacity: 0.8;
 }
 
 .noResultsTitle {
-    margin: 0 0 8px 0;
-    color: #e0e0ff;
+    margin: 0 0 8px;
+    color: var(--text-color);
     font-size: 16px;
+    font-weight: 600;
 }
 
 .noResultsText {
     margin: 0;
     font-size: 13px;
-    opacity: 0.8;
+    opacity: 0.7;
 }
 
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(12px);
     }
     to {
         opacity: 1;
@@ -373,23 +393,70 @@
     }
 }
 
-.giftButton {
-    color: #8a2be2;
-    font-size: 18px;
-    transition: all 0.2s;
-    padding: 5px;
-    border-radius: 4px;
-    background: transparent;
-    border: none;
-    cursor: pointer;
+/* Notifications */
+.notificationsContainer {
+    position: relative;
 }
 
-.giftButton:hover {
-    color: #00d4ff;
-    background: rgba(138, 43, 226, 0.2);
-    transform: none;
+.notificationActive {
+    color: var(--notification-active);
+    animation: pulse 1.5s infinite ease-in-out;
 }
 
-.giftIcon {
-    font-size: inherit;
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.08);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.notificationsMenu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: var(--menu-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 8px 0;
+    box-shadow: var(--shadow);
+    z-index: 1001;
+    min-width: 260px;
+    max-height: 360px;
+    overflow-y: auto;
+    animation: slideIn 0.3s ease-out;
+}
+
+.notificationItem {
+    display: flex;
+    flex-direction: column;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-color);
+    font-size: 13px;
+    transition: all 0.3s ease;
+}
+
+.notificationItem:hover {
+    background: rgba(255, 255, 255, var(--hover-opacity));
+    color: var(--button-hover);
+}
+
+.notificationTime {
+    color: var(--secondary-text);
+    font-size: 11px;
+    margin-top: 6px;
+    opacity: 0.7;
+}
+
+.noNotifications {
+    padding: 16px;
+    text-align: center;
+    color: var(--secondary-text);
+    font-size: 13px;
+    opacity: 0.7;
 }

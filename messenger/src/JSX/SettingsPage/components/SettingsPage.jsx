@@ -3,6 +3,8 @@ import { useForm } from 'react-hook-form';
 import styles from '../styles/SettingsPage.module.css';
 import { FiEye, FiEyeOff, FiGift } from 'react-icons/fi';
 import Sidebar from './Sidebar';
+import { useUser } from './Context/UserContext';
+import { useTheme } from './Context/ThemeContext';
 
 const Background = () => {
     return (
@@ -12,35 +14,29 @@ const Background = () => {
     );
 };
 
-const SettingsPage = () => {
-    const [bannerType, setBannerType] = useState('color');
-    const [bannerColor, setBannerColor] = useState('#1a2a4d');
-    const [bannerImage, setBannerImage] = useState(null);
+const SettingsPage = ({ setIsModalOpen }) => {
+    const { user, updateUser } = useUser();
+    const { updateThemeSettings } = useTheme();
+    const [bannerType, setBannerType] = useState(user.banner.type);
+    const [bannerColor, setBannerColor] = useState(user.banner.type === 'color' ? user.banner.value : '#1a2a4d');
+    const [bannerImage, setBannerImage] = useState(user.banner.type === 'image' ? user.banner.value : null);
     const [showPhone, setShowPhone] = useState(false);
     const [avatarBorderType, setAvatarBorderType] = useState('color');
-    const [avatarBorderColor, setAvatarBorderColor] = useState('#4d79f6');
+    const [avatarBorderColor, setAvatarBorderColor] = useState(user.avatarBorderColor || '#4d79f6');
     const [avatarBorderImage, setAvatarBorderImage] = useState(null);
     const [maxGiftsSelected, setMaxGiftsSelected] = useState(false);
+    const [avatar, setAvatar] = useState(user.avatarUrl);
+    const [profileBackgroundColor, setProfileBackgroundColor] = useState(user.backgroundColor || '#071332');
 
     const { register, handleSubmit, formState: { errors } } = useForm({
         defaultValues: {
-            username: 'Командир Ковальски',
-            tag: 'Капитан 1-го ранга',
-            email: 'commander@starfleet.com',
-            phone: '+7 (999) 123-45-67',
-            status: 'Опытный командир с 15-летним стажем. Специализация: дальние космические миссии.',
-        }
+            username: user.username,
+            tag: user.tag,
+            email: user.email,
+            phone: user.phone,
+            status: user.status,
+        },
     });
-
-    // Состояние для витрины подарков
-    const [gifts, setGifts] = useState([
-        { id: 1, image: "https://cdn1.ozone.ru/s3/multimedia-1-h/7548608069.jpg", name: "Золотой лабубу", selected: true },
-        { id: 2, image: "https://avatars.mds.yandex.net/get-mpic/13527901/2a000001971b61fbaf300b399920a6a840f3/orig", name: "Никита", selected: false },
-        { id: 3, image: "https://avatars.mds.yandex.net/i?id=3eaffa6d84e0523f6ed1786307f4e0a4_l-5295169-images-thumbs&n=13", name: "Лабуба", selected: true },
-        { id: 4, image: "https://i.imgur.com/JQ9qX1z.png", name: "Космический шлем", selected: false },
-        { id: 5, image: "https://i.imgur.com/8Km9tLL.png", name: "Звездный меч", selected: true },
-        { id: 6, image: "https://i.imgur.com/3Zq3Z8L.png", name: "Галактический щит", selected: false },
-    ]);
 
     const handleBannerChange = (e) => {
         const file = e.target.files[0];
@@ -48,6 +44,7 @@ const SettingsPage = () => {
             const reader = new FileReader();
             reader.onloadend = () => {
                 setBannerImage(reader.result);
+                updateUser({ banner: { type: 'image', value: reader.result } });
             };
             reader.readAsDataURL(file);
         }
@@ -56,7 +53,12 @@ const SettingsPage = () => {
     const handleAvatarChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            console.log('Avatar file selected:', file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setAvatar(reader.result);
+                updateUser({ avatarUrl: reader.result });
+            };
+            reader.readAsDataURL(file);
         }
     };
 
@@ -66,6 +68,7 @@ const SettingsPage = () => {
             const reader = new FileReader();
             reader.onloadend = () => {
                 setAvatarBorderImage(reader.result);
+                updateUser({ avatarBorder: { type: 'image', value: reader.result } });
             };
             reader.readAsDataURL(file);
         }
@@ -73,16 +76,33 @@ const SettingsPage = () => {
 
     const handleColorChange = (e) => {
         setBannerColor(e.target.value);
+        updateUser({ banner: { type: 'color', value: e.target.value } });
     };
 
     const handleBorderColorChange = (e) => {
-        setAvatarBorderColor(e.target.value);
+        const newColor = e.target.value;
+        setAvatarBorderColor(newColor);
+        updateUser({ avatarBorderColor: newColor });
+        updateThemeSettings({ avatarBorderColor: newColor });
     };
 
-    // Обработчик выбора подарка с ограничением
+    const handleBackgroundColorChange = (e) => {
+        const newColor = e.target.value;
+        setProfileBackgroundColor(newColor);
+        updateUser({ backgroundColor: newColor });
+        updateThemeSettings({ backgroundColor: newColor });
+    };
+
+    const handleResetBanner = () => {
+        setBannerType('color');
+        setBannerColor('#1a2a4d');
+        setBannerImage(null);
+        updateUser({ banner: { type: 'color', value: '#1a2a4d' } });
+    };
+
     const toggleGiftSelection = (id) => {
-        const selectedCount = gifts.filter(gift => gift.selected).length;
-        const isCurrentlySelected = gifts.find(gift => gift.id === id)?.selected;
+        const selectedCount = user.gifts.filter(gift => gift.selected).length;
+        const isCurrentlySelected = user.gifts.find(gift => gift.id === id)?.selected;
 
         if (!isCurrentlySelected && selectedCount >= 3) {
             setMaxGiftsSelected(true);
@@ -90,15 +110,16 @@ const SettingsPage = () => {
             return;
         }
 
-        setGifts(gifts.map(gift =>
+        const updatedGifts = user.gifts.map(gift =>
             gift.id === id ? { ...gift, selected: !gift.selected } : gift
-        ));
+        );
+        updateUser({ gifts: updatedGifts });
     };
 
     const onSubmit = (data) => {
+        updateUser(data);
         console.log('Form submitted:', data);
-        const selectedGifts = gifts.filter(gift => gift.selected);
-        console.log('Selected gifts:', selectedGifts);
+        console.log('Selected gifts:', user.gifts.filter(gift => gift.selected));
     };
 
     const maskPhoneNumber = (phone) => {
@@ -110,12 +131,17 @@ const SettingsPage = () => {
         <div className={styles.container}>
             <Background />
             <Sidebar />
-
             <main className={styles.mainContent}>
                 <div className={styles.contentWrapper}>
                     <header className={styles.pageHeader}>
                         <h1>Настройки профиля</h1>
                         <p>Управляйте своей космической идентификацией</p>
+                        <button
+                            className={styles.viewProfileButton}
+                            onClick={() => setIsModalOpen(true)}
+                        >
+                            Просмотреть профиль
+                        </button>
                     </header>
 
                     <div className={styles.profileSection}>
@@ -131,7 +157,10 @@ const SettingsPage = () => {
                                     <div className={styles.bannerToggle}>
                                         <button
                                             className={`${styles.toggleButton} ${bannerType === 'color' ? styles.activeToggle : ''}`}
-                                            onClick={() => setBannerType('color')}
+                                            onClick={() => {
+                                                setBannerType('color');
+                                                updateUser({ banner: { type: 'color', value: bannerColor } });
+                                            }}
                                         >
                                             Цвет
                                         </button>
@@ -164,6 +193,12 @@ const SettingsPage = () => {
                                             Выбрать изображение
                                         </label>
                                     )}
+                                    <button
+                                        className={styles.resetButton}
+                                        onClick={handleResetBanner}
+                                    >
+                                        Сбросить фон
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -175,10 +210,11 @@ const SettingsPage = () => {
                                         ? `2px solid ${avatarBorderColor}`
                                         : avatarBorderImage
                                             ? `2px solid transparent`
-                                            : `2px solid rgba(77, 121, 246, 0.3)`,
+                                            : `2px solid ${avatarBorderColor}`,
                                     backgroundImage: avatarBorderType === 'image' && avatarBorderImage
                                         ? `url(${avatarBorderImage})`
-                                        : 'none'
+                                        : 'none',
+                                    background: avatar ? `url(${avatar}) center/cover` : 'linear-gradient(135deg, #1e2b4d, #0f1a2e)',
                                 }}
                             >
                                 <div className={styles.avatarGlow}></div>
@@ -234,9 +270,27 @@ const SettingsPage = () => {
                         </div>
 
                         <div className={styles.profileInfo}>
-                            <h2>Командир Ковальски</h2>
-                            <p className={styles.userEmail}>commander@starfleet.com</p>
+                            <h2>{user.username}</h2>
+                            <p className={styles.userEmail}>{user.email}</p>
                             <p className={styles.userStatus}>На связи</p>
+                        </div>
+                    </div>
+
+                    <div className={styles.themeSection}>
+                        <div className={styles.sectionHeader}>
+                            <h3>Цвет фона профиля</h3>
+                        </div>
+                        <p className={styles.sectionDescription}>
+                            Выберите цвет фона для вашего профиля
+                        </p>
+                        <div className={styles.colorPickerWrapper}>
+                            <input
+                                type="color"
+                                value={profileBackgroundColor}
+                                onChange={handleBackgroundColorChange}
+                                className={styles.colorPicker}
+                            />
+                            <span className={styles.colorValue}>{profileBackgroundColor}</span>
                         </div>
                     </div>
 
@@ -268,8 +322,8 @@ const SettingsPage = () => {
                                         required: 'Email обязателен',
                                         pattern: {
                                             value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                                            message: 'Неверный формат email'
-                                        }
+                                            message: 'Неверный формат email',
+                                        },
                                     })}
                                     className={styles.formInput}
                                 />
@@ -283,11 +337,11 @@ const SettingsPage = () => {
                                             required: 'Номер телефона обязателен',
                                             pattern: {
                                                 value: /^\+\d\s\(\d{3}\)\s\d{3}-\d{2}-\d{2}$/,
-                                                message: 'Неверный формат номера'
-                                            }
+                                                message: 'Неверный формат номера',
+                                            },
                                         })}
                                         className={styles.formInput}
-                                        value={showPhone ? undefined : maskPhoneNumber('+7 (999) 123-45-67')}
+                                        value={showPhone ? undefined : maskPhoneNumber(user.phone)}
                                     />
                                     <button
                                         type="button"
@@ -307,21 +361,20 @@ const SettingsPage = () => {
                                 {...register('status', {
                                     maxLength: {
                                         value: 100,
-                                        message: 'Статус не должен превышать 100 символов'
-                                    }
+                                        message: 'Статус не должен превышать 100 символов',
+                                    },
                                 })}
                                 className={styles.formTextarea}
                             ></textarea>
                             {errors.status && <p className={styles.error}>{errors.status.message}</p>}
                         </div>
 
-                        {/* Секция витрины подарков */}
                         <div className={styles.giftsSection}>
                             <div className={styles.sectionHeader}>
                                 <FiGift className={styles.sectionIcon} />
                                 <h3>Витрина подарков</h3>
                                 <span className={styles.giftsCounter}>
-                                    {gifts.filter(gift => gift.selected).length}/3 выбрано
+                                    {user.gifts.filter(gift => gift.selected).length}/3 выбрано
                                 </span>
                             </div>
                             <p className={styles.sectionDescription}>
@@ -335,8 +388,8 @@ const SettingsPage = () => {
                             )}
 
                             <div className={styles.giftsGrid}>
-                                {gifts.map(gift => {
-                                    const selectedCount = gifts.filter(g => g.selected).length;
+                                {user.gifts.map(gift => {
+                                    const selectedCount = user.gifts.filter(g => g.selected).length;
                                     const isDisabled = !gift.selected && selectedCount >= 3;
 
                                     return (

@@ -1,7 +1,8 @@
+/* GroupNavigation.module.css */
+
 .navPanel {
     width: 100px;
-    height: 100vh;
-    background: linear-gradient(180deg, #1a1a2e, #16213e);
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -11,40 +12,51 @@
     left: 0;
     top: 0;
     z-index: 998;
-    border-right: 1px solid rgba(138, 43, 226, 0.3);
+    transition: all 0.3s ease;
 }
 
 .homeButton {
     background: none;
     border: none;
-    color: #e0e0ff;
     font-size: 24px;
     cursor: pointer;
     margin-bottom: 10px;
     transition: transform 0.3s ease, color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
 }
 
 .homeButton:hover {
-    color: #00d4ff;
-    transform: scale(1.2);
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .separator {
     width: 40px;
     height: 2px;
-    background: #b0b0ff;
     margin-bottom: 15px;
+    transition: background 0.3s ease;
+    opacity: 0.3;
 }
 
 .groupList {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    align-items: center;
+    width: 100%;
+    padding: 0 10px;
 }
 
 .groupItem {
     position: relative;
     cursor: pointer;
+    display: flex;
+    justify-content: center;
 }
 
 .avatarWrapper {
@@ -52,8 +64,11 @@
     height: 50px;
     overflow: hidden;
     border-radius: 10px;
-    transition: transform 0.3s ease;
+    transition: all 0.3s ease;
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .avatar {
@@ -64,25 +79,20 @@
 }
 
 .avatarWrapper:hover {
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7)!important;
+    transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
 .avatarWrapper.selected {
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7) !important;
+    box-shadow: 0 0 15px currentColor !important;
+    transform: scale(1.05);
 }
-
-.groupItem:hover .avatarWrapper {
-    transform: scale(1.1);
-}
-
 
 .tooltip {
     position: absolute;
     left: 50%;
     top: calc(100% + 10px);
     transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.9);
-    color: #e0e0ff;
     padding: 6px 12px;
     z-index: 2147483647;
     border-radius: 6px;
@@ -95,10 +105,7 @@
     opacity: 0;
     transition: opacity 0.2s ease, transform 0.2s ease;
     transform-origin: top center;
-    isolation: isolate;
-    will-change: transform, opacity;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .groupItem:hover .tooltip {
@@ -107,84 +114,21 @@
     animation: tooltipFadeIn 0.2s ease-out forwards;
 }
 
-@keyframes tooltipFadeIn {
-    from {
-        opacity: 0;
-        transform: translateX(-50%) scale(0.9);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(-50%) scale(1);
-    }
-}
-
 .addGroupButton {
     position: relative;
     cursor: pointer;
     margin-top: 10px;
-}
-
-.formGroup select {
-
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background: rgba(20, 20, 50, 0.5);
-    border: 1px solid rgba(100, 149, 237, 0.2);
-    border-radius: 12px;
-    color: #ffffff;
-    font-size: 15px;
-    padding: 14px 40px 14px 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-    width: 100%;
-    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23b0b0ff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%2F%3E%3C%2Fsvg%3E'); /* Кастомная стрелка */
-    background-repeat: no-repeat;
-    background-position: right 16px center;
-}
-
-.formGroup select:focus {
-    outline: none;
-    border-color: #4fc3f7;
-    box-shadow: 0 0 0 2px rgba(79, 195, 247, 0.2);
-}
-
-.formGroup select option {
-
-    background: #1a1a3a;
-    color: #e0e0ff;
-    font-size: 15px;
-    padding: 10px;
-    border: none;
-}
-
-
-.formGroup select option:hover {
-    background: rgba(79, 195, 247, 0.3);
-    color: #ffffff;
-}
-
-
-.formGroup select option:checked {
-    background: linear-gradient(135deg, rgba(79, 195, 247, 0.3), rgba(100, 149, 237, 0.3));
-    color: #ffffff;
-    font-weight: 500;
+    display: flex;
+    justify-content: center;
 }
 
 .addGroupButton .avatarWrapper {
-    background: rgba(30, 30, 70, 0.7);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px dashed rgba(138, 43, 226, 0.5);
     transition: all 0.3s ease;
 }
 
-.addGroupButton .avatarWrapper:hover {
-    background: rgba(138, 43, 226, 0.2);
-    border-color: #8a2be2;
-    box-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+.addGroupButton:hover .avatarWrapper {
+    transform: scale(1.1);
+    box-shadow: 0 0 10px currentColor;
 }
 
 .plusIcon {
@@ -198,9 +142,9 @@
 
 .addGroupButton:hover .plusIcon {
     transform: scale(1.2);
-    color: #00d4ff;
 }
 
+/* Modal Styles */
 .modalOverlay {
     position: fixed;
     top: 0;
@@ -216,41 +160,23 @@
     animation: fadeIn 0.3s ease-out;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
 .modal {
-    background: linear-gradient(145deg, #0f0f23, #1a1a3a);
-    border-radius: 20px;
+    border-radius: 16px;
     width: 480px;
     max-width: 95%;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(100, 149, 237, 0.2);
-    overflow: hidden;
+    max-height: 90vh;
+    overflow-y: auto;
     position: relative;
     animation: modalSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-@keyframes modalSlideIn {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 .closeButton {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    background: rgba(30, 30, 60, 0.5);
+    top: 12px;
+    right: 12px;
     border: none;
-    color: #e0e0ff;
     cursor: pointer;
     transition: all 0.3s ease;
     width: 36px;
@@ -263,72 +189,72 @@
 }
 
 .closeButton:hover {
-    background: rgba(79, 195, 247, 0.2);
-    color: #4fc3f7;
-    transform: rotate(90deg);
+    transform: rotate(90deg) scale(1.1);
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .modalHeader {
-    padding: 24px 24px 0;
+    padding: 24px 24px 16px;
+    position: sticky;
+    top: 0;
+    background: inherit;
+    z-index: 1;
+    border-bottom: 1px solid transparent;
 }
 
 .modalTitle {
-    color: #e0e0ff;
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 600;
     margin: 0 0 8px 0;
     text-align: center;
 }
 
 .modalDescription {
-    color: #b0b0ff;
     font-size: 14px;
     line-height: 1.5;
-    margin: 0 0 16px 0;
+    margin: 0 0 20px 0;
     text-align: center;
+    opacity: 0.8;
 }
 
 .tabs {
     display: flex;
-    gap: 8px;
-    background: rgba(20, 20, 50, 0.5);
+    gap: 4px;
     border-radius: 12px;
     padding: 4px;
+    margin-bottom: 16px;
 }
 
 .tabButton {
     flex: 1;
-    padding: 12px;
-    background: transparent;
+    padding: 10px 12px;
     border: none;
-    color: #b0b0ff;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 500;
     text-align: center;
 }
 
-.tabButton:hover {
-    color: #e0e0ff;
-    background: rgba(79, 195, 247, 0.1);
+.tabButton.active {
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-.tabButton.active {
-    background: linear-gradient(135deg, rgba(79, 195, 247, 0.3), rgba(100, 149, 237, 0.3));
-    color: #ffffff;
-    box-shadow: 0 4px 12px rgba(79, 195, 247, 0.2);
+.tabButton:not(.active):hover {
+    opacity: 0.9;
 }
 
 .modalContent {
-    padding: 24px;
+    padding: 0 24px 24px;
 }
 
-.createForm, .joinForm {
+.createForm,
+.joinForm {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 16px;
 }
 
 .formGroup {
@@ -338,29 +264,27 @@
 }
 
 .formGroup label {
-    color: #b0b0ff;
     font-size: 14px;
     font-weight: 500;
+    opacity: 0.9;
 }
 
 .formGroup input,
 .formGroup textarea,
 .formGroup select {
-    padding: 14px 16px;
-    background: rgba(20, 20, 50, 0.5);
-    border: 1px solid rgba(100, 149, 237, 0.2);
-    border-radius: 12px;
-    color: #ffffff;
+    padding: 12px 14px;
+    border-radius: 10px;
     font-size: 15px;
+    border: 1px solid;
     transition: all 0.3s ease;
+    width: 100%;
 }
 
 .formGroup input:focus,
 .formGroup textarea:focus,
 .formGroup select:focus {
     outline: none;
-    border-color: #4fc3f7;
-    box-shadow: 0 0 0 2px rgba(79, 195, 247, 0.2);
+    box-shadow: 0 0 0 2px currentColor;
 }
 
 .formGroup textarea {
@@ -368,6 +292,24 @@
     resize: vertical;
 }
 
+.selectWrapper {
+    position: relative;
+}
+
+.selectWrapper select {
+    appearance: none;
+    padding-right: 32px;
+}
+
+.selectArrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+/* Avatar Upload */
 .avatarUpload {
     display: flex;
     justify-content: center;
@@ -382,12 +324,10 @@
 
 .avatarPreviewContainer {
     position: relative;
-    width: 120px;
-    height: 120px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
     overflow: hidden;
-    border: 2px solid rgba(100, 149, 237, 0.3);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
     transition: all 0.3s ease;
 }
 
@@ -403,12 +343,12 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
     opacity: 0;
     transition: all 0.3s ease;
+    background: rgba(0, 0, 0, 0.5);
 }
 
 .avatarPreviewContainer:hover .avatarOverlay {
@@ -416,29 +356,23 @@
 }
 
 .uploadPlaceholder {
-    width: 120px;
-    height: 120px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
-    background: rgba(20, 20, 50, 0.5);
-    border: 2px dashed rgba(100, 149, 237, 0.5);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: #b0b0ff;
     transition: all 0.3s ease;
     text-align: center;
-    padding-right: 5px;
+    border: 2px dashed currentColor;
 }
 
-.uploadPlaceholder:hover {
-    background: rgba(79, 195, 247, 0.1);
-    border-color: #4fc3f7;
-    color: #e0e0ff;
+.uploadPlaceholder svg {
+    margin-bottom: 8px;
 }
 
-.uploadPlaceholder span {
-    margin-top: 8px;
+.uploadText {
     font-size: 12px;
     max-width: 90px;
     line-height: 1.2;
@@ -448,87 +382,197 @@
     display: none;
 }
 
-.agreement {
+/* Checkbox */
+.checkboxContainer {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin: 10px 0;
-}
-
-.agreement input {
-    width: 18px;
-    height: 18px;
-    accent-color: #4fc3f7;
-}
-
-.agreement label {
-    color: #b0b0ff;
+    position: relative;
+    padding-left: 28px;
+    cursor: pointer;
     font-size: 14px;
-    line-height: 1.5;
+    user-select: none;
+    line-height: 1.4;
 }
 
-.agreement a {
-    color: #4fc3f7;
-    text-decoration: none;
+.checkboxContainer input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkmark {
+    position: absolute;
+    top: 2px;
+    left: 0;
+    height: 18px;
+    width: 18px;
+    border-radius: 4px;
     transition: all 0.2s ease;
+    border: 1px solid;
 }
 
-.agreement a:hover {
-    text-decoration: underline;
+.checkboxContainer:hover input ~ .checkmark {
+    opacity: 0.8;
 }
 
+.checkboxContainer input:checked ~ .checkmark {
+    background-color: currentColor;
+}
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.checkboxContainer input:checked ~ .checkmark:after {
+    display: block;
+}
+
+.checkboxContainer .checkmark:after {
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Buttons */
 .submitButton {
-    padding: 14px;
-    background: linear-gradient(135deg, #4fc3f7, #6393f1);
+    padding: 12px;
     border: none;
-    border-radius: 12px;
-    color: #0a0a1a;
-    font-size: 16px;
+    border-radius: 10px;
+    font-size: 15px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
     margin-top: 10px;
-    box-shadow: 0 4px 15px rgba(79, 195, 247, 0.3);
+    width: 100%;
 }
 
 .submitButton:hover {
-    background: linear-gradient(135deg, #63d2ff, #7aa3ff);
-    box-shadow: 0 6px 20px rgba(79, 195, 247, 0.4);
     transform: translateY(-2px);
+    opacity: 0.9;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
+/* Example Box */
 .example {
     margin-top: 10px;
     padding: 12px;
-    background: rgba(20, 20, 50, 0.3);
     border-radius: 8px;
     font-size: 14px;
-    color: #b0b0ff;
     line-height: 1.5;
+    border: 1px solid;
+    opacity: 0.8;
 }
 
 .example p {
     margin: 0 0 6px 0;
-    color: #e0e0ff;
+    font-weight: 500;
 }
 
 .example code {
     display: block;
     padding: 8px;
-    background: rgba(0, 0, 0, 0.2);
     border-radius: 6px;
     font-family: 'Courier New', monospace;
-    color: #4fc3f7;
     overflow-x: auto;
+    background: rgba(0, 0, 0, 0.1);
 }
 
+/* Links */
 .termsLink {
-    color: #4b83f8;
     text-decoration: none;
     transition: all 0.2s ease;
+    font-weight: 500;
 }
 
 .termsLink:hover {
-    color: #4fc3f7;
     text-decoration: underline;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes tooltipFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+    }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .modal {
+        width: 90%;
+        max-height: 85vh;
+    }
+
+    .modalHeader {
+        padding: 20px 16px 12px;
+    }
+
+    .modalContent {
+        padding: 0 16px 20px;
+    }
+
+    .avatarPreviewContainer,
+    .uploadPlaceholder {
+        width: 80px;
+        height: 80px;
+    }
+
+    .modalTitle {
+        font-size: 20px;
+    }
+
+    .modalDescription {
+        font-size: 13px;
+    }
+}
+
+/* Scrollbar */
+.modal::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 0 16px 16px 0;
+}
+
+.modal::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.modal::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
 }

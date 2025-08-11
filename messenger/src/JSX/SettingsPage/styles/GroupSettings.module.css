@@ -1,0 +1,763 @@
+.container {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    overflow: hidden;
+    background: radial-gradient(circle at 20% 20%, #2a3b6a, #0d1f47, #071332);
+    color: #e0e0e0;
+    font-family: 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.mainContent {
+    flex: 1;
+    overflow-y: auto;
+    position: relative;
+    background: radial-gradient(circle at 10% 20%, rgba(77, 121, 246, 0.2) 0%, transparent 50%),
+    radial-gradient(circle at 90% 80%, rgba(106, 90, 205, 0.2) 0%, transparent 50%),
+    linear-gradient(to bottom, #071332, #0c172f);
+    z-index: 1;
+    height: 100vh;
+}
+
+.contentWrapper {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 50px;
+    position: relative;
+    z-index: 1;
+}
+
+.pageHeader {
+    margin-bottom: 50px;
+    text-align: center;
+    position: relative;
+    padding-bottom: 20px;
+}
+
+.pageHeader::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 2px;
+    background: linear-gradient(90deg, #4d79f6, #8a6df7);
+}
+
+.pageHeader h1 {
+    font-size: 40px;
+    margin: 0 0 12px 0;
+    background: linear-gradient(90deg, #ffffff, #b8c8ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(77, 121, 246, 0.5);
+}
+
+.pageHeader p {
+    color: #7a8aaa;
+    margin: 0;
+    font-size: 18px;
+    opacity: 0.9;
+}
+
+.groupsContainer {
+    display: flex;
+    gap: 50px;
+    flex-wrap: wrap;
+}
+
+.groupsSidebar {
+    width: 400px;
+    background: rgba(15, 26, 46, 0.85);
+    border-radius: 20px;
+    padding: 40px;
+    border: 1px solid rgba(77, 121, 246, 0.4);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    align-self: flex-start;
+}
+
+.searchBar {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.searchInput {
+    width: 100%;
+    padding: 14px 50px 14px 50px; /* Adjusted padding to accommodate icon */
+    background: rgba(10, 14, 23, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    color: #ffffff;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.searchInput:focus {
+    outline: none;
+    border-color: #4d79f6;
+    box-shadow: 0 0 0 3px rgba(77, 121, 246, 0.3);
+}
+
+.searchIcon {
+    position: absolute;
+    top: 50%;
+    left: 20px;
+    transform: translateY(-50%);
+    color: #7a8aaa;
+    font-size: 20px;
+}
+
+.clearSearch {
+    position: absolute;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: #7a8aaa;
+    cursor: pointer;
+    font-size: 20px;
+    transition: all 0.3s ease;
+}
+
+.clearSearch:hover {
+    color: #4d79f6;
+}
+
+.groupsList {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-height: 600px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #4d79f6 rgba(255, 255, 255, 0.1);
+}
+
+.groupsList::-webkit-scrollbar {
+    width: 8px;
+}
+
+.groupsList::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.groupsList::-webkit-scrollbar-thumb {
+    background: #4d79f6;
+    border-radius: 4px;
+}
+
+.groupCard {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+    background: rgba(10, 14, 23, 0.9);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(77, 121, 246, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.groupCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(77, 121, 246, 0.3);
+    border-color: #4d79f6;
+}
+
+.selectedGroup {
+    background: rgba(77, 121, 246, 0.3);
+    border-color: #4d79f6;
+    box-shadow: 0 5px 15px rgba(77, 121, 246, 0.4);
+}
+
+.groupCard::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at center, rgba(77, 121, 246, 0.3), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.groupCard:hover::after {
+    opacity: 0.4;
+}
+
+.groupAvatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 16px;
+    object-fit: cover;
+    border: 2px solid rgba(77, 121, 246, 0.5);
+    transition: all 0.3s ease;
+}
+
+.groupCard:hover .groupAvatar {
+    transform: scale(1.1);
+}
+
+.groupInfo {
+    flex: 1;
+}
+
+.groupInfo h3 {
+    margin: 0;
+    font-size: 20px;
+    color: #e0e4ff;
+    font-weight: 600;
+}
+
+.groupInfo p {
+    margin: 8px 0 0 0;
+    font-size: 14px;
+    color: #7a8aaa;
+}
+
+.memberCount {
+    font-size: 13px;
+    color: #4d79f6;
+    margin-top: 8px;
+    display: block;
+    font-weight: 500;
+}
+
+.noResults {
+    color: #7a8aaa;
+    text-align: center;
+    font-size: 16px;
+    padding: 30px;
+}
+
+.groupSettings {
+    flex: 1;
+    background: rgba(15, 26, 46, 0.85);
+    border-radius: 20px;
+    padding: 40px;
+    border: 1px solid rgba(77, 121, 246, 0.4);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.groupHeader {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.avatarContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.groupAvatarLarge {
+    width: 100px;
+    height: 100px;
+    border-radius: 20px;
+    object-fit: cover;
+    border: 3px solid rgba(77, 121, 246, 0.6);
+    box-shadow: 0 0 15px rgba(77, 121, 246, 0.5);
+    transition: all 0.3s ease;
+}
+
+.editAvatarBtn {
+    position: absolute;
+    bottom: -10px;
+    right: -10px;
+    background: linear-gradient(90deg, #4d79f6, #6a5acd);
+    border: none;
+    color: white;
+    padding: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(77, 121, 246, 0.3);
+}
+
+.editAvatarBtn:hover {
+    background: linear-gradient(90deg, #5a87ff, #7b68ee);
+    transform: scale(1.1);
+}
+
+.fileInput {
+    display: none;
+}
+
+.groupHeader h2 {
+    font-size: 28px;
+    margin: 0;
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.groupHeader p {
+    margin: 8px 0 0 0;
+    color: #7a8aaa;
+    font-size: 16px;
+}
+
+.formSection {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.formRow {
+    display: flex;
+    gap: 30px;
+}
+
+.formGroup {
+    flex: 1;
+    margin: 0;
+}
+
+.formGroup label {
+    display: block;
+    margin-bottom: 10px;
+    color: #a0a0c0;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.formInput, .formTextarea, .roleSelect {
+    width: 100%;
+    padding: 14px 20px;
+    background: rgba(10, 14, 23, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    color: #ffffff;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.formInput:focus, .formTextarea:focus, .roleSelect:focus {
+    outline: none;
+    border-color: #4d79f6;
+    box-shadow: 0 0 0 3px rgba(77, 121, 246, 0.3);
+}
+
+.formTextarea {
+    min-height: 140px;
+    resize: vertical;
+}
+
+.error {
+    color: #ff6a6a;
+    font-size: 14px;
+    margin-top: 6px;
+}
+
+.rolesSection, .membersSection {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.rolesSection h3, .membersSection h3 {
+    font-size: 22px;
+    color: #ffffff;
+    margin: 0 0 20px 0;
+    font-weight: 600;
+}
+
+.addRole, .addMember {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.addButton {
+    background: linear-gradient(90deg, #4d79f6, #6a5acd);
+    border: none;
+    padding: 10px 20px;
+    color: white;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(77, 121, 246, 0.3);
+}
+
+.addButton:hover {
+    background: linear-gradient(90deg, #5a87ff, #7b68ee);
+    transform: translateY(-2px);
+}
+
+.addButton:disabled {
+    background: rgba(77, 121, 246, 0.4);
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.rolesList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.roleItem {
+    background: rgba(77, 121, 246, 0.2);
+    border: 1px solid rgba(77, 121, 246, 0.5);
+    border-radius: 12px;
+    padding: 10px 20px;
+    font-size: 14px;
+    color: #e0e4ff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+}
+
+.roleItem:hover {
+    background: rgba(77, 121, 246, 0.3);
+    transform: translateY(-2px);
+}
+
+.roleActions {
+    display: flex;
+    gap: 8px;
+}
+
+.editRoleButton {
+    background: transparent;
+    border: 1px solid rgba(77, 121, 246, 0.4);
+    color: #4d79f6;
+    padding: 6px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.editRoleButton:hover {
+    background: rgba(77, 121, 246, 0.2);
+    border-color: #4d79f6;
+}
+
+.removeRoleButton {
+    background: transparent;
+    border: 1px solid rgba(255, 77, 77, 0.4);
+    color: #ff6a6a;
+    padding: 6px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.removeRoleButton:hover {
+    background: rgba(255, 77, 77, 0.2);
+    border-color: #ff6a6a;
+}
+
+.removeRoleButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.membersList {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.memberItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: rgba(10, 14, 23, 0.9);
+    border-radius: 16px;
+    border: 1px solid rgba(77, 121, 246, 0.3);
+    transition: all 0.3s ease;
+}
+
+.memberItem:hover {
+    background: rgba(77, 121, 246, 0.2);
+    border-color: #4d79f6;
+    box-shadow: 0 5px 15px rgba(77, 121, 246, 0.3);
+}
+
+.memberInfo {
+    display: flex;
+    flex-direction: column;
+}
+
+.memberInfo span:first-child {
+    font-size: 18px;
+    color: #e0e4ff;
+    font-weight: 500;
+}
+
+.memberRole {
+    font-size: 14px;
+    color: #4d79f6;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 5px;
+}
+
+.memberActions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.roleSelect {
+    padding: 10px 16px;
+    font-size: 14px;
+    background: rgba(10, 14, 23, 0.9);
+    border: 1px solid rgba(77, 121, 246, 0.3);
+}
+
+.removeButton {
+    background: transparent;
+    border: 1px solid rgba(255, 77, 77, 0.4);
+    color: #ff6a6a;
+    padding: 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.removeButton:hover {
+    background: rgba(255, 77, 77, 0.2);
+    border-color: #ff6a6a;
+}
+
+.actionButtons {
+    display: flex;
+    gap: 15px;
+    margin-top: 40px;
+    justify-content: flex-end;
+}
+
+.saveButton {
+    background: linear-gradient(90deg, #4d79f6, #6a5acd);
+    border: none;
+    padding: 14px 30px;
+    color: white;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(77, 121, 246, 0.3);
+}
+
+.saveButton:hover {
+    background: linear-gradient(90deg, #5a87ff, #7b68ee);
+    transform: translateY(-2px);
+}
+
+.saveButton:disabled {
+    background: rgba(77, 121, 246, 0.4);
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.cancelButton {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 14px 30px;
+    color: #a0a0c0;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+}
+
+.cancelButton:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+.deleteGroupButton {
+    background: linear-gradient(90deg, #ff4d4d, #ff1a1a);
+    border: none;
+    padding: 14px 30px;
+    color: white;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 77, 77, 0.3);
+}
+
+.deleteGroupButton:hover {
+    background: linear-gradient(90deg, #ff5c5c, #ff2929);
+    transform: translateY(-2px);
+}
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal {
+    background: rgba(15, 26, 46, 0.95);
+    border-radius: 20px;
+    padding: 30px;
+    width: 500px;
+    max-width: 90%;
+    border: 1px solid rgba(77, 121, 246, 0.4);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+.modal h3 {
+    font-size: 22px;
+    color: #ffffff;
+    margin: 0 0 20px 0;
+    font-weight: 600;
+}
+
+.modal p {
+    color: #e0e4ff;
+    font-size: 16px;
+    margin: 0 0 20px 0;
+}
+
+.modal label strong {
+    color: #4d79f6;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 18px;
+}
+
+.permissionToggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+.permissionToggle input {
+    width: 20px;
+    height: 20px;
+    accent-color: #4d79f6;
+}
+
+.permissionToggle input:disabled + label {
+    color: #7a8aaa;
+    opacity: 0.7;
+}
+
+.permissionToggle label {
+    color: #e0e4ff;
+    font-size: 14px;
+}
+
+.modalActions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+    justify-content: flex-end;
+}
+
+@media (max-width: 1024px) {
+    .groupsContainer {
+        flex-direction: column;
+    }
+
+    .groupsSidebar {
+        width: 100%;
+    }
+
+    .groupSettings {
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .contentWrapper {
+        padding: 30px;
+    }
+
+    .pageHeader h1 {
+        font-size: 32px;
+    }
+
+    .formRow {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .groupHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+    }
+
+    .groupAvatarLarge {
+        margin-bottom: 20px;
+    }
+
+    .avatarContainer {
+        align-self: center;
+    }
+
+    .editAvatarBtn {
+        bottom: 0;
+        right: -40px;
+    }
+
+    .actionButtons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .saveButton, .cancelButton, .deleteGroupButton {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .modal {
+        padding: 20px;
+    }
+}

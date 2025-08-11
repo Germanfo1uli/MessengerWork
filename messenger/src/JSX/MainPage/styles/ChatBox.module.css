@@ -1,3 +1,23 @@
+:root {
+    --container-bg: rgba(138, 43, 226, 0.1);
+    --border-color: rgba(138, 43, 226, 0.2);
+    --avatar-border: #8a2be2;
+    --avatar-bg: linear-gradient(135deg, #8a2be2 0%, #4b0082 100%);
+    --text-color: #e0e0ff;
+    --secondary-text: #b0b0ff;
+    --accent-color: #8a2be2;
+    --status-online: #00ff9d;
+    --status-idle: #f39c12;
+    --status-busy: #e74c3c;
+    --status-offline: #7b68ee;
+    --unread-badge-bg: #8a2be2;
+    --favorite-color: #FFD700;
+    --message-status-color: #b0b0ff;
+    --message-status-read: #8a2be2;
+    --message-status-sending: #b0b0ff;
+    --shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+}
+
 .container {
     display: flex;
     gap: 10px;
@@ -5,10 +25,11 @@
     padding: 12px 15px;
     position: relative;
     transition: background-color 0.2s ease;
+    background: var(--container-bg);
 }
 
 .container:hover {
-    background-color: rgba(138, 43, 226, 0.1);
+    background: rgba(255, 255, 255, 0.15);
 }
 
 .container::after {
@@ -18,7 +39,7 @@
     left: 60px;
     right: 15px;
     height: 1px;
-    background: rgba(138, 43, 226, 0.2);
+    background: var(--border-color);
 }
 
 .avatar_wrapper {
@@ -35,19 +56,19 @@
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    border: 2px solid #8a2be2;
-    background: linear-gradient(135deg, #8a2be2 0%, #4b0082 100%);
+    border: 2px solid var(--avatar-border);
+    background: var(--avatar-bg);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .chatbox:hover {
     transform: scale(1.1);
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    box-shadow: var(--shadow);
 }
 
 .avatar_text {
     font-size: 14px;
-    color: #e0e0ff;
+    color: var(--text-color);
     font-weight: bold;
     text-transform: uppercase;
 }
@@ -55,31 +76,34 @@
 .statusBadge {
     position: absolute;
     bottom: 0;
-    right: 0;
+    right: 2px;
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    border: 2px solid #16213e;
-    box-shadow: 0 0 0 2px rgba(22, 33, 62, 0.3);
+    border: 2px solid var(--avatar-bg);
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
 }
 
 .statusBadge[data-status='online'] {
-    background: #00ffaa;
+    background: var(--status-online);
+    box-shadow: 0 0 10px var(--status-online);
 }
 
 .statusBadge[data-status='idle'] {
-    background: #ffcc00;
+    background: var(--status-idle);
+    box-shadow: 0 0 10px var(--status-idle);
 }
 
 .statusBadge[data-status='busy'] {
-    background: #ff5555;
+    background: var(--status-busy);
+    box-shadow: 0 0 10px var(--status-busy);
 }
 
 .statusBadge[data-status='offline'] {
-    background: #888888;
+    background: var(--status-offline);
+    box-shadow: 0 0 10px var(--status-offline);
 }
 
-/* Остальные стили остаются без изменений */
 .chat_text {
     display: flex;
     flex-direction: column;
@@ -91,7 +115,7 @@
     margin: 0;
     font-size: 15px;
     font-weight: 600;
-    color: #e0e0ff;
+    color: var(--text-color);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -99,7 +123,7 @@
 
 .p_lastmes {
     margin: 4px 0 0 0;
-    color: #b0b0ff;
+    color: var(--secondary-text);
     font-size: 12px;
     white-space: nowrap;
     overflow: hidden;
@@ -115,7 +139,7 @@
 
 .p_date {
     margin: 0;
-    color: #8a2be2;
+    color: var(--accent-color);
     font-size: 11px;
 }
 
@@ -123,8 +147,8 @@
     margin-top: 4px;
     width: 20px;
     height: 20px;
-    background-color: #8a2be2;
-    color: #e0e0ff;
+    background-color: var(--unread-badge-bg);
+    color: var(--text-color);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -140,18 +164,15 @@
 }
 
 .favorite_icon {
-    color: #FFD700; /* золотой цвет для звезды */
+    color: var(--favorite-color);
     font-size: 14px;
     filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.7));
     transition: transform 0.2s ease;
 }
 
-/* Можно добавить анимацию при наведении */
 .container:hover .favorite_icon {
     transform: scale(1.2);
 }
-/* Добавьте эти стили в ваш файл */
-/* Добавьте эти стили в ваш ChatBox.module.css */
 
 .lastMessageContainer {
     display: flex;
@@ -167,32 +188,28 @@
 
 .messageStatusIcon {
     font-size: 12px;
-    color: #b0b0ff;
+    color: var(--message-status-color);
     opacity: 0.7;
 }
 
 .messageStatusIcon.read {
-    color: #8a2be2;
+    color: var(--message-status-read);
     opacity: 1;
 }
 
 .messageStatusIcon.sending {
-    color: #b0b0ff;
+    color: var(--message-status-sending);
     animation: pulse 1.5s infinite;
 }
 
 @keyframes pulse {
-    0% { opacity: 0.4; }
-    50% { opacity: 1; }
-    100% { opacity: 0.4; }
-}
-
-.p_lastmes {
-    margin: 0;
-    color: #b0b0ff;
-    font-size: 12px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    flex: 1;
+    0% {
+        opacity: 0.4;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.4;
+    }
 }
