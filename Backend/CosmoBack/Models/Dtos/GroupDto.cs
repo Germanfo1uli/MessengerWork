@@ -10,9 +10,11 @@ namespace CosmoBack.Models.Dtos
         public string? GroupTag { get; set; }
         public string? Description { get; set; }
         public Guid? AvatarImageId { get; set; }
+        public ImageDto? AvatarImage { get; set; }
         public DateTime CreatedAt { get; set; }
         public bool IsActive { get; set; }
         public bool IsFavorite { get; set; }
+        public int MembersCount { get; set; }
         public DateTime? LastMessageAt { get; set; }
         public GroupMessageDto? LastMessage { get; set; }
     }

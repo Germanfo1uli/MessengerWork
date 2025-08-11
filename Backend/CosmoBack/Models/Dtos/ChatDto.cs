@@ -18,5 +18,6 @@ namespace CosmoBack.Models.Dtos
         public string Username { get; set; } = default!;
         public OnlineStatus OnlineStatus { get; set; }
         public string? ContactTag { get; set; }
+        public ImageDto? AvatarImage { get; set; }
     }
 }

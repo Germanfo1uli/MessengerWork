@@ -36,5 +36,6 @@ namespace CosmoBack.Models
         public virtual User? Sender { get; set; }
         public virtual ICollection<Media>? Media { get; set; }
         public virtual ICollection<Reaction>? Reactions { get; set; }
+        public virtual ICollection<Reply>? Replies { get; set; }
     }
 }

@@ -34,7 +34,6 @@ function useSignalR() {
 
             newConnection.onclose(async () => {
                 setIsConnected(false);
-                console.log('SignalR Disconnected');
                 // Attempt to restart only if not manually stopped
                 if (!isStartingRef.current) {
                     await startConnection();
@@ -43,7 +42,6 @@ function useSignalR() {
 
             await newConnection.start();
             setIsConnected(true);
-            console.log('SignalR Connected');
         } catch (error) {
             console.error('SignalR Connection Error:', error);
         } finally {
@@ -56,7 +54,6 @@ function useSignalR() {
             isStartingRef.current = false; // Ensure stop is allowed
             await connection.stop();
             setIsConnected(false);
-            console.log('SignalR Disconnected');
         }
     }, [connection]);
 

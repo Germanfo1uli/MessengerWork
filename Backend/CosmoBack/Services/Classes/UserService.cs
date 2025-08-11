@@ -1,5 +1,6 @@
 ﻿using CosmoBack.CosmoDBContext;
 using CosmoBack.Models;
+using CosmoBack.Models.Dtos;
 using CosmoBack.Repositories.Interfaces;
 using CosmoBack.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -10,10 +11,10 @@ namespace CosmoBack.Services.Classes
 {
     public class UserService(IUserRepository userRepository, CosmoDbContext context) : IUserService
     {
-        private readonly IUserRepository _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-        private readonly CosmoDbContext _context = context ?? throw new ArgumentNullException(nameof(context));
+        private readonly IUserRepository _userRepository = userRepository;
+        private readonly CosmoDbContext _context = context;
 
-        public async Task<User> GetUserByIdAsync(Guid id)
+        public async Task<(UserDto, ImageDto?)> GetUserByIdAsync(Guid id)
         {
             try
             {
@@ -22,7 +23,45 @@ namespace CosmoBack.Services.Classes
                 {
                     throw new KeyNotFoundException($"Пользователь с ID {id} не найден");
                 }
-                return user;
+
+                var userDto = new UserDto
+                {
+                    Id = user.Id,
+                    Username = user.Username,
+                    Phone = user.Phone,
+                    PasswordHash = user.PasswordHash,
+                    CreatedAt = user.CreatedAt,
+                    Bio = user.Bio,
+                    AvatarImageId = user.AvatarImageId,
+                    LastSeen = user.LastSeen,
+                    IsActive = user.IsActive,
+                    PublicName = user.PublicName,
+                    OnlineStatus = user.OnlineStatus,
+                    Theme = user.Theme
+                };
+
+                ImageDto? avatarImage = null;
+                if (user.AvatarImageId.HasValue)
+                {
+                    var image = await _context.Images.FirstOrDefaultAsync(i => i.Id == user.AvatarImageId);
+                    if (image != null)
+                    {
+                        avatarImage = new ImageDto
+                        {
+                            Id = image.Id,
+                            FileName = image.FileName,
+                            MimeType = image.MimeType,
+                            FileSize = image.FileSize,
+                            Data = image.Data,
+                            EntityType = image.EntityType,
+                            EntityId = image.EntityId,
+                            UploadDate = image.UploadDate,
+                            Url = image.Url
+                        };
+                    }
+                }
+
+                return (userDto, avatarImage);
             }
             catch (Exception ex)
             {
@@ -39,6 +78,7 @@ namespace CosmoBack.Services.Classes
                 {
                     throw new KeyNotFoundException($"Пользователь с именем {username} не найден");
                 }
+
                 return user;
             }
             catch (Exception ex)
@@ -56,6 +96,7 @@ namespace CosmoBack.Services.Classes
                 {
                     throw new KeyNotFoundException($"Пользователь с публичным именем {publicname} не найден");
                 }
+
                 return user;
             }
             catch (Exception ex)
@@ -80,7 +121,22 @@ namespace CosmoBack.Services.Classes
                 user.IsActive = true;
 
                 await _userRepository.AddAsync(user);
-                return await GetUserByIdAsync(user.Id);
+                var (userDto, _) = await GetUserByIdAsync(user.Id);
+                return new User
+                {
+                    Id = userDto.Id,
+                    Username = userDto.Username,
+                    Phone = userDto.Phone,
+                    PasswordHash = userDto.PasswordHash,
+                    CreatedAt = userDto.CreatedAt,
+                    Bio = userDto.Bio,
+                    AvatarImageId = userDto.AvatarImageId,
+                    LastSeen = userDto.LastSeen,
+                    IsActive = userDto.IsActive,
+                    PublicName = userDto.PublicName,
+                    OnlineStatus = userDto.OnlineStatus,
+                    Theme = userDto.Theme
+                };
             }
             catch (Exception ex)
             {
@@ -92,16 +148,18 @@ namespace CosmoBack.Services.Classes
         {
             try
             {
+                var (existingUserDto, _) = await GetUserByIdAsync(user.Id);
                 var existingUser = await _userRepository.GetByIdAsync(user.Id);
                 if (existingUser == null)
                 {
                     throw new KeyNotFoundException($"Пользователь с ID {user.Id} не найден");
                 }
 
-                if (await _context.Users.AnyAsync(u => u.Id != user.Id && (u.Phone == user.Phone)))
+                if (await _context.Users.AnyAsync(u => u.Id != user.Id && u.Phone == user.Phone))
                 {
                     throw new InvalidOperationException("Пользователь с таким номером телефона уже существует");
                 }
+
                 existingUser.Username = user.Username;
                 existingUser.Phone = user.Phone;
                 existingUser.Bio = user.Bio;
@@ -122,6 +180,7 @@ namespace CosmoBack.Services.Classes
         {
             try
             {
+                var (userDto, _) = await GetUserByIdAsync(id);
                 var user = await _userRepository.GetByIdAsync(id);
                 if (user == null)
                 {

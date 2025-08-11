@@ -213,7 +213,7 @@ const ChatBox = ({ name, unread, lastMessage, time, status, isFavorite, messageS
                         data-status={status}
                         style={{
                             border: `2px solid ${themeStyles.avatarBorder}`,
-                            background: themeStyles[`status${status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()}`],
+                            background: themeStyles[`status${status}`],
                         }}
                     ></div>
                 </div>

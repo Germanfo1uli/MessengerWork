@@ -26,8 +26,10 @@ namespace CosmoBack.Models
 
         public string? Bio { get; set; }
 
-        [ForeignKey("AvatarImage")]
+        [ForeignKey("Image")]
         public Guid? AvatarImageId { get; set; }
+
+        public Image? AvatarImage { get; set; }
 
         public DateTime? LastSeen { get; set; }
 
@@ -41,14 +43,13 @@ namespace CosmoBack.Models
 
         public Theme Theme { get; set; } = Theme.Light;
 
-        // Навигационные свойства
-        public Image? AvatarImage { get; set; } 
+        // Коллекции и навигационные свойства
         public ICollection<Chat>? ChatsAsFirstUser { get; set; }
         public ICollection<Chat>? ChatsAsSecondUser { get; set; }
         public ICollection<Group>? OwnedGroups { get; set; }
         public ICollection<Channel>? OwnedChannels { get; set; }
-        public ICollection<GroupMember>? GroupMemberships { get; set; }
-        public ICollection<ChannelMember>? ChannelMemberships { get; set; }
+        public ICollection<GroupMember>? GroupMember { get; set; }
+        public ICollection<ChannelMember>? ChannelMember { get; set; }
         public ICollection<Message>? SentMessages { get; set; }
         public ICollection<Contact> Contacts { get; set; } = new List<Contact>();
         public ICollection<Contact> ContactOf { get; set; } = new List<Contact>();
@@ -60,7 +61,7 @@ namespace CosmoBack.Models
         public ICollection<Notification>? Notifications { get; set; }
     }
 
-    public enum OnlineStatus // 0-offline 1-online 2-away 3-donotdisturb
+    public enum OnlineStatus
     {
         Offline,
         Online,
@@ -68,7 +69,7 @@ namespace CosmoBack.Models
         DoNotDisturb
     }
 
-    public enum Theme // 0-Light 1-Dark 2-System
+    public enum Theme
     {
         Light,
         Dark,

@@ -28,7 +28,7 @@ namespace CosmoBack.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("AvatarImageId")
+                    b.Property<Guid?>("AvatarImageId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("ChannelTag")
@@ -58,31 +58,51 @@ namespace CosmoBack.Migrations
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uuid");
 
+                    b.Property<long>("PublicId")
+                        .HasColumnType("bigint");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AvatarImageId");
 
                     b.HasIndex("OwnerId");
 
+                    b.HasIndex("PublicId")
+                        .IsUnique();
+
                     b.ToTable("Channels");
                 });
 
             modelBuilder.Entity("CosmoBack.Models.ChannelMember", b =>
                 {
-                    b.Property<Guid>("ChannelId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<bool>("Notifications")
-                        .HasColumnType("boolean");
+                    b.Property<Guid>("ChannelId")
+                        .HasColumnType("uuid");
 
-                    b.HasKey("ChannelId", "UserId");
+                    b.Property<bool>("IsFavorite")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("Notifications")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<int>("Role")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChannelId");
+
+                    b.HasIndex("Role");
 
                     b.HasIndex("UserId");
 
@@ -291,6 +311,9 @@ namespace CosmoBack.Migrations
                         .HasColumnType("character varying(255)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("EntityType", "EntityId")
+                        .IsUnique();
 
                     b.ToTable("Images");
                 });
@@ -749,11 +772,10 @@ namespace CosmoBack.Migrations
 
             modelBuilder.Entity("CosmoBack.Models.Channel", b =>
                 {
-                    b.HasOne("CosmoBack.Models.Image", "AvatarImage")
+                    b.HasOne("CosmoBack.Models.Image", "Avatar")
                         .WithMany()
                         .HasForeignKey("AvatarImageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("CosmoBack.Models.User", "Owner")
                         .WithMany("OwnedChannels")
@@ -761,7 +783,7 @@ namespace CosmoBack.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("AvatarImage");
+                    b.Navigation("Avatar");
 
                     b.Navigation("Owner");
                 });
@@ -775,7 +797,7 @@ namespace CosmoBack.Migrations
                         .IsRequired();
 
                     b.HasOne("CosmoBack.Models.User", "User")
-                        .WithMany("ChannelMemberships")
+                        .WithMany("ChannelMember")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -844,9 +866,10 @@ namespace CosmoBack.Migrations
 
             modelBuilder.Entity("CosmoBack.Models.Group", b =>
                 {
-                    b.HasOne("CosmoBack.Models.Image", "AvatarImage")
+                    b.HasOne("CosmoBack.Models.Image", "Avatar")
                         .WithMany()
-                        .HasForeignKey("AvatarImageId");
+                        .HasForeignKey("AvatarImageId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("CosmoBack.Models.User", "Owner")
                         .WithMany("OwnedGroups")
@@ -854,7 +877,7 @@ namespace CosmoBack.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("AvatarImage");
+                    b.Navigation("Avatar");
 
                     b.Navigation("Owner");
                 });
@@ -868,7 +891,7 @@ namespace CosmoBack.Migrations
                         .IsRequired();
 
                     b.HasOne("CosmoBack.Models.User", "User")
-                        .WithMany("GroupMemberships")
+                        .WithMany("GroupMember")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -893,7 +916,8 @@ namespace CosmoBack.Migrations
                 {
                     b.HasOne("CosmoBack.Models.Channel", "Channel")
                         .WithMany("Messages")
-                        .HasForeignKey("ChannelId");
+                        .HasForeignKey("ChannelId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("CosmoBack.Models.Chat", "Chat")
                         .WithMany("Messages")
@@ -996,9 +1020,9 @@ namespace CosmoBack.Migrations
             modelBuilder.Entity("CosmoBack.Models.Reply", b =>
                 {
                     b.HasOne("CosmoBack.Models.Message", "OriginalMessage")
-                        .WithMany()
+                        .WithMany("Replies")
                         .HasForeignKey("OriginalMessageId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("CosmoBack.Models.Message", "ReplyMessage")
@@ -1038,7 +1062,8 @@ namespace CosmoBack.Migrations
                 {
                     b.HasOne("CosmoBack.Models.Image", "AvatarImage")
                         .WithMany()
-                        .HasForeignKey("AvatarImageId");
+                        .HasForeignKey("AvatarImageId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("AvatarImage");
                 });
@@ -1092,6 +1117,8 @@ namespace CosmoBack.Migrations
                     b.Navigation("Media");
 
                     b.Navigation("Reactions");
+
+                    b.Navigation("Replies");
                 });
 
             modelBuilder.Entity("CosmoBack.Models.OAuthProvider", b =>
@@ -1106,7 +1133,7 @@ namespace CosmoBack.Migrations
 
             modelBuilder.Entity("CosmoBack.Models.User", b =>
                 {
-                    b.Navigation("ChannelMemberships");
+                    b.Navigation("ChannelMember");
 
                     b.Navigation("ChatsAsFirstUser");
 
@@ -1116,7 +1143,7 @@ namespace CosmoBack.Migrations
 
                     b.Navigation("Contacts");
 
-                    b.Navigation("GroupMemberships");
+                    b.Navigation("GroupMember");
 
                     b.Navigation("Notifications");
 

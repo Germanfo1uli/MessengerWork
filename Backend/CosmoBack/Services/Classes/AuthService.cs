@@ -8,14 +8,14 @@ namespace CosmoBack.Services.Classes
 {
     public class AuthService(IUserRepository userRepository, ITokenService tokenService) : IAuthService
     {
-        private readonly IUserRepository _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-        private readonly ITokenService _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService)); // пока не используется
+        private readonly IUserRepository _userRepository = userRepository;
+        private readonly ITokenService _tokenService = tokenService; // пока не используется
 
         public async Task<User> AuthenticateAsync(string phone, string password)
         {
             try
             {
-                var user = await _userRepository.GetByPhoneAsync(phone); // телефон используется как уникальное имя пользователя
+                var user = await _userRepository.GetByPhoneAsync(phone); 
                 if (user == null || !VerifyPassword(password, user.PasswordHash))
                 {
                     throw new UnauthorizedAccessException("Неверный телефон или пароль");

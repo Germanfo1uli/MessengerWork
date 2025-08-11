@@ -43,9 +43,6 @@ const useAuthProvider = () => {
             expiresAt: decoded.expiresAt,
             isLoading: false
         });
-        console.log(decoded);
-        console.log(auth);
-
     }, [decodeToken]);
 
     // Очищает данные аутентификации
@@ -120,26 +117,31 @@ const useAuthProvider = () => {
             const validToken = await checkTokenExpiration();
             if (!validToken) {
                 logout();
+                setAuth(prev => ({ ...prev, isLoading: false }));
                 return;
             }
     
             const decoded = decodeToken(validToken);
             if (!decoded) {
                 logout();
+                setAuth(prev => ({ ...prev, isLoading: false }));
                 return;
             }
-    
+
             setAuth({
                 isAuthenticated: true,
                 userId: decoded.userId,
                 username: decoded.username,
                 token: validToken,
-                expiresAt: decoded.expiresAt, // Use expiresAt from decoded token
+                expiresAt: decoded.expiresAt,
                 isLoading: false
             });
         };
     
-        initializeAuth();
+        initializeAuth().catch(error => {
+            console.error('Error during auth initialization:', error);
+            setAuth(prev => ({ ...prev, isLoading: false }));
+        });
     }, [checkTokenExpiration, decodeToken, logout]);
 
 

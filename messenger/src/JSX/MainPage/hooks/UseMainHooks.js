@@ -22,7 +22,8 @@ const useMainHooks = () => {
 
     return {
         getStatusString,
-        formatTimeFromISO
+        formatTimeFromISO,
+        
     }
 }
 

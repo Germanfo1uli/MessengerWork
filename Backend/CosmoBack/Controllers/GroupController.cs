@@ -35,7 +35,7 @@ namespace CosmoBack.Controllers
             try
             {
                 var groups = await _groupService.GetUserGroupsAsync(userId);
-                return Ok(groups);
+                return Ok(groups.Select(g => new { Group = g.Item1, AvatarImage = g.Item2 }));
             }
             catch (Exception ex)
             {
@@ -116,9 +116,8 @@ namespace CosmoBack.Controllers
         {
             try
             {
-                var userId = Guid.Parse(User.FindFirst("sub")?.Value
-                    ?? throw new UnauthorizedAccessException("Пользователь не авторизован"));
-                var group = await _groupService.ToggleFavoriteGroupAsync(groupId, userId, request.Favorite);
+                var currentUserId = User.GetUserId();
+                var group = await _groupService.ToggleFavoriteGroupAsync(groupId, currentUserId, request.Favorite);
                 return Ok(group);
             }
             catch (KeyNotFoundException ex)

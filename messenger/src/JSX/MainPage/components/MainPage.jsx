@@ -35,6 +35,7 @@ const MainPage = () => {
                 <ChatWindow
                     connection={connection}
                     activeChat={activeChat}
+                    setActiveChat={setActiveChat}
                     isConnected={isConnected}
                 />
             </div>

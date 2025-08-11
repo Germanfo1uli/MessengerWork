@@ -7,5 +7,6 @@ namespace CosmoBack.Repositories.Interfaces
         Task<IEnumerable<Notification>> GetAllByUserIdAsync(Guid userId);
         Task<IEnumerable<Notification>> GetAllByChatIdAsync(Guid chatId);
         Task<IEnumerable<Notification>> GetAllByGroupIdAsync(Guid groupId);
+        Task<IEnumerable<Notification>> GetAllByChannelIdAsync(Guid channelId);
     }
 }
