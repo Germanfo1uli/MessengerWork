@@ -8,23 +8,23 @@ import { IoStarOutline } from 'react-icons/io5';
 import { FaEnvelope, FaGift, FaShoppingCart, FaBox, FaAddressBook, FaQuestionCircle, FaBell } from 'react-icons/fa';
 import Modal from './Modal';
 import AddContactModal from './AddContactModal';
+import HelpModal from './HelpModal';
 import { apiRequest } from '../../../hooks/ApiRequest';
 import { useAuth } from '../../../hooks/UseAuth';
 import { useNavigate } from 'react-router-dom';
 import useMainHooks from '../../../hooks/UseMainHooks';
 import debounce from 'lodash.debounce';
 import { useTheme } from '../../SettingsPage/components/Context/ThemeContext';
-import {useUser} from "../../SettingsPage/components/Context/UserContext";
-
-
+import { useUser } from '../../SettingsPage/components/Context/UserContext';
 
 const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
     const { isLoading, userId, isAuthenticated, logout } = useAuth();
-    const { user, updateUser } = useUser(); // Use UserContext
+    const { user, updateUser } = useUser();
     const { themeSettings } = useTheme();
     const { theme, avatarBorderColor, backgroundColor } = themeSettings;
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isAddContactModalOpen, setIsAddContactModalOpen] = useState(false);
+    const [isHelpModalOpen, setIsHelpModalOpen] = useState(false); // New state for HelpModal
     const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('favorites');
@@ -51,12 +51,11 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
         }
     ]);
     const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true);
-    const { formatTimeFromISO } = useMainHooks(); // Removed getStatusString
+    const { formatTimeFromISO } = useMainHooks();
     const navigate = useNavigate();
     const moreButtonRef = useRef(null);
     const notificationsButtonRef = useRef(null);
 
-    // Fallback user data if UserContext is not initialized
     const fallbackUser = {
         username: user?.username || 'User',
         avatarUrl: user?.avatarUrl || '/default-avatar.png',
@@ -273,7 +272,7 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
 
                 setIsSearching(true);
                 try {
-                    console.log(isAuthenticated)
+                    console.log(isAuthenticated);
                     const response = await apiRequest(`/api/chat/search?userId=${userId}&query=${encodeURIComponent(query.substring(1))}`, {
                         method: 'GET',
                         authenticated: isAuthenticated
@@ -322,7 +321,6 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Fetch chats
                 const chatsResponse = await apiRequest(`/api/chat/user/${userId}`, {
                     method: 'GET',
                     authenticated: isAuthenticated
@@ -342,7 +340,6 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                     : [];
                 setData(enhancedChats);
 
-                // Fetch user profile if UserContext is not initialized
                 if (!user?.username || !user?.avatarUrl || !user?.status) {
                     try {
                         const profileResponse = await apiRequest(`/api/user/${userId}`, {
@@ -352,7 +349,7 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                         updateUser({
                             username: profileResponse.username || 'User',
                             avatarUrl: profileResponse.avatarUrl || '/default-avatar.png',
-                            status: profileResponse.status || 'Offline' // Use status directly
+                            status: profileResponse.status || 'Offline'
                         });
                     } catch (error) {
                         console.error('Failed to fetch user profile:', error);
@@ -372,7 +369,6 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
             return;
         }
 
-        // Only redirect if explicitly not authenticated
         if (!isAuthenticated && !isLoading) {
             logout();
             navigate('/');
@@ -493,6 +489,10 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
 
     const toggleAddContactModal = () => {
         setIsAddContactModalOpen(!isAddContactModalOpen);
+    };
+
+    const toggleHelpModal = () => {
+        setIsHelpModalOpen(!isHelpModalOpen); // Toggle HelpModal
     };
 
     const toggleMoreMenu = () => {
@@ -751,7 +751,7 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                                 </button>
                                 <button
                                     className={cl.moreMenuItem}
-                                    onClick={() => navigate('/help')}
+                                    onClick={toggleHelpModal} // Updated to toggle HelpModal
                                     style={{ color: themeStyles.textColor }}
                                 >
                                     <FaQuestionCircle className={cl.moreMenuIcon} />
@@ -773,6 +773,11 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                 isOpen={isAddContactModalOpen}
                 onClose={toggleAddContactModal}
                 onAddContact={handleAddContact}
+            />
+
+            <HelpModal
+                isOpen={isHelpModalOpen}
+                onClose={toggleHelpModal}
             />
 
             <div
@@ -837,8 +842,8 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                 className={cl.chatsList}
                 style={{
                     background: themeStyles.chatsListBg,
-                    overflowY: 'auto', // Ensure scrollable chats list
-                    flexGrow: 1 // Ensure chats list takes available space
+                    overflowY: 'auto',
+                    flexGrow: 1
                 }}
             >
                 {filteredChats.length > 0 ? (
@@ -849,7 +854,7 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                                 unread={10}
                                 lastMessage={chat.lastMessage?.comment ?? "Нет сообщений"}
                                 time={formatTimeFromISO(chat.lastMessage?.createdAt)}
-                                statusClass={getChatStatusClass(chat.secondUser.onlineStatus)} // Pass CSS class for status
+                                statusClass={getChatStatusClass(chat.secondUser.onlineStatus)}
                                 isFavorite={chat.isFavorite}
                                 messageStatus={"sent"}
                                 isSentByUser={chat.lastMessage?.isSentByUser ?? false}
