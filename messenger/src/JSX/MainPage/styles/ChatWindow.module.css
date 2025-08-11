@@ -2,7 +2,7 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    height: 100%;
+    height: 100vh; /* Ensure full viewport height */
     min-width: 0;
     max-width: calc(100% - 100px);
     margin-left: auto;
@@ -17,7 +17,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100%;
+    height: 100vh; /* Ensure full viewport height */
     min-width: 0;
     max-width: calc(100% - 30px);
     margin-left: auto;
@@ -267,13 +267,17 @@
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
     gap: 15px;
     background: transparent;
     position: relative;
     align-items: flex-start;
     scrollbar-width: thin;
     scrollbar-color: rgba(138, 43, 226, 0.5) transparent;
+    max-height: calc(100vh - 120px); /* Adjust based on header and input height */
+}
+
+.messagesArea .message:first-child {
+    margin-top: 10px; /* From previous change */
 }
 
 .messagesArea::-webkit-scrollbar {
@@ -298,7 +302,7 @@
 
 .message {
     max-width: 70%;
-    padding: 10px 15px;
+    padding: 10px 20px;
     position: relative;
     word-wrap: break-word;
     align-self: flex-start;
