@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import cl from '../styles/ChatPanel.module.css';
 import ChatBox from './ChatBox';
-import { IoSettingsOutline } from 'react-icons/io5';
+import { IoSettingsOutline, IoSearchOutline, IoStarOutline } from 'react-icons/io5';
 import { IoIosMore } from 'react-icons/io';
-import { IoSearchOutline } from 'react-icons/io5';
-import { IoStarOutline } from 'react-icons/io5';
 import { FaEnvelope, FaGift, FaShoppingCart, FaBox, FaAddressBook, FaQuestionCircle, FaBell } from 'react-icons/fa';
 import Modal from './Modal';
-import NewContactModal from './NewContactModal'; // Updated import
+import NewContactModal from './NewContactModal';
 import HelpModal from './HelpModal';
 import ContactsModal from './ContactsModal';
 import { apiRequest } from '../../../hooks/ApiRequest';
@@ -24,7 +22,7 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
     const { themeSettings } = useTheme();
     const { theme, avatarBorderColor, backgroundColor } = themeSettings;
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isNewContactModalOpen, setIsNewContactModalOpen] = useState(false); // Updated state name
+    const [isNewContactModalOpen, setIsNewContactModalOpen] = useState(false);
     const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
     const [isContactsModalOpen, setIsContactsModalOpen] = useState(false);
     const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
@@ -372,9 +370,9 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                             authenticated: isAuthenticated
                         });
                         updateUser({
-                            username: profileResponse.username || 'User',
-                            avatarUrl: profileResponse.avatarUrl || '/default-avatar.png',
-                            status: profileResponse.status || 'Offline'
+                            username: profileResponse.user?.username || 'User',
+                            avatarUrl: profileResponse.user?.avatarUrl || '/default-avatar.png',
+                            status: profileResponse.user?.status || 'Offline'
                         });
                     } catch (error) {
                         console.error('Failed to fetch user profile:', error);
@@ -515,7 +513,6 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                         };
 
                         fetchChatDetails();
-
                         return [...prev, tempChat];
                     }
                 });
@@ -583,7 +580,7 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
         setIsModalOpen(!isModalOpen);
     };
 
-    const toggleNewContactModal = () => { // Updated function name
+    const toggleNewContactModal = () => {
         setIsNewContactModalOpen(!isNewContactModalOpen);
     };
 
@@ -672,12 +669,11 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
         switch (onlineStatus) {
             case 1:
                 return cl.online;
-            case 0:
-                return cl.offline;
             case 2:
                 return cl.idle;
             case 3:
                 return cl.busy;
+            case 0:
             default:
                 return cl.offline;
         }
