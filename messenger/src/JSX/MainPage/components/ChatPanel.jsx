@@ -273,6 +273,7 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
 
                 setIsSearching(true);
                 try {
+                    console.log(isAuthenticated)
                     const response = await apiRequest(`/api/chat/search?userId=${userId}&query=${encodeURIComponent(query.substring(1))}`, {
                         method: 'GET',
                         authenticated: isAuthenticated
