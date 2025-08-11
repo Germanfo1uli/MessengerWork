@@ -34,6 +34,7 @@ const useAuthProvider = () => {
 
         localStorage.setItem('authToken', token);
         localStorage.setItem('refreshToken', refreshToken);
+        localStorage.removeItem('userProfile');
 
         setAuth({
             isAuthenticated: true,

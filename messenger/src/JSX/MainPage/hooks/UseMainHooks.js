@@ -3,11 +3,11 @@ import { useCallback } from "react";
 const useMainHooks = () => {
     const getStatusString = useCallback((statusCode) => {
         switch(statusCode) {
-            case 0: return 'offline';
-            case 1: return 'online';
-            case 2: return 'idle';
-            case 3: return 'busy';
-            default: return 'offline';
+            case 0: return 'Offline';
+            case 1: return 'Online';
+            case 2: return 'Idle';
+            case 3: return 'Busy';
+            default: return 'Offline';
         }
     }, []);
 

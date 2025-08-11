@@ -51,7 +51,7 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
         }
     ]);
     const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true);
-    const { formatTimeFromISO } = useMainHooks(); // Removed getStatusString
+    const { formatTimeFromISO, getStatusString } = useMainHooks(); // Removed getStatusString
     const navigate = useNavigate();
     const moreButtonRef = useRef(null);
     const notificationsButtonRef = useRef(null);
@@ -374,9 +374,9 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                             authenticated: isAuthenticated
                         });
                         updateUser({
-                            username: profileResponse.username || 'User',
-                            avatarUrl: profileResponse.avatarUrl || '/default-avatar.png',
-                            status: profileResponse.status || 'Offline' // Use status directly
+                            username: profileResponse.user.username || 'User',
+                            avatarUrl: profileResponse.user.avatarUrl || '/default-avatar.png',
+                            status: getStatusString(profileResponse.user.onlineStatus) || 'Offline' // Use status directly
                         });
                     } catch (error) {
                         console.error('Failed to fetch user profile:', error);
@@ -712,8 +712,6 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
             return new Date(dateB || 0) - new Date(dateA || 0);
         });
     }, [data, searchResults, activeTab, searchQuery]);
-
-    console.log(filteredChats)
 
     return (
         <div
