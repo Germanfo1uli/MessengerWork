@@ -675,3 +675,182 @@
     50% { opacity: 1; }
     100% { opacity: 0.6; }
 }
+
+/* Pinned message banner */
+.pinnedMessageBanner {
+    padding: 10px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 5;
+}
+
+.pinnedContent {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 12px;
+}
+
+.pinIcon {
+    font-size: 16px;
+    color: #8a2be2;
+}
+
+.pinnedText {
+    flex: 1;
+    overflow: hidden;
+}
+
+.pinnedLabel {
+    font-size: 12px;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.pinnedPreview {
+    font-size: 13px;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.unpinButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.unpinButton:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Selection toolbar */
+.selectionToolbar {
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.selectionCount {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.selectionActions {
+    display: flex;
+    gap: 10px;
+}
+
+.selectionAction {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.selectionAction:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Selected message style */
+.message.selected {
+    outline: 2px solid rgba(138, 43, 226, 0.5);
+    transform: scale(1.02);
+    box-shadow: 0 0 15px rgba(138, 43, 226, 0.3);
+}
+
+/* Report modal */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.reportModal {
+    width: 90%;
+    max-width: 500px;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.reportModal h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.reportModal p {
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.reportTextarea {
+    width: 100%;
+    height: 120px;
+    padding: 12px;
+    border-radius: 8px;
+    resize: none;
+    margin-bottom: 20px;
+    font-family: inherit;
+}
+
+.reportButtons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.cancelReport, .submitReport {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.cancelReport:hover {
+    opacity: 0.9;
+}
+
+.submitReport:hover {
+    opacity: 0.9;
+}
+
+.submitReport:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.reportSubmitted {
+    text-align: center;
+    padding: 20px;
+}
+
+.reportSubmitted h3 {
+    color: #4caf50;
+    margin-bottom: 10px;
+}

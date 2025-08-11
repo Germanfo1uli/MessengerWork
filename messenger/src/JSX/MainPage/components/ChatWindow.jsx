@@ -17,6 +17,11 @@ const ChatWindow = ({ connection, activeChat, setActiveChat, onToggleFavorite, i
     const [replyingTo, setReplyingTo] = useState(null);
     const [avatarText, setAvatarText] = useState('');
     const [avatarColor, setAvatarColor] = useState('#4B0082');
+    const [pinnedMessage, setPinnedMessage] = useState(null);
+    const [selectedMessages, setSelectedMessages] = useState([]);
+    const [isReporting, setIsReporting] = useState(false);
+    const [reportReason, setReportReason] = useState('');
+    const [reportSubmitted, setReportSubmitted] = useState(false);
     const { isLoading, userId, username, isAuthenticated, logout } = useAuth();
     const { getStatusString, formatTimeFromISO } = useMainHooks();
     const navigate = useNavigate();
@@ -24,6 +29,7 @@ const ChatWindow = ({ connection, activeChat, setActiveChat, onToggleFavorite, i
     const messagesEndRef = useRef(null);
     const messagesAreaRef = useRef(null);
     const inputRef = useRef(null);
+    const reportModalRef = useRef(null);
     const availableReactions = ['😊', '👍', '❤️', '😂', '😢'];
     const { themeSettings, fontFamilies } = useTheme();
     const {
@@ -258,6 +264,9 @@ const ChatWindow = ({ connection, activeChat, setActiveChat, onToggleFavorite, i
             if (contextMenuRef.current && !contextMenuRef.current.contains(event.target)) {
                 setContextMenu(null);
             }
+            if (reportModalRef.current && !reportModalRef.current.contains(event.target)) {
+                setIsReporting(false);
+            }
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -306,7 +315,6 @@ const ChatWindow = ({ connection, activeChat, setActiveChat, onToggleFavorite, i
 
             let chatId = (chatType === 'User' || chatType === 'Contact') && !activeChat.joined ? null : activeChat.id;
 
-            // Проверяем формат chatId только если он не null
             if (chatId) {
                 const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
                 if (!guidRegex.test(chatId)) {
@@ -314,18 +322,9 @@ const ChatWindow = ({ connection, activeChat, setActiveChat, onToggleFavorite, i
                 }
             }
 
-            console.log('Sending message with params:', {
-                chatId: chatId,
-                recipientId: recipientId,
-                message: message,
-                tempId: tempId,
-                replyToId: replyingTo?.id
-            });
-
             if (!connection || connection.state !== 'Connected') {
                 throw new Error('SignalR connection is not active');
             }
-            console.log(chatId, recipientId, message, tempId);
 
             await connection.invoke(
                 "SendMessage",
@@ -351,7 +350,6 @@ const ChatWindow = ({ connection, activeChat, setActiveChat, onToggleFavorite, i
     };
 
     const handleAvatarClick = () => {
-        console.log('Avatar clicked!');
         setIsProfileOpen(true);
     };
 
@@ -400,6 +398,55 @@ const ChatWindow = ({ connection, activeChat, setActiveChat, onToggleFavorite, i
         setReplyingTo(null);
     };
 
+    const handlePinMessage = (messageId) => {
+        const messageToPin = messages.find(msg => msg.id === messageId);
+        if (messageToPin) {
+            setPinnedMessage(messageToPin);
+            setContextMenu(null);
+        }
+    };
+
+    const handleUnpinMessage = () => {
+        setPinnedMessage(null);
+    };
+
+    const handleSelectMessage = (messageId) => {
+        setSelectedMessages(prev => {
+            if (prev.includes(messageId)) {
+                return prev.filter(id => id !== messageId);
+            } else {
+                return [...prev, messageId];
+            }
+        });
+        setContextMenu(null);
+    };
+
+    const handleClearSelection = () => {
+        setSelectedMessages([]);
+    };
+
+    const handleReportMessage = (messageId) => {
+        setContextMenu({ messageId });
+        setIsReporting(true);
+        setReportReason('');
+    };
+
+    const submitReport = async () => {
+        if (!reportReason.trim()) return;
+
+        try {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            setReportSubmitted(true);
+            setTimeout(() => {
+                setIsReporting(false);
+                setReportSubmitted(false);
+                setContextMenu(null);
+            }, 3000);
+        } catch (error) {
+            console.error('Failed to submit report:', error);
+        }
+    };
+
     const handleContextMenuAction = (action, messageId, emoji = null) => {
         const message = messages.find((msg) => msg.id === messageId);
         switch (action) {
@@ -407,7 +454,10 @@ const ChatWindow = ({ connection, activeChat, setActiveChat, onToggleFavorite, i
                 handleReply(message);
                 break;
             case 'pin':
-                console.log(`Pinning message ${messageId}`);
+                handlePinMessage(messageId);
+                break;
+            case 'unpin':
+                handleUnpinMessage();
                 break;
             case 'copy':
                 navigator.clipboard.writeText(message.comment);
@@ -416,10 +466,10 @@ const ChatWindow = ({ connection, activeChat, setActiveChat, onToggleFavorite, i
                 console.log(`Forwarding message ${messageId}`);
                 break;
             case 'report':
-                console.log(`Reporting message ${messageId}`);
+                handleReportMessage(messageId);
                 break;
             case 'select':
-                console.log(`Selecting message ${messageId}`);
+                handleSelectMessage(messageId);
                 break;
             case 'react':
                 setMessages((prev) =>
@@ -514,6 +564,49 @@ const ChatWindow = ({ connection, activeChat, setActiveChat, onToggleFavorite, i
                 fontSize: `${windowFontSize}px`,
             }}
         >
+            {/* Pinned message banner */}
+            {pinnedMessage && (
+                <div className={cl.pinnedMessageBanner} style={{ background: themeStyles.headerBg }}>
+                    <div className={cl.pinnedContent}>
+                        <FiMapPin className={cl.pinIcon} />
+                        <div className={cl.pinnedText}>
+                            <span className={cl.pinnedLabel}>Pinned message</span>
+                            <p className={cl.pinnedPreview}>{pinnedMessage.comment}</p>
+                        </div>
+                        <button
+                            className={cl.unpinButton}
+                            onClick={handleUnpinMessage}
+                            style={{ color: themeStyles.textColor }}
+                        >
+                            <FiX />
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Selected messages toolbar */}
+            {selectedMessages.length > 0 && (
+                <div className={cl.selectionToolbar} style={{ background: themeStyles.headerBg }}>
+                    <span className={cl.selectionCount}>{selectedMessages.length} selected</span>
+                    <div className={cl.selectionActions}>
+                        <button
+                            className={cl.selectionAction}
+                            onClick={() => handleReply(messages.find(msg => msg.id === selectedMessages[0]))}
+                            style={{ color: themeStyles.textColor }}
+                        >
+                            <FiCornerUpLeft />
+                        </button>
+                        <button
+                            className={cl.selectionAction}
+                            onClick={handleClearSelection}
+                            style={{ color: themeStyles.textColor }}
+                        >
+                            <FiX />
+                        </button>
+                    </div>
+                </div>
+            )}
+
             <div
                 className={cl.chatHeader}
                 style={{
@@ -575,8 +668,9 @@ const ChatWindow = ({ connection, activeChat, setActiveChat, onToggleFavorite, i
                 {messages.map((msg) => (
                     <div
                         key={msg.id}
-                        className={`${cl.message} ${msg.isUser ? cl.userMessage : cl.contactMessage}`}
+                        className={`${cl.message} ${msg.isUser ? cl.userMessage : cl.contactMessage} ${selectedMessages.includes(msg.id) ? cl.selected : ''}`}
                         onContextMenu={(e) => handleContextMenu(e, msg)}
+                        onClick={() => selectedMessages.length > 0 && handleSelectMessage(msg.id)}
                         style={{
                             borderRadius:
                                 windowChatStyle === 'bubbles'
@@ -649,12 +743,21 @@ const ChatWindow = ({ connection, activeChat, setActiveChat, onToggleFavorite, i
                         >
                             <FiCornerUpLeft /> Ответить
                         </button>
-                        <button
-                            onClick={() => handleContextMenuAction('pin', contextMenu.messageId)}
-                            style={{ color: themeStyles.textColor }}
-                        >
-                            <FiMapPin /> Закрепить
-                        </button>
+                        {pinnedMessage?.id === contextMenu.messageId ? (
+                            <button
+                                onClick={() => handleContextMenuAction('unpin', contextMenu.messageId)}
+                                style={{ color: themeStyles.textColor }}
+                            >
+                                <FiMapPin /> Открепить
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() => handleContextMenuAction('pin', contextMenu.messageId)}
+                                style={{ color: themeStyles.textColor }}
+                            >
+                                <FiMapPin /> Закрепить
+                            </button>
+                        )}
                         <button
                             onClick={() => handleContextMenuAction('copy', contextMenu.messageId)}
                             style={{ color: themeStyles.textColor }}
