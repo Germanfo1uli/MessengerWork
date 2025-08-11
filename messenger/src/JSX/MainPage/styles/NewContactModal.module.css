@@ -1,0 +1,52 @@
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1100;
+}
+
+.modalContent {
+    border-radius: 8px;
+    padding: 20px;
+    width: 350px;
+    max-width: 90%;
+    text-align: center;
+}
+
+.modalContent h2 {
+    margin: 0 0 15px;
+    font-size: 1.5rem;
+}
+
+.formGroup {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.formGroup label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.formGroup input {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.closeButton {
+    width: 100%;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}

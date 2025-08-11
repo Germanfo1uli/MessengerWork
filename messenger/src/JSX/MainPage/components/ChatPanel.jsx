@@ -7,15 +7,16 @@ import { IoSearchOutline } from 'react-icons/io5';
 import { IoStarOutline } from 'react-icons/io5';
 import { FaEnvelope, FaGift, FaShoppingCart, FaBox, FaAddressBook, FaQuestionCircle, FaBell } from 'react-icons/fa';
 import Modal from './Modal';
-import AddContactModal from './AddContactModal';
-import HelpModal from './HelpModal'; // Added import
+import NewContactModal from './NewContactModal'; // Updated import
+import HelpModal from './HelpModal';
+import ContactsModal from './ContactsModal';
 import { apiRequest } from '../../../hooks/ApiRequest';
 import { useAuth } from '../../../hooks/UseAuth';
 import { useNavigate } from 'react-router-dom';
 import useMainHooks from '../hooks/UseMainHooks';
 import debounce from 'lodash.debounce';
 import { useTheme } from '../../SettingsPage/components/Context/ThemeContext';
-import {useUser} from "../../SettingsPage/components/Context/UserContext";
+import { useUser } from '../../SettingsPage/components/Context/UserContext';
 
 const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
     const { isLoading, userId, isAuthenticated, logout } = useAuth();
@@ -23,8 +24,9 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
     const { themeSettings } = useTheme();
     const { theme, avatarBorderColor, backgroundColor } = themeSettings;
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isAddContactModalOpen, setIsAddContactModalOpen] = useState(false);
-    const [isHelpModalOpen, setIsHelpModalOpen] = useState(false); // Added state for HelpModal
+    const [isNewContactModalOpen, setIsNewContactModalOpen] = useState(false); // Updated state name
+    const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+    const [isContactsModalOpen, setIsContactsModalOpen] = useState(false);
     const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('favorites');
@@ -581,12 +583,16 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
         setIsModalOpen(!isModalOpen);
     };
 
-    const toggleAddContactModal = () => {
-        setIsAddContactModalOpen(!isAddContactModalOpen);
+    const toggleNewContactModal = () => { // Updated function name
+        setIsNewContactModalOpen(!isNewContactModalOpen);
     };
 
     const toggleHelpModal = () => {
         setIsHelpModalOpen(!isHelpModalOpen);
+    };
+
+    const toggleContactsModal = () => {
+        setIsContactsModalOpen(!isContactsModalOpen);
     };
 
     const toggleMoreMenu = () => {
@@ -861,7 +867,7 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                                 </button>
                                 <button
                                     className={cl.moreMenuItem}
-                                    onClick={() => navigate('/contacts')}
+                                    onClick={toggleContactsModal}
                                     style={{ color: themeStyles.textColor }}
                                 >
                                     <FaAddressBook className={cl.moreMenuIcon} />
@@ -887,15 +893,22 @@ const ChatPanel = ({ connection, onChatSelect, isConnected }) => {
                 user={fallbackUser}
             />
 
-            <AddContactModal
-                isOpen={isAddContactModalOpen}
-                onClose={toggleAddContactModal}
+            <NewContactModal
+                isOpen={isNewContactModalOpen}
+                onClose={toggleNewContactModal}
                 onAddContact={handleAddContact}
             />
 
             <HelpModal
                 isOpen={isHelpModalOpen}
                 onClose={toggleHelpModal}
+            />
+
+            <ContactsModal
+                isOpen={isContactsModalOpen}
+                onClose={toggleContactsModal}
+                onContactClick={handleChatClick}
+                onAddContactClick={toggleNewContactModal}
             />
 
             <div
